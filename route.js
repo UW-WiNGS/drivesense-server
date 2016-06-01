@@ -1,23 +1,6 @@
-var express = require('express');    //Express Web Server 
-var busboy = require('connect-busboy'); //middleware for form/file upload
 var path = require('path');     //used for file path
-var fs = require('fs-extra');       //File System - for file manipulation
-var util = require('util');
-var sqlite3 = require('sqlite3').verbose();
 
-
-var app = express();
-app.use(busboy());
-
-app.use(express.static(path.join(__dirname, 'public')));
-
-/* ========================================================== 
-Create a Route (/upload) to handle the Form submission 
-(handle POST requests to /upload)
-============================================================ */
-
-
-app.route('/upload').post(function (req, res, next) {
+var upload = function (req, res, next) {
   req.pipe(req.busboy);
   var result = {};
   req.busboy.on('field', function(fieldname, val) {
@@ -35,9 +18,11 @@ app.route('/upload').post(function (req, res, next) {
       });
     });
   });
-});
+};
 
-app.route('/show').get(function (req, res) {
+
+
+var showtrip = function (req, res, next) {
   var query = req.query;
   var devid = query.devid;
   var tripid = query.tripid;
@@ -60,11 +45,9 @@ app.route('/show').get(function (req, res) {
       res.json(msg);
     }
   });
-});
+};
 
-
-
-app.route('/register').post(function (req, res, next) {
+var signup = function (req, res, next) {
   console.log(req.body);
 
   req.pipe(req.busboy);
@@ -73,11 +56,16 @@ app.route('/register').post(function (req, res, next) {
     result[fieldname] = val;
     console.log(result);
   });  
-});
+
+};
+
+var signin = function (req, res, next) {
 
 
+};
 
 
-var server = app.listen(8000, function() {
-    console.log('Listening on port %d', server.address().port);
-});
+module.exports.upload = upload;
+module.exports.showtrip = showtrip;
+module.exports.signup = signup;
+module.exports.signin = signin;
