@@ -25,7 +25,7 @@ app.route('/upload').post(function (req, res, next) {
   });  
   req.busboy.on('file', function (fieldname, file, filename) {  
     console.log("Uploading: " + filename);
-    var folder = __dirname + '/databases/' + result['deviceid'] + '/';
+    var folder = path.join(__dirname, '../uploads/' + result['deviceid'] + '/');
     fs.mkdirp(folder, function (err) {
       var fstream = fs.createWriteStream(folder + filename);
       file.pipe(fstream);
@@ -39,12 +39,18 @@ app.route('/upload').post(function (req, res, next) {
 
 app.route('/show').get(function (req, res) {
   var query = req.query;
+  var devid = query.devid;
   var tripid = query.tripid;
-  var dir = "./databases/6c9b21c5b0db3074/";
-  var files = fs.readdirSync(dir);
-  var dbfile = dir + files[tripid];
-  var db = new sqlite3.Database(dbfile);
-
+  var dir = path.join(__dirname, "../uploads/" + devid + "/");
+  try {
+    var files = fs.readdirSync(dir);
+    var dbfile = dir + files[tripid];
+    var db = new sqlite3.Database(dbfile);
+  } catch(err) {
+    var msg = {status: 'err', data: err};
+    res.json(msg);
+    return;
+  }
   db.all("SELECT * FROM gps;", function(err, rows) {
     if(err) {
       var msg = {status: 'err', data: err};
@@ -57,6 +63,17 @@ app.route('/show').get(function (req, res) {
 });
 
 
+
+app.route('/register').post(function (req, res, next) {
+  console.log(req.body);
+
+  req.pipe(req.busboy);
+  var result = {};
+  req.busboy.on('field', function(fieldname, val) {
+    result[fieldname] = val;
+    console.log(result);
+  });  
+});
 
 
 
