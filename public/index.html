@@ -47,7 +47,7 @@
 	</div>
 	<div class="modal-footer">
 	  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-	  <button type="button" class="btn btn-primary">Submit</button>
+	  <button type="button" class="btn btn-primary" onclick="submitSignIn()">Submit</button>
 	</div>
       </div>
     </div>
@@ -67,19 +67,24 @@
 	<div class="modal-body">
 	  <form id="signupform">
 	    <div class="form-group">
-	      <input type="text" placeholder="Email" class="form-control">
+             <div class="row">
+               <div class="col-sm-6 col-md-6"><input type="text" placeholder="First Name" class="form-control" name="firstname"></div>
+	       <div class="col-sm-6 col-md-6"><input type="text" placeholder="Last Name" class="form-control" name="lastname"></div>
+	    </div></div>
+	    <div class="form-group">
+	      <input type="text" placeholder="Email" class="form-control" name="email">
 	    </div>
 	    <div class="form-group">
-	      <input type="password" placeholder="Password" class="form-control">
+	      <input type="password" placeholder="Password" class="form-control" name="password">
 	    </div> 
 	    <div class="form-group">
-	      <input type="password" placeholder="Repeat Password" class="form-control">
+	      <input type="password" placeholder="Repeat Password" class="form-control" name="repeat">
 	    </div> 
 	  </form> 
 	</div>
 	<div class="modal-footer">
 	  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-	  <button type="button" class="btn btn-primary">Submit</button>
+	  <button type="button" class="btn btn-primary" onclick="submitSignUp()">Submit</button>
 	</div>
       </div>
     </div>
@@ -169,7 +174,77 @@
     </footer>
   </div>
 
+<script>
 
+var validateSignUpForm = function() {
+  var firstname = document.forms["signupform"]["firstname"].value; 
+  var lastname = document.forms["signupform"]["lastname"].value; 
+  var email = document.forms["signupform"]["email"].value; 
+  var password = document.forms["signupform"]["password"].value; 
+  var repeat = document.forms["signupform"]["repeat"].value; 
+  if(firstname == '' || lastname == '') {
+    alert("Name cannot be empty");
+    return null;
+  } 
+  if(email == '' || password == '' || repeat == '') {
+    alert("Email and password cannot be empty");
+    return null;
+  }
+  if(email.indexOf("@") == -1) {
+    alert("Email format is incorrect");
+    return null;
+  }
+  if(password != repeat) {
+    alert("Passwords not match");
+    return null;
+  }
+  var signup = {
+    firstname: firstname,
+    lastname: lastname,
+    email: email,
+    password: password,
+    repeat: repeat
+  };  
+  return signup;
+}
+
+var submitSignUp = function() {
+/*
+  var signup = validateSignUpForm(); 
+  if (signup == null) {
+    return;
+  } 
+*/
+  var signup = {
+    firstname: 'lei',
+    lastname: 'kang',
+    email: 'lkang@cs.wisc.edu',
+    password: 'kanglei',
+    repeat: 'kanglei'
+  }; 
+  var posturl = window.location.origin + "/signup";
+  console.log(posturl);
+  var signuppost = $.ajax({
+    type: 'POST', 
+    url: posturl, 
+    data: signup,
+  });
+  signuppost.error(function() {
+    alert("Sign Up Failure");
+  });
+  signuppost.success(function(msg, status){
+    if(status == "success") {
+      console.log(msg);
+    } else {
+      console.log(status);
+    } 
+  }); 
+}
+</script>
+
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script> 
+ 
 <script src="/bower_components/jquery/dist/jquery.min.js"></script> 
 <script src="/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
 

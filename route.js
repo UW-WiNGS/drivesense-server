@@ -49,19 +49,19 @@ var showtrip = function (req, res, next) {
 
 var signup = function (req, res, next) {
   console.log(req.body);
-
-  req.pipe(req.busboy);
-  var result = {};
   req.busboy.on('field', function(fieldname, val) {
-    result[fieldname] = val;
-    console.log(result);
-  });  
-
+    console.log(filedname + " " + val); 
+  });
+  var receive = req.body; 
+  var msg = {status: 'okay', data: receive};
+  res.json(msg);
 };
 
 var signin = function (req, res, next) {
-
-
+  console.log(req.body);
+  var receive = req.body;
+  var msg = {status: 'okay', data: receive};
+  res.json(msg);
 };
 
 
