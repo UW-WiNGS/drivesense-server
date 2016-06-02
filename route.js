@@ -1,4 +1,6 @@
 var path = require('path');     //used for file path
+var mysql = require('./mysql.js').dbcon;
+
 
 var upload = function (req, res, next) {
   req.pipe(req.busboy);
@@ -48,12 +50,13 @@ var showtrip = function (req, res, next) {
 };
 
 var signup = function (req, res, next) {
-  console.log(req.body);
-  req.busboy.on('field', function(fieldname, val) {
-    console.log(filedname + " " + val); 
-  });
+
   var receive = req.body; 
-  var msg = {status: 'okay', data: receive};
+ 
+  mysql.query("show databases;", function(err, rows) {
+    console.log("here");
+   });
+   var msg = {status: 'okay', data: receive};
   res.json(msg);
 };
 
@@ -61,7 +64,7 @@ var signin = function (req, res, next) {
   console.log(req.body);
   var receive = req.body;
   var msg = {status: 'okay', data: receive};
-  res.json(msg);
+res.json(msg);
 };
 
 
