@@ -2,8 +2,10 @@ var mysql      = require('mysql');
 var connection = mysql.createConnection({
   host     : 'localhost',
   user     : 'root',
-  password : 'drivesense',
-  database : 'drivesense_wings'
+//  password : 'drivesense',
+  password : 'studentsublease',
+  database : 'drivesense_wings',
+  multipleStatements: true,
 });
 
 connection.connect(function(err) {

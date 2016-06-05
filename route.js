@@ -1,6 +1,6 @@
 var path = require('path');     //used for file path
-var mysql = require('./mysql.js').dbcon;
-
+var mysqlwrapper = require('./mysql_wrapper.js');
+var User = require('./user.js');
 
 var upload = function (req, res, next) {
   req.pipe(req.busboy);
@@ -49,22 +49,28 @@ var showtrip = function (req, res, next) {
   });
 };
 
-var signup = function (req, res, next) {
 
-  var receive = req.body; 
- 
-  mysql.query("show databases;", function(err, rows) {
-    console.log("here");
-   });
-   var msg = {status: 'okay', data: receive};
-  res.json(msg);
+var signup = function (req, res, next) {
+  var query = req.body; 
+  var user = new User();
+  user.fromObject(query);
+  console.log(user);
+  mysqlwrapper.insertUser(user,function(err, id) {
+    if(err) {
+      console.log(err);
+      res.json(new Error("user signup failed"));
+    } else {
+      var msg = {status: 'okay', data: null};
+      res.json(msg);
+    }
+  }); 
 };
 
 var signin = function (req, res, next) {
   console.log(req.body);
   var receive = req.body;
   var msg = {status: 'okay', data: receive};
-res.json(msg);
+  res.json(msg);
 };
 
 

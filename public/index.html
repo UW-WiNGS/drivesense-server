@@ -38,10 +38,10 @@
 	<div class="modal-body">
 	  <form id="signinform">
 	    <div class="form-group">
-	      <input type="text" placeholder="Email" class="form-control">
+	      <input type="text" placeholder="Email" class="form-control" name="email">
 	    </div>
 	    <div class="form-group">
-	      <input type="password" placeholder="Password" class="form-control">
+	      <input type="password" placeholder="Password" class="form-control" name="password">
 	    </div> 
           </form> 
 	</div>
@@ -176,6 +176,49 @@
 
 <script>
 
+var validateSignInForm = function() {
+  var email = document.forms["signinform"]["email"].value; 
+  var password = document.forms["signinform"]["password"].value; 
+   if(email == '' || password == '') {
+    alert("Email and password cannot be empty");
+    return null;
+  }
+  var signin = {
+    email: email,
+    password: password,
+  };  
+  return signin;
+}
+
+
+var submitSignIn = function() {
+
+  var signin = validateSignInForm(); 
+  if (signin == null) {
+    return;
+  } 
+
+  var posturl = window.location.origin + "/signin";
+
+  var signinpost = $.ajax({
+    type: 'POST', 
+    url: posturl, 
+    data: signin,
+  });
+  signinpost.error(function() {
+    alert("Sign Up Failure");
+  });
+  signinpost.success(function(msg, status){
+    if(status == "success") {
+      console.log(msg);
+      location.reload();
+    } else {
+      console.log(status);
+    } 
+  }); 
+}
+
+
 var validateSignUpForm = function() {
   var firstname = document.forms["signupform"]["firstname"].value; 
   var lastname = document.forms["signupform"]["lastname"].value; 
@@ -209,21 +252,14 @@ var validateSignUpForm = function() {
 }
 
 var submitSignUp = function() {
-/*
+
   var signup = validateSignUpForm(); 
   if (signup == null) {
     return;
   } 
-*/
-  var signup = {
-    firstname: 'lei',
-    lastname: 'kang',
-    email: 'lkang@cs.wisc.edu',
-    password: 'kanglei',
-    repeat: 'kanglei'
-  }; 
+
   var posturl = window.location.origin + "/signup";
-  console.log(posturl);
+
   var signuppost = $.ajax({
     type: 'POST', 
     url: posturl, 
@@ -235,11 +271,13 @@ var submitSignUp = function() {
   signuppost.success(function(msg, status){
     if(status == "success") {
       console.log(msg);
+      location.reload();
     } else {
       console.log(status);
     } 
   }); 
 }
+
 </script>
 
 

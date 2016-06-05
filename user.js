@@ -1,10 +1,16 @@
-function user(uobj) {
-  var keys = {'firstname', 'lastname', 'email', 'password'};
-  var values = [];
-  for (var key in keys) {
-    values[key] = uobj[key];
+
+function User() {
+}
+
+User.keys = ['firstname', 'lastname', 'email', 'password'];
+
+User.prototype.fromObject = function(uobj) {
+  var keys = User.keys;
+  for (var i = 0; i < keys.length; ++i) {
+    var key = keys[i];
+    this[key] = uobj[key];
   }
 }
 
-module.exports = user;
+module.exports = User;
 
