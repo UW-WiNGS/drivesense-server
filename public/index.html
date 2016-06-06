@@ -17,11 +17,22 @@
       <div class="navbar-header">
          <a class="navbar-brand" href="index.html" style="font-size:30px;">DriveSense</a>
       </div>
-      <div id="signinup" class="navbar-collapse collapse">
-        <form class="navbar-form navbar-right">
+      <div id="navbar" class="collapse navbar-collapse">
+        <div id="signinup" class="nav navbar-nav navbar-right"  style="display:block">
           <button type="button" class="btn btn-success btn-lg" data-toggle="modal" data-target="#signin">Sign in</button>
-          <button type="button" class="btn btn-info btn-lg"    data-toggle="modal" data-target="#signup">Sign up</button>
-        </form>
+          <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#signup">Sign up</button>
+        </div>
+        <div id="username" class="nav navbar-nav navbar-right"  style="display:none">
+          <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" id="user" style="text-align:center;font-size:20px;">User Name<b class="caret"></b></a>
+          <ul class="dropdown-menu" id="menu1">
+            <li><a href="mytrips.html">My Trips</a></li>
+            <li class="divider"></li>
+            <li><a href="index.html" onclick="logout()">Log Out</a></li>
+          </ul>
+          </li>
+  
+        </div> 
       </div>
     </div>
   </nav>

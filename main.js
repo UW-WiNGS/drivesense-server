@@ -18,7 +18,7 @@ app.use(bodyparser.urlencoded({ extended: true })); // for parsing application/x
 
 
 app.post('/upload', route.upload);
-app.get('/show', route.showtrip);
+app.get('/mytrips', route.showtrip);
 app.post('/signup', route.signup);
 app.post('/signin', route.signin);
 
