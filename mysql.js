@@ -1,9 +1,11 @@
+//mysql -u drivesense -h mysql.cs.wisc.edu -p --skip-secure-auth
+
 var mysql      = require('mysql');
 var connection = mysql.createConnection({
   host     : 'localhost',
   user     : 'root',
-//  password : 'drivesense',
-  password : 'studentsublease',
+  password : 'drivesense',
+//  password : 'studentsublease',
   database : 'drivesense_wings',
   multipleStatements: true,
 });

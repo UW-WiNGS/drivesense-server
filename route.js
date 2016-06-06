@@ -1,6 +1,7 @@
 var path = require('path');     //used for file path
 var mysqlwrapper = require('./mysql_wrapper.js');
 var User = require('./user.js');
+var fs = require('fs-extra');
 
 var upload = function (req, res, next) {
   req.pipe(req.busboy);
@@ -74,7 +75,57 @@ var signin = function (req, res, next) {
 };
 
 
+var androidsignin = function(req, res, next) {
+  req.pipe(req.busboy);
+  var user = {};
+  req.busboy.on('field', function(fieldname, val) {
+    user[fieldname] = val;
+  });
+  req.busboy.on('finish', function() {
+    mysqlwrapper.userSignIn(user, function(err) {
+      if(err) {
+        var msg = {status: 'err', data: err};         
+      } else {
+        var msg = {status: 'okay', data: null};
+      }
+      res.json(msg);
+    });
+  });
+};  
+
+
+var androidsignup = function(req, res, next) {
+  req.pipe(req.busboy);
+  var user = {};
+  req.busboy.on('field', function(fieldname, val) {
+    user[fieldname] = val;
+  });
+  req.busboy.on('finish', function() {
+    mysqlwrapper.userSignUp(user, function(err, id) {
+     if(err) {
+        var msg = {status: 'err', data: err};         
+      } else {
+        var msg = {status: 'okay', data: null};
+      }
+      res.json(msg);
+    });
+  });
+
+
+
+};  
+
+
+ 
 module.exports.upload = upload;
 module.exports.showtrip = showtrip;
 module.exports.signup = signup;
 module.exports.signin = signin;
+
+module.exports.androidsignin = androidsignin;
+module.exports.androidsignup = androidsignup;
+
+
+
+
+

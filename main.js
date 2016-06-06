@@ -21,6 +21,8 @@ app.post('/upload', route.upload);
 app.get('/mytrips', route.showtrip);
 app.post('/signup', route.signup);
 app.post('/signin', route.signin);
+app.post('/androidsignin', route.androidsignin);
+app.post('/androidsignup', route.androidsignup);
 
 
 var server = app.listen(8000, function() {
