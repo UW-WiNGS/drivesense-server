@@ -11,6 +11,7 @@ var upload = function (req, res, next) {
   });  
   req.busboy.on('file', function (fieldname, file, filename) {  
     console.log("Uploading: " + filename);
+    console.log(result);
     var folder = path.join(__dirname, '../uploads/' + result['deviceid'] + '/');
     fs.mkdirp(folder, function (err) {
       var fstream = fs.createWriteStream(folder + filename);
