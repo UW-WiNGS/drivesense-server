@@ -7,20 +7,26 @@ var path = require('path');     //used for file path
 var express = require('express');    //Express Web Server 
 var busboy = require('connect-busboy'); //middleware for form/file upload
 var bodyparser = require('body-parser');
+var cookieParser = require('cookie-parser');
 
 var route = require('./route');
 var app = express();
 
+
 app.use(busboy());
-app.use(express.static(path.join(__dirname, 'public'))); 
 app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public'))); 
 
 
 app.post('/upload', route.upload);
 app.get('/mytrips', route.showtrip);
 app.post('/signup', route.signup);
-app.post('/signin', route.signin);
+app.post('/signin', [route.test, route.signin]);
+app.get('/signinstatus', route.signinstatus);
+
+
 app.post('/androidsignin', route.androidsignin);
 app.post('/androidsignup', route.androidsignup);
 

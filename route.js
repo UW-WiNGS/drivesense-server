@@ -2,6 +2,61 @@ var path = require('path');     //used for file path
 var mysqlwrapper = require('./mysql_wrapper.js');
 var User = require('./user.js');
 var fs = require('fs-extra');
+var jwt = require('jsonwebtoken');
+
+var signinstatus = function (req, res, next) {
+  console.log("signin status");
+  var token = req.cookies.token || req.body.token || req.query.token || req.headers['x-access-token'];
+  // decode token
+  if (token) {
+    // verifies secret and checks exp
+    jwt.verify(token, 'secret', function(err, decoded) {      
+      if (err) {
+        var msg = {status: 'fail', message: 'Failed to authenticate token.'};    
+        res.json(msg);
+      } else {
+        // if everything is good, save to request for use in other routes
+        req.decoded = decoded;    
+        console.log(decoded);
+        var msg = {status: 'success', message: ''};
+        res.json(msg);
+      }
+    });
+
+  } else {
+    // if there is no token
+    // return an error
+    return res.status(403).send({ 
+        status: 'fail', 
+        message: 'No token provided.' 
+    });
+    
+  }
+};
+
+var test = function (req, res, next) {
+  console.log("test");
+  next();
+};
+
+var signin = function (req, res, next) {
+  console.log("signin");
+  var user = new User();
+  user.fromObject(req.body);
+  mysqlwrapper.userSignIn(user, function(err) {
+    var msg = {};
+    if(err) {
+      console.log(err);
+      msg = {status: 'fail', data: err};
+    } else {
+      var token = jwt.sign(user, 'secret', {expiresIn: '1d'});
+      res.cookie('token', token);
+      msg = {status: 'success', data: user, token: token};
+    }
+    res.json(msg);
+  });
+};
+
 
 var upload = function (req, res, next) {
   req.pipe(req.busboy);
@@ -60,19 +115,13 @@ var signup = function (req, res, next) {
   mysqlwrapper.insertUser(user,function(err, id) {
     if(err) {
       console.log(err);
-      res.json(new Error("user signup failed"));
+      var msg = {status: 'fail', data: err};
+      res.json(msg);
     } else {
-      var msg = {status: 'okay', data: null};
+      var msg = {status: 'success', data: null};
       res.json(msg);
     }
   }); 
-};
-
-var signin = function (req, res, next) {
-  console.log(req.body);
-  var receive = req.body;
-  var msg = {status: 'okay', data: receive};
-  res.json(msg);
 };
 
 
@@ -111,9 +160,6 @@ var androidsignup = function(req, res, next) {
       res.json(msg);
     });
   });
-
-
-
 };  
 
 
@@ -122,6 +168,9 @@ module.exports.upload = upload;
 module.exports.showtrip = showtrip;
 module.exports.signup = signup;
 module.exports.signin = signin;
+
+module.exports.signinstatus = signinstatus;
+module.exports.test = test;
 
 module.exports.androidsignin = androidsignin;
 module.exports.androidsignup = androidsignup;

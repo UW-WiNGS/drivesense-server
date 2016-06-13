@@ -10,7 +10,7 @@
 
 </head>
 
-<body>
+<body onload="showUserName()">
 
   <nav class="navbar navbar-inverse navbar-static-top">
    <div class="container">
@@ -187,6 +187,17 @@
 
 <script>
 
+var showUserName = function(token) {
+  console.log(token);
+  var urlloginstatus = window.location.origin + "/signinstatus";
+  $.get(urlloginstatus, function( data ) {
+    console.log("get login status");
+    console.log(data);
+    $(".user" ).html( data );
+  });
+}
+
+
 var validateSignInForm = function() {
   var email = document.forms["signinform"]["email"].value; 
   var password = document.forms["signinform"]["password"].value; 
@@ -203,26 +214,31 @@ var validateSignInForm = function() {
 
 
 var submitSignIn = function() {
-
+/*
   var signin = validateSignInForm(); 
   if (signin == null) {
     return;
   } 
-
+*/
   var posturl = window.location.origin + "/signin";
 
+  var signin = {};
+  signin.email = "kanglei1130@gmail.com";
+  signin.password = "kanglei";
+  console.log(signin);
   var signinpost = $.ajax({
     type: 'POST', 
     url: posturl, 
     data: signin,
   });
   signinpost.error(function() {
-    alert("Sign Up Failure");
+    alert("Sign In Failure");
   });
   signinpost.success(function(msg, status){
     if(status == "success") {
       console.log(msg);
-      location.reload();
+      //location.reload();
+      showUserName(msg.token);
     } else {
       console.log(status);
     } 
