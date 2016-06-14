@@ -21,10 +21,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 
 app.post('/upload', route.upload);
-app.get('/mytrips', route.showtrip);
 app.post('/signup', route.signup);
-app.post('/signin', [route.test, route.signin]);
-app.get('/signinstatus', route.signinstatus);
+app.post('/signin', [route.signin]);
+app.get('/signout', [route.signout]);
+
+
+app.get('/signinstatus', [route.tokenverification, route.signinstatus]);
+app.get('/mytrips', [route.tokenverification, route.showtrip]);
 
 
 app.post('/androidsignin', route.androidsignin);

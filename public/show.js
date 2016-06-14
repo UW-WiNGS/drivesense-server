@@ -11,7 +11,7 @@ function initMap() {
 	 console.log(JSON.stringify(msg.data));
 	 alert("tripid is not valid!!!");
        } else {
-	 displayTrip(map, msg.data);
+	 //displayTrip(map, msg.data);
        }
      } else {
        console.log(status);
@@ -19,7 +19,7 @@ function initMap() {
   });
 }
 function displayTrip(map, data) {
-
+  if(!data) return;
   var latlngbounds = new google.maps.LatLngBounds();
   for(var i = 0; i < data.length; ++i) {
     var point = data[i];

@@ -4,60 +4,6 @@ var User = require('./user.js');
 var fs = require('fs-extra');
 var jwt = require('jsonwebtoken');
 
-var signinstatus = function (req, res, next) {
-  console.log("signin status");
-  var token = req.cookies.token || req.body.token || req.query.token || req.headers['x-access-token'];
-  // decode token
-  if (token) {
-    // verifies secret and checks exp
-    jwt.verify(token, 'secret', function(err, decoded) {      
-      if (err) {
-        var msg = {status: 'fail', message: 'Failed to authenticate token.'};    
-        res.json(msg);
-      } else {
-        // if everything is good, save to request for use in other routes
-        req.decoded = decoded;    
-        console.log(decoded);
-        var msg = {status: 'success', message: ''};
-        res.json(msg);
-      }
-    });
-
-  } else {
-    // if there is no token
-    // return an error
-    return res.status(403).send({ 
-        status: 'fail', 
-        message: 'No token provided.' 
-    });
-    
-  }
-};
-
-var test = function (req, res, next) {
-  console.log("test");
-  next();
-};
-
-var signin = function (req, res, next) {
-  console.log("signin");
-  var user = new User();
-  user.fromObject(req.body);
-  mysqlwrapper.userSignIn(user, function(err) {
-    var msg = {};
-    if(err) {
-      console.log(err);
-      msg = {status: 'fail', data: err};
-    } else {
-      var token = jwt.sign(user, 'secret', {expiresIn: '1d'});
-      res.cookie('token', token);
-      msg = {status: 'success', data: user, token: token};
-    }
-    res.json(msg);
-  });
-};
-
-
 var upload = function (req, res, next) {
   req.pipe(req.busboy);
   var result = {};
@@ -78,7 +24,6 @@ var upload = function (req, res, next) {
     });
   });
 };
-
 
 
 var showtrip = function (req, res, next) {
@@ -105,6 +50,66 @@ var showtrip = function (req, res, next) {
     }
   });
 };
+
+
+var signout = function(req, res, next) {
+  res.clearCookie('token');
+  var msg = {status:'success', data:'token cleared'};
+  res.json(msg);
+};
+
+
+var signinstatus = function (req, res, next) {
+  var user = req.body;
+  var msg = {status: 'success', data: {firstname: user.firstname, lastname:user.lastname}};
+  res.json(msg);
+};
+
+
+var tokenverification = function (req, res, next) {
+   var token = req.cookies.token || req.body.token || req.query.token || req.headers['x-access-token'];
+  // decode token
+  if (token) {
+    // verifies secret and checks exp
+    jwt.verify(token, 'secret', function(err, decoded) {      
+      if (err) {
+        var msg = {status: 'fail', data: 'Failed to authenticate token.'};    
+        res.json(msg);
+      } else {
+        // if everything is good, save to request for use in other routes
+        req.body = decoded;    
+        next(); 
+      }
+    });
+
+  } else {
+    // if there is no token
+    // return an error
+    return res.status(403).send({ 
+        status: 'fail', 
+        data: 'No token provided.' 
+    }); 
+  }
+};
+
+var signin = function (req, res, next) {
+  console.log("signin");
+  var user = new User();
+  user.fromObject(req.body);
+  mysqlwrapper.userSignIn(user, function(err, row) {
+    var msg = {};
+    if(err) {
+      console.log(err);
+      msg = {status: 'fail', data: err};
+    } else {
+      var token = jwt.sign(row, 'secret', {expiresIn: '1d'});
+      res.cookie('token', token);
+      msg = {status: 'success', data: {firstname: row.firstname, lastname: row.lastname}};
+    }
+    res.json(msg);
+  });
+};
+
 
 
 var signup = function (req, res, next) {
@@ -168,9 +173,10 @@ module.exports.upload = upload;
 module.exports.showtrip = showtrip;
 module.exports.signup = signup;
 module.exports.signin = signin;
+module.exports.signout = signout;
 
 module.exports.signinstatus = signinstatus;
-module.exports.test = test;
+module.exports.tokenverification = tokenverification;
 
 module.exports.androidsignin = androidsignin;
 module.exports.androidsignup = androidsignup;

@@ -1,12 +1,16 @@
 <!DOCTYPE html>
 <html>
   <head>
+<!--
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+-->
     <meta charset="utf-8">
     <title>Show Trip</title>
     <link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="/carousel.css">
     <link href="/car.jpg" rel="shortcut icon" type="image/x-icon">
+    <script src="/bower_components/jquery/dist/jquery.min.js"></script> 
+    <script src="/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
 
    <style>
       html, body {
@@ -19,46 +23,26 @@
         height: 50%;
       }
     </style>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script> 
+
   </head>
-  <body>
+  <body onload="showUserName()">
 
-
-  <nav class="navbar navbar-inverse navbar-static-top">
-   <div class="container">
-      <div class="navbar-header">
-         <a class="navbar-brand" href="index.html" style="font-size:30px;">DriveSense</a>
-      </div>
-      <div id="navbar" class="collapse navbar-collapse">
-        <div id="signinup" class="nav navbar-nav navbar-right"  style="display:block">
-          <button type="button" class="btn btn-success btn-lg" data-toggle="modal" data-target="#signin">Sign in</button>
-          <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#signup">Sign up</button>
-        </div>
-        <div id="username" class="nav navbar-nav navbar-right"  style="display:none">
-          <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" id="user" style="text-align:center;font-size:20px;">User Name<b class="caret"></b></a>
-          <ul class="dropdown-menu" id="menu1">
-            <li><a href="mytrips.html">My Trips</a></li>
-            <li class="divider"></li>
-            <li><a href="index.html" onclick="logout()">Log Out</a></li>
-          </ul>
-          </li>
-  
-        </div> 
-      </div>
-    </div>
-  </nav>
-
-
-
+  <div id="header"></div>
   <div id="map"></div>
 
+  
+
+
+  <script>
+    $(document).ready(function(){
+      $("#header").load("navbar.html");
+    });
+
+  </script>
+
     
-
-
-
-
-  <script src="./show.js"></script>
+  <script src="/show.js"></script> 
+  <script src="/user.js"></script>
   <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB3dwDzOBKBdFmKH9yn5yvp72lw09kW01M&callback=initMap"></script> 
 </body>
 </html>
