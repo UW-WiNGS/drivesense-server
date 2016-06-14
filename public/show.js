@@ -1,25 +1,10 @@
 function initMap() {
   var madison = {lat: 43.073052, lng: -89.401230};
   var map = new google.maps.Map(document.getElementById('map'), { zoom: 15, center: madison});
-
-  var cururl = window.location.href;
-  console.log(cururl);
-  var geturl = cururl.replace("show.html", "show");
-  $.get(geturl, function(msg, status){
-     if(status=="success") { 
-       if(msg.status == "err") {
-	 console.log(JSON.stringify(msg.data));
-	 alert("tripid is not valid!!!");
-       } else {
-	 //displayTrip(map, msg.data);
-       }
-     } else {
-       console.log(status);
-     }
-  });
 }
-function displayTrip(map, data) {
+function displayTrip(data) {
   if(!data) return;
+  var map = new google.maps.Map(document.getElementById('map'), { zoom: 15, center: madison});
   var latlngbounds = new google.maps.LatLngBounds();
   for(var i = 0; i < data.length; ++i) {
     var point = data[i];
@@ -31,5 +16,25 @@ function displayTrip(map, data) {
     });
   }
   map.fitBounds(latlngbounds);
+}
+
+function displaySummary(arr) {
+    
+}
+
+
+function showTrips() {
+  var geturl = window.location.origin + "/mytrips";
+  $.get(geturl, function(msg, status){
+     if(status=="success") { 
+       if(msg.status != "success") {	
+	 alert("Load trips failed");
+       } else {
+	  displaySummary(msg.data); 
+       }
+     } else {
+       alert(status);
+     }
+  });
 }
 

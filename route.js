@@ -3,70 +3,49 @@ var mysqlwrapper = require('./mysql_wrapper.js');
 var User = require('./user.js');
 var fs = require('fs-extra');
 var jwt = require('jsonwebtoken');
+var util = require('util');
+var formidable = require('formidable');
+var sqlite3 = require('sqlite3').verbose();
 
-var getUserID = function (req, res, next) {
-  req.pipe(req.busboy);
-  var result = {};
-  req.busboy.on('field', function(fieldname, val) {
-    result[fieldname] = val;
-    if(filedname == "email") {
-      mysqlwrapper.getUserIDByEmail(val, function(err, id){
-        if(err) {
-          console.log(err);
-        } else {
-          req.userid = id;
-          next();
-        }
-      });
-    }
-  });   
-}
-
-var upload = function (req, res, next) {
-  req.pipe(req.busboy);
-  var result = {};
-  req.busboy.on('field', function(fieldname, val) {
-    result[fieldname] = val;
-  });  
-  req.busboy.on('file', function (fieldname, file, filename) {  
-    console.log("Uploading: " + filename);
-    console.log(result);
-    var folder = path.join(__dirname, '../uploads/' + result['deviceid'] + '/');
-    fs.mkdirp(folder, function (err) {
-      var fstream = fs.createWriteStream(folder + filename);
-      file.pipe(fstream);
-      fstream.on('close', function () {    
-        console.log("Upload Finished of " + filename);              
-        res.send('okay');           //where to go next
-      });
-    });
-  });
-};
-
-
-var showtrip = function (req, res, next) {
-  var query = req.query;
-  var devid = query.devid;
-  var tripid = query.tripid;
-  var dir = path.join(__dirname, "../uploads/" + devid + "/");
+var showtrips = function (req, res, next) {
+  var userid = req.body.userid;
+  var dir = path.join(__dirname, "../uploads/" + userid + "/");
   try {
     var files = fs.readdirSync(dir);
-    var dbfile = dir + files[tripid];
-    var db = new sqlite3.Database(dbfile);
   } catch(err) {
-    var msg = {status: 'err', data: err};
+    var msg = {status: 'fail', data: err};
     res.json(msg);
     return;
   }
-  db.all("SELECT * FROM gps;", function(err, rows) {
-    if(err) {
-      var msg = {status: 'err', data: err};
+  var trips = {};
+  var index = 0;
+  var len = files.length;
+  (function loadTrip() {
+    var dbfile = dir + files[index];
+    if(index == len) {
+      var msg = {status: 'success', data:trips};
       res.json(msg);
-    } else {
-      var msg = {status: 'okay', data: rows};
-      res.json(msg);
+      return;
     }
-  });
+    try {
+      var db = new sqlite3.Database(dbfile);
+      db.all("select * from gps;", function(err, rows) {
+        if (err) { 
+          console.log(err); 
+        } else {
+          trips[files[index]] = rows;
+          index++;
+          loadTrip();
+        }
+      });
+    } catch (exception) {
+      console.log(exception);
+      var msg = {status: 'fail', data: exception};
+      res.json(msg);     
+      return;
+    }
+  })();
+
 };
 
 
@@ -111,7 +90,6 @@ var tokenverification = function (req, res, next) {
 };
 
 var signin = function (req, res, next) {
-  console.log("signin");
   var user = new User();
   user.fromObject(req.body);
   mysqlwrapper.userSignIn(user, function(err, row) {
@@ -151,46 +129,75 @@ var signup = function (req, res, next) {
 
 
 var androidsignin = function(req, res, next) {
-  req.pipe(req.busboy);
-  var user = {};
-  req.busboy.on('field', function(fieldname, val) {
-    user[fieldname] = val;
-  });
-  req.busboy.on('finish', function() {
+  var form = new formidable.IncomingForm();
+  form.parse(req, function(err, fields, files) {
+    var user = fields;     
     mysqlwrapper.userSignIn(user, function(err) {
       if(err) {
-        var msg = {status: 'err', data: err};         
+        var msg = {status: 'fail', data: err};         
       } else {
-        var msg = {status: 'okay', data: null};
+        var msg = {status: 'success', data: null};
       }
       res.json(msg);
     });
   });
-};  
+}  
 
 
 var androidsignup = function(req, res, next) {
-  req.pipe(req.busboy);
-  var user = {};
-  req.busboy.on('field', function(fieldname, val) {
-    user[fieldname] = val;
-  });
-  req.busboy.on('finish', function() {
+  var form = new formidable.IncomingForm();
+  form.parse(req, function(err, fields, files) {
+    var user = fields;     
     mysqlwrapper.userSignUp(user, function(err, id) {
      if(err) {
-        var msg = {status: 'err', data: err};         
+        var msg = {status: 'fail', data: err};         
       } else {
-        var msg = {status: 'okay', data: null};
+        var msg = {status: 'success', data: null};
       }
       res.json(msg);
     });
   });
 };  
 
+var upload = function (req, res, next) {
+  var form = new formidable.IncomingForm();
+  form.parse(req, function(err, fields, files) {
+    var file = files.uploads;
+    mysqlwrapper.getUserIDByEmail(fields.email, function(err, id){
+      if(err) {
+        console.log(err);
+        var msg = {status: 'fail', data: err};
+        res.json(msg);
+        return;
+      } 
+      var folder = path.join(__dirname, '../uploads/' + id + '/');
+      fs.mkdirp(folder, function (err) {
+        if(err) {
+          console.log(err);
+          var msg = {status: 'fail', data: err};
+          res.json(msg);
+          return;
+        }
+        fs.copy(file.path, path.join(folder, file.name), function(err){
+          if (err) {
+            console.error(err);
+            var msg = {status: 'fail', data: err};
+            res.json(msg);
+          } else {
+            var msg = {status: 'success', data: ''};
+            res.json(msg);
+          } 
+        }); 
+      });
+    });
+  });//end of paring form
+}
 
- 
+
+
 module.exports.upload = upload;
-module.exports.showtrip = showtrip;
+
+module.exports.showtrips = showtrips;
 module.exports.signup = signup;
 module.exports.signin = signin;
 module.exports.signout = signout;

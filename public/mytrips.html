@@ -25,18 +25,61 @@
     </style>
 
   </head>
-  <body onload="showUserName()">
+  <body onload="showUserName();showTrips();">
 
   <div id="header"></div>
   <div id="map"></div>
 
-  
+  <div class="container" style="">
 
+  <div class="container" style="margin-top:5px;margin-bottom:5px;">
+    <form id="mainForm" name="mainForm">
+      Display on map:
+      <label class="radio-inline">
+        <input type="radio" name="rads" value="speed" checked>Speed
+      </label>
+      <label class="radio-inline">
+        <input type="radio" name="rads" value="score">Score
+      </label>
+      <label class="radio-inline">
+        <input type="radio" name="rads" value="brake">Brakes
+      </label>
+    </form>
+  </div>  
+
+  <div class="container">
+    <div class="form-group">
+    <label for="trips">Trip list:</label>
+      <select class="form-control" id="trips" name="trips">
+        <option value="0" selected>No Trip Uploaded Yet!</option>
+      </select>
+    </div>
+  </div>
+
+  </div>
 
   <script>
     $(document).ready(function(){
       $("#header").load("navbar.html");
     });
+
+    var displaySelected = function(e) {
+      if (e.target.tagName != 'INPUT'){
+        return;
+      }
+      var radVal = document.mainForm.rads.value;
+      console.log(radVal); 
+ 
+    }
+    var tripSelected = function() {
+      //jump label
+      var x = document.getElementById("trips");
+      console.log(x.value); 
+    }
+
+    document.getElementById("trips").addEventListener("change", tripSelected);
+    document.getElementById("mainForm").addEventListener("click", displaySelected);
+
 
   </script>
 
