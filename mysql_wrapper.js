@@ -5,6 +5,20 @@ var mysqlwrapper = function() {
 
 }
 
+mysqlwrapper.prototype.getUserIDByEmail = function (email, callback) {
+  var sql = "select userid from user where email like binary '" + email + "'";
+  conn.query(sql, function(err, rows, field){
+    if(err) {
+      callback(err, null);
+    } else if(rows.length == 0) {
+      callback(new Error("no user has email:" + email), null);
+    } else {
+      callback(null, rows[0].userid);
+    }
+  });
+}
+
+
 mysqlwrapper.prototype.userSignUp = function (user, callback) {
   var sql = "insert into user set ? ";
   conn.query(sql, user, function(err, rows, field){

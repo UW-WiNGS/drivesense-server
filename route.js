@@ -4,6 +4,24 @@ var User = require('./user.js');
 var fs = require('fs-extra');
 var jwt = require('jsonwebtoken');
 
+var getUserID = function (req, res, next) {
+  req.pipe(req.busboy);
+  var result = {};
+  req.busboy.on('field', function(fieldname, val) {
+    result[fieldname] = val;
+    if(filedname == "email") {
+      mysqlwrapper.getUserIDByEmail(val, function(err, id){
+        if(err) {
+          console.log(err);
+        } else {
+          req.userid = id;
+          next();
+        }
+      });
+    }
+  });   
+}
+
 var upload = function (req, res, next) {
   req.pipe(req.busboy);
   var result = {};
@@ -117,13 +135,15 @@ var signup = function (req, res, next) {
   var user = new User();
   user.fromObject(query);
   console.log(user);
-  mysqlwrapper.insertUser(user,function(err, id) {
+  mysqlwrapper.userSignUp(user,function(err, id) {
     if(err) {
       console.log(err);
       var msg = {status: 'fail', data: err};
       res.json(msg);
     } else {
-      var msg = {status: 'success', data: null};
+      var token = jwt.sign(row, 'secret', {expiresIn: '1d'});
+      res.cookie('token', token);
+      var msg = {status: 'success', data: {firstname: user.firstname, lastname:user.lastname}};
       res.json(msg);
     }
   }); 
