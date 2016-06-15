@@ -19,7 +19,7 @@ function displayTrip(data) {
 }
 
 function displaySummary(arr) {
-    
+ console.log(arr);    
 }
 
 
