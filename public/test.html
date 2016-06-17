@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+  <head>
+<!--
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+-->
+  <meta charset="utf-8">
+  <title>Show Trip</title>
+  <link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/carousel.css">
+  <link href="/car.jpg" rel="shortcut icon" type="image/x-icon">
+  <script src="/bower_components/jquery/dist/jquery.min.js"></script> 
+  <script src="/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+  <script src="/bower_components/angular/angular.js"></script>
+
+   <style>
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      #map {
+        margin-top: -20px;
+        height: 50%;
+      }
+    </style>
+
+  </head>
+  <body onload="showUserName();">
+
+  <div id="header"></div>
+  <div id="map"></div>
+
+  <div class="container" ng-app="displayTripsApp" ng-controller="displayTripsCtrl" ng-init="trip=0">
+
+  <div class="container" style="margin-top:5px;margin-bottom:5px;">
+    <form id="mainForm" name="mainForm">
+      Display on map:
+      <label class="radio-inline">
+        <input type="radio" name="rads" value="speed" checked>Speed
+      </label>
+      <label class="radio-inline">
+        <input type="radio" name="rads" value="score">Score
+      </label>
+      <label class="radio-inline">
+        <input type="radio" name="rads" value="brake">Brakes
+      </label>
+    </form>
+  </div>  
+
+  <div class="container">
+    <div class="form-group">
+    <label for="trips">Trip list:</label>
+      <select class="form-control" id="trips" name="trips" 
+        ng-change="showTrip()" ng-model="trips.selectedTrip">
+        <option ng-selected="{{option.id == selectedTrip.id}}" ng-repeat="option in trips.availableOptions" value="{{selectedTrip.id}}">{{option.name}}</option>
+      </select>
+    </div>
+  </div>
+
+  </div>
+
+  <script>
+    $(document).ready(function(){
+      $("#header").load("navbar.html");
+    });
+    var app = angular.module('displayTripsApp', []);
+    app.controller('displayTripsCtrl', function($scope, $http, $location){ 
+      $http.get("/mytrips").then(function(res){
+        if(res.status == 200) {
+          $scope.tripdata = res.data.data;
+          var keys = Object.keys(tripdata);
+          for(var i = 0; i < keys.length; i++) {
+            $scope.trips.availableOptions[i] = {id: i, name: keys[i]};
+          }
+          $scope.trips.selectedTrip = $scope.trips.availableOptions[0]; 
+        }
+      });
+      $scope.showTrip = function() {
+        var curtrip = $scope.trips.selectedTrip.name;
+        console.log($scope.tripdata[curtrip]);
+      };
+
+      $scope.trips = {
+        availableOptions: [],
+        selectedTrip: {} 
+      };
+
+    });
+   
+    app.service('tripdata', function ($http) {
+      var data;
+      return {
+        data: data
+      };
+      function getData() {
+        return data;
+      }
+      function setInfo(value) {
+        info = value;
+      }
+    });
+
+  </script>
+
+    
+  <script src="/show.js"></script> 
+  <script src="/user.js"></script>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB3dwDzOBKBdFmKH9yn5yvp72lw09kW01M&callback=initMap"></script> 
+</body>
+</html>
+
+
