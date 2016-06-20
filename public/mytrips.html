@@ -37,13 +37,13 @@
     <form id="mainForm" name="mainForm">
       Display on map:
       <label class="radio-inline">
-        <input type="radio" name="rads" value="speed" checked>Speed
+        <input type="radio" name="rads" value="speed" ng-click="showTrip()" ng-model="display" checked>Speed
       </label>
       <label class="radio-inline">
-        <input type="radio" name="rads" value="score">Score
+        <input type="radio" name="rads" value="score" ng-click="showTrip()" ng-model="display">Score
       </label>
       <label class="radio-inline">
-        <input type="radio" name="rads" value="brake">Brakes
+        <input type="radio" name="rads" value="brake" ng-click="showTrip()" ng-model="display">Brakes
       </label>
     </form>
   </div>  
@@ -52,8 +52,8 @@
     <div class="form-group">
     <label for="trips">Trip list:</label>
       <select class="form-control" id="trips" name="trips" 
-        ng-change="showTrip()" ng-model="trips.selectedTrip">
-        <option ng-selected="{{option.id == selectedTrip.id}}" ng-repeat="option in trips.availableOptions" value="{{selectedTrip.id}}">{{option.name}}</option>
+        ng-options="option.name for option in data.availableOptions track by option.id"
+        ng-model="data.selectedOption" ng-change="showTrip()">
       </select>
     </div>
   </div>
@@ -65,42 +65,62 @@
       $("#header").load("navbar.html");
     });
     var app = angular.module('displayTripsApp', []);
-    app.controller('displayTripsCtrl', function($scope, $http, $location){ 
+    app.service('tripformat', function () {
+      var data = {};
+      this.getData = function(key) {
+        return data[key];
+      }
+      this.getKeys = function() {
+        return Object.keys(data);
+      }
+      
+      this.setData = function(value) {
+        var keys = Object.keys(value);
+        for(var i = 0; i < keys.length; i++) {
+          var cur = keys[i];
+          var time = new Date(parseInt(cur));
+          data[time] = value[keys[i]];
+        }
+      }
+    });
+
+   app.controller('displayTripsCtrl', function($scope, $http, tripformat){ 
       $http.get("/mytrips").then(function(res){
         if(res.status == 200) {
-          $scope.tripdata = res.data.data;
-          var keys = Object.keys(tripdata);
-          for(var i = 0; i < keys.length; i++) {
-            $scope.trips.availableOptions[i] = {id: i, name: keys[i]};
+          var response = res.data;
+          if(response.status == "fail") {
+            $scope.data.availableOptions[0] = {id: 0, name: "No trip uploaded yet!"};           
+            $scope.data.selectedOption = $scope.trips.availableOptions[0]; 
+            return;
           }
-          $scope.trips.selectedTrip = $scope.trips.availableOptions[0]; 
+          var tripdata = response.data;
+          tripformat.setData(tripdata);
+          var keys = tripformat.getKeys(); 
+          for(var i = 0; i < keys.length; i++) {
+            var cur = keys[i];
+            $scope.data.availableOptions[i] = {id: i, name: cur.toString()};
+          }
+          $scope.data.selectedOption = $scope.data.availableOptions[0]; 
+          $scope.showTrip();
         }
       });
       $scope.showTrip = function() {
-        var curtrip = $scope.trips.selectedTrip.name;
-        console.log($scope.tripdata[curtrip]);
+        var cur = $scope.data.selectedOption.name;
+        var method = $scope.display;
+        //console.log($scope.mainForm.rads);
+        //console.log($scope.tripdata[curtrip]);
+        var trip = tripformat.getData(cur);
+        //console.log(trip);
+        displayTrip(trip);
       };
 
-      $scope.trips = {
+      $scope.data = {
         availableOptions: [],
-        selectedTrip: {} 
+        selectedOption: {} 
       };
 
     });
    
-    app.service('tripdata', function ($http) {
-      var data;
-      return {
-        data: data
-      };
-      function getData() {
-        return data;
-      }
-      function setInfo(value) {
-        info = value;
-      }
-    });
-
   </script>
 
     

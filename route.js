@@ -33,7 +33,7 @@ var showtrips = function (req, res, next) {
         if (err) { 
           console.log(err); 
         } else {
-          trips[files[index]] = rows;
+          trips[files[index].substr(0, 13)] = rows;
           index++;
           loadTrip();
         }
