@@ -116,10 +116,17 @@ var submitSignUp = function() {
   });
   signuppost.success(function(msg, status){
     if(status == "success") {
-      console.log(msg);
-      location.reload();
+      if(msg.status == "success") {
+        location.reload();
+      } else {
+        if(msg.data == "ER_DUP_ENTRY") {
+          alert("Email has been registered");
+        } else {
+          alert("Unkown error");
+        }
+      }
     } else {
-      console.log(status);
+      alert("server failure, please try again later");
     } 
   }); 
 }

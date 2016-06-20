@@ -125,9 +125,9 @@ var signup = function (req, res, next) {
       console.log(err.code);
       var msg = {};
       if(err.code == "ER_DUP_ENTRY") {
-        msg = {status: 'fail', data: "email has been registered"};
+        msg = {status: 'fail', data: err.code};
       } else {
-        msg = {status: 'fail', data: err.code}; 
+        msg = {status: 'fail', data: 'unknown'}; 
       }
       res.json(msg);
     } else {
