@@ -30,6 +30,19 @@ mysqlwrapper.prototype.userSignUp = function (user, callback) {
   });
 }
 
+mysqlwrapper.prototype.getUserByID = function (userid, callback) {
+  var sql = "select * from user where userid = " + userid + ";"; 
+  conn.query(sql, function(err, rows, field){
+    if(err) {
+      callback(err, null);
+    } else if(rows.length == 0) {
+      callback(new Error("not registered"), null);
+    } else {
+      callback(null, rows[0]);
+    }
+  });
+}
+
 
 mysqlwrapper.prototype.userSignIn = function (user, callback) {
   var sql = "select * from user where email like binary '" + user.email + "' and password like binary '" + user.password + "'";

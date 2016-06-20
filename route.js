@@ -57,9 +57,16 @@ var signout = function(req, res, next) {
 
 
 var signinstatus = function (req, res, next) {
-  var user = req.body;
-  var msg = {status: 'success', data: {firstname: user.firstname, lastname:user.lastname}};
-  res.json(msg);
+  var userid = req.body.userid;
+  mysqlwrapper.getUserByID(userid, function(err, user) {
+    var msg = {};
+    if(err) {
+      msg = {status: 'fail', data: err.message}; 
+    } else {
+      msg = {status: 'success', data: {firstname: user.firstname, lastname:user.lastname}};
+    }
+    res.json(msg);
+  });
 };
 
 
@@ -74,7 +81,7 @@ var tokenverification = function (req, res, next) {
         res.json(msg);
       } else {
         // if everything is good, save to request for use in other routes
-        req.body = decoded;    
+        req.body.userid = decoded.userid;    
         next(); 
       }
     });
@@ -98,7 +105,7 @@ var signin = function (req, res, next) {
       console.log(err);
       msg = {status: 'fail', data: err};
     } else {
-      var token = jwt.sign(row, 'secret', {expiresIn: '1d'});
+      var token = jwt.sign({userid:row.userid}, 'secret', {expiresIn: '1d'});
       res.cookie('token', token);
       msg = {status: 'success', data: {firstname: row.firstname, lastname: row.lastname}};
     }
@@ -115,11 +122,16 @@ var signup = function (req, res, next) {
   console.log(user);
   mysqlwrapper.userSignUp(user,function(err, id) {
     if(err) {
-      console.log(err);
-      var msg = {status: 'fail', data: err};
+      console.log(err.code);
+      var msg = {};
+      if(err.code == "ER_DUP_ENTRY") {
+        msg = {status: 'fail', data: "email has been registered"};
+      } else {
+        msg = {status: 'fail', data: err.code}; 
+      }
       res.json(msg);
     } else {
-      var token = jwt.sign(row, 'secret', {expiresIn: '1d'});
+      var token = jwt.sign({userid:id}, 'secret', {expiresIn: '1d'});
       res.cookie('token', token);
       var msg = {status: 'success', data: {firstname: user.firstname, lastname:user.lastname}};
       res.json(msg);
