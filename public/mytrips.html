@@ -90,7 +90,7 @@
           var response = res.data;
           if(response.status == "fail") {
             $scope.data.availableOptions[0] = {id: 0, name: "No trip uploaded yet!"};           
-            $scope.data.selectedOption = $scope.trips.availableOptions[0]; 
+            $scope.data.selectedOption = $scope.data.availableOptions[0]; 
             return;
           }
           var tripdata = response.data;
