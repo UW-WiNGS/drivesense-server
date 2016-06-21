@@ -21,7 +21,7 @@ var getIcons = function() {
   return res;
 }
 
-function displayTrip(data) {
+function displayTrip(data, method) {
   if(!data) return;
   var madison = {lat: 43.073052, lng: -89.401230};
   var map = new google.maps.Map(document.getElementById('map'), { zoom: 15, center: madison});
@@ -32,10 +32,27 @@ function displayTrip(data) {
     var latlng = new google.maps.LatLng(point.x0, point.x1);
     latlngbounds.extend(latlng);
 
+    var index = 0;
+
     var speed = point.x2;
-    var index = Math.round(speed/5.0);
+    var score = point.x3;
+    var brake = point.x4;
+    if(method == "speed") {
+      index = Math.round(speed/5.0);
+    } else if(method=="score") {
+      index = Math.round(10.0 - score);
+    } else if(method=="brake") {
+      if(brake < 0) index = 3;
+      else index = 0;
+    } else {
+      console.log("unknown method:" + method);
+    }
     if(index >= icons.length) {
       index = icons.length - 1; 
+    }
+    if(isNaN(index)) {
+      index = 0; 
+      console.log("index calculation error");
     }
     var circle = icons[index].icon; 
     var marker = new google.maps.Marker({

@@ -37,13 +37,13 @@
     <form id="mainForm" name="mainForm">
       Display on map:
       <label class="radio-inline">
-        <input type="radio" name="rads" value="speed" ng-click="showTrip()" ng-model="display" checked>Speed
+        <input type="radio" name="rads" value="speed" ng-model="radioValue" ng-click="showTrip()" checked>Speed
       </label>
       <label class="radio-inline">
-        <input type="radio" name="rads" value="score" ng-click="showTrip()" ng-model="display">Score
+        <input type="radio" name="rads" value="score" ng-model="radioValue" ng-click="showTrip()">Score
       </label>
       <label class="radio-inline">
-        <input type="radio" name="rads" value="brake" ng-click="showTrip()" ng-model="display">Brakes
+        <input type="radio" name="rads" value="brake" ng-model="radioValue" ng-click="showTrip()">Brakes
       </label>
     </form>
   </div>  
@@ -106,18 +106,16 @@
       });
       $scope.showTrip = function() {
         var cur = $scope.data.selectedOption.name;
-        var method = $scope.display;
-        //console.log($scope.mainForm.rads);
-        //console.log($scope.tripdata[curtrip]);
+        var method = $scope.radioValue;
         var trip = tripformat.getData(cur);
-        //console.log(trip);
-        displayTrip(trip);
+        displayTrip(trip, method);
       };
 
       $scope.data = {
         availableOptions: [],
         selectedOption: {} 
       };
+      $scope.radioValue = "speed";
 
     });
    
