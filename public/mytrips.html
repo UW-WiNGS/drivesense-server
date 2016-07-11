@@ -13,17 +13,29 @@
   <script src="/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
   <script src="/bower_components/angular/angular.js"></script>
 
-   <style>
-      html, body {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-      }
-      #map {
-        margin-top: -20px;
-        height: 50%;
-      }
-    </style>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    #map {
+      margin-top: -20px;
+      height: 50%;
+    }
+    table, th , td  {
+      border: 1px solid grey;
+      border-collapse: collapse;
+      padding: 5px;
+      width: 50%;
+    }
+    table tr:nth-child(odd) {
+      background-color: #f1f1f1;
+    }
+    table tr:nth-child(even) {
+      background-color: #ffffff;
+    }
+  </style>
 
   </head>
   <body onload="showUserName();">
@@ -56,6 +68,23 @@
         ng-model="data.selectedOption" ng-change="showTrip()">
       </select>
     </div>
+  </div>
+
+
+  <div class="container">
+ 
+    <label for="summary">Trip summary:</label>
+    <table>
+      <tr>
+        <td>Distance</td><td>{{ values.distance.toFixed(2) }} miles</td>
+      </tr>
+      <tr> 
+         <td>Duration</td> <td>{{ (values.duration/60000).toFixed(2) }} minutes</td>
+      </tr>
+      <tr> 
+         <td>Score</td> <td>{{ values.score.toFixed(2) }} out of 10.0</td>
+      </tr>
+    </table>
   </div>
 
   </div>
@@ -108,7 +137,8 @@
         var cur = $scope.data.selectedOption.name;
         var method = $scope.radioValue;
         var trip = tripformat.getData(cur);
-        displayTrip(trip, method);
+        var summary = displayTrip(trip, method);
+        $scope.values = summary; 
       };
 
       $scope.data = {

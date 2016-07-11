@@ -21,16 +21,34 @@ var getIcons = function() {
   return res;
 }
 
+var distance = function(lat1, lon1, lat2, lon2) {
+  var p = 0.017453292519943295;    // Math.PI / 180
+  var c = Math.cos;
+  var a = 0.5 - c((lat2 - lat1) * p)/2 + 
+          c(lat1 * p) * c(lat2 * p) * 
+          (1 - c((lon2 - lon1) * p))/2;
+
+  return 12742 * Math.asin(Math.sqrt(a)) * 0.621371; // 2 * R; R = 6371 km; to miles
+}
+
+
 function displayTrip(data, method) {
-  if(!data) return;
+  if(!data) return null;
+ 
   var madison = {lat: 43.073052, lng: -89.401230};
   var map = new google.maps.Map(document.getElementById('map'), { zoom: 15, center: madison});
   var latlngbounds = new google.maps.LatLngBounds();
   var icons = getIcons();
-  for(var i = 0; i < data.length; ++i) {
+  var len = data.length;
+  var summary = {distance: 0, score: data[len-1].x3, duration: (data[len - 1].time - data[0].time)}; 
+  for(var i = 0; i < len; ++i) {
     var point = data[i];
     var latlng = new google.maps.LatLng(point.x0, point.x1);
     latlngbounds.extend(latlng);
+    
+    if(i > 0) {
+      summary.distance += distance(data[i - 1].x0, data[i - 1].x1, point.x0, point.x1);
+    }
 
     var index = 0;
 
@@ -62,6 +80,7 @@ function displayTrip(data, method) {
     });
   }
   map.fitBounds(latlngbounds);
+  return summary;
 }
 
 
