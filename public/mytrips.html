@@ -127,7 +127,7 @@
           var keys = tripformat.getKeys(); 
           for(var i = 0; i < keys.length; i++) {
             var cur = keys[i];
-            $scope.data.availableOptions[i] = {id: i, name: cur.toString()};
+            $scope.data.availableOptions[keys.length - i - 1] = {id: i, name: cur.toString()};
           }
           $scope.data.selectedOption = $scope.data.availableOptions[0]; 
           $scope.showTrip();
