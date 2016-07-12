@@ -2,10 +2,14 @@
 var showUserName = function() {
   var urlloginstatus = window.location.origin + "/signinstatus";
   $.get(urlloginstatus, function(msg) {
-    var user = msg.data;
-    document.getElementById("signinup").style.display="none";
-    document.getElementById("username").style.display="block";
-    document.getElementById("user").innerHTML = user.firstname + " " + user.lastname;
+    if(msg.status == 'success') {
+      var user = msg.data;
+      document.getElementById("signinup").style.display="none";
+      document.getElementById("username").style.display="block";
+      document.getElementById("user").innerHTML = user.firstname + " " + user.lastname;
+    } else {
+
+    }
   });
 }
 

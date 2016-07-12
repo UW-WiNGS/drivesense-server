@@ -1,5 +1,5 @@
 var path = require('path');     //used for file path
-var mysqlwrapper = require('./mysql_wrapper.js');
+var mysqluser = require('./mysql_user.js');
 var User = require('./user.js');
 var fs = require('fs-extra');
 var jwt = require('jsonwebtoken');
@@ -58,7 +58,7 @@ var signout = function(req, res, next) {
 
 var signinstatus = function (req, res, next) {
   var userid = req.body.userid;
-  mysqlwrapper.getUserByID(userid, function(err, user) {
+  mysqluser.getUserByID(userid, function(err, user) {
     var msg = {};
     if(err) {
       msg = {status: 'fail', data: err.message}; 
@@ -99,7 +99,7 @@ var tokenverification = function (req, res, next) {
 var signin = function (req, res, next) {
   var user = new User();
   user.fromObject(req.body);
-  mysqlwrapper.userSignIn(user, function(err, row) {
+  mysqluser.userSignIn(user, function(err, row) {
     var msg = {};
     if(err) {
       console.log(err);
@@ -120,7 +120,7 @@ var signup = function (req, res, next) {
   var user = new User();
   user.fromObject(query);
   console.log(user);
-  mysqlwrapper.userSignUp(user,function(err, id) {
+  mysqluser.userSignUp(user,function(err, id) {
     if(err) {
       console.log(err.code);
       var msg = {};
@@ -144,7 +144,7 @@ var androidsignin = function(req, res, next) {
   var form = new formidable.IncomingForm();
   form.parse(req, function(err, fields, files) {
     var user = fields;     
-    mysqlwrapper.userSignIn(user, function(err) {
+    mysqluser.userSignIn(user, function(err) {
       if(err) {
         var msg = {status: 'fail', data: err};         
       } else {
@@ -160,7 +160,7 @@ var androidsignup = function(req, res, next) {
   var form = new formidable.IncomingForm();
   form.parse(req, function(err, fields, files) {
     var user = fields;     
-    mysqlwrapper.userSignUp(user, function(err, id) {
+    mysqluser.userSignUp(user, function(err, id) {
      if(err) {
         var msg = {status: 'fail', data: err};         
       } else {
@@ -175,7 +175,7 @@ var upload = function (req, res, next) {
   var form = new formidable.IncomingForm();
   form.parse(req, function(err, fields, files) {
     var file = files.uploads;
-    mysqlwrapper.getUserIDByEmail(fields.email, function(err, id){
+    mysqluser.getUserIDByEmail(fields.email, function(err, id){
       if(err) {
         console.log(err);
         var msg = {status: 'fail', data: err};
