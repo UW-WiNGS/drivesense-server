@@ -1,11 +1,11 @@
 var conn = require('./mysql').dbcon;
 
 
-var mysqlwrapper = function() {
+var mysqluser = function() {
 
 }
 
-mysqlwrapper.prototype.getUserIDByEmail = function (email, callback) {
+mysqluser.prototype.getUserIDByEmail = function (email, callback) {
   var sql = "select userid from user where email like binary '" + email + "'";
   conn.query(sql, function(err, rows, field){
     if(err) {
@@ -19,7 +19,7 @@ mysqlwrapper.prototype.getUserIDByEmail = function (email, callback) {
 }
 
 
-mysqlwrapper.prototype.userSignUp = function (user, callback) {
+mysqluser.prototype.userSignUp = function (user, callback) {
   var sql = "insert into user set ? ";
   conn.query(sql, user, function(err, rows, field){
     if(err) {
@@ -30,7 +30,7 @@ mysqlwrapper.prototype.userSignUp = function (user, callback) {
   });
 }
 
-mysqlwrapper.prototype.getUserByID = function (userid, callback) {
+mysqluser.prototype.getUserByID = function (userid, callback) {
   var sql = "select * from user where userid = " + userid + ";"; 
   conn.query(sql, function(err, rows, field){
     if(err) {
@@ -44,7 +44,7 @@ mysqlwrapper.prototype.getUserByID = function (userid, callback) {
 }
 
 
-mysqlwrapper.prototype.userSignIn = function (user, callback) {
+mysqluser.prototype.userSignIn = function (user, callback) {
   var sql = "select * from user where email like binary '" + user.email + "' and password like binary '" + user.password + "'";
   conn.query(sql, user, function(err, rows, field){
     if(err) {
@@ -57,6 +57,6 @@ mysqlwrapper.prototype.userSignIn = function (user, callback) {
   });
 }
 
-module.exports = new mysqlwrapper();
+module.exports = new mysqluser();
 
 
