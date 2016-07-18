@@ -35,6 +35,7 @@ var distance = function(lat1, lon1, lat2, lon2) {
 function displayTrip(data, method) {
   if(!data) return null;
  
+  drawChart(data,method);
   var madison = {lat: 43.073052, lng: -89.401230};
   var map = new google.maps.Map(document.getElementById('map'), { zoom: 15, center: madison});
   var latlngbounds = new google.maps.LatLngBounds();
@@ -81,6 +82,47 @@ function displayTrip(data, method) {
   }
   map.fitBounds(latlngbounds);
   return summary;
+}
+function drawChart(data, method) {
+  var len = data.length;
+  
+  var data_list = [];
+  for(var i = 0; i < len; ++i){
+    var point = data[i];
+    date = new Date(point.time * 1000) 
+    if(method == "speed") {
+      data_list.push([date, point.x2])
+    } else if(method=="score") {
+      data_list.push([date, point.x3])
+    } else if(method=="brake") {
+      data_list.push([date, point.x4])
+    } else {
+      console.log("unknown method:" + method);
+    }
+    data_list.push([])
+  }
+ 
+  $('#chart').highcharts({
+        chart: {
+            type: 'line'
+        },
+        title: {
+            text: method
+        },
+        xAxis: {
+            title: {
+                text: 'time'
+            }
+        },
+        yAxis: {
+           title: {
+                text: method
+            }
+        },
+        series: [{
+            data: data_list
+        }]
+  });
 }
 
 
