@@ -22,6 +22,6 @@ CREATE TABLE IF NOT EXISTS trip (
   score           decimal(16, 8),
 
 
-  status          INT SIGNED
+  tripstatus          INT SIGNED
 
 );

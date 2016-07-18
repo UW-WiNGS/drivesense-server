@@ -1,6 +1,10 @@
 var path = require('path');     //used for file path
 var mysqluser = require('./mysql_user.js');
 var User = require('./user.js');
+var Trip = require('./trip.js');
+
+
+
 var fs = require('fs-extra');
 var jwt = require('jsonwebtoken');
 var util = require('util');
@@ -190,6 +194,10 @@ var upload = function (req, res, next) {
           res.json(msg);
           return;
         }
+        //insert the data into database
+        fields.userid = id;
+        insertTripIntoDatabase(fields, file.path, function(err) {/*we do not care about err at this point*/});
+        //backup the data
         fs.copy(file.path, path.join(folder, file.name), function(err){
           if (err) {
             console.error(err);
@@ -205,7 +213,26 @@ var upload = function (req, res, next) {
   });//end of paring form
 }
 
-
+var insertTripIntoDatabase = function (fields, dbfile, callback) {
+  console.log(fields);
+  var trip = new Trip();
+  trip.fromObject(fields);
+  console.log(trip);
+  try {
+    //get userid etc. by email 
+    var db = new sqlite3.Database(dbfile);
+    db.all("select * from gps;", function(err, rows) {
+      if (err) { 
+        console.log(err); 
+      } else {
+        console.log(rows.length);
+      }
+    });
+  } catch (exception) {
+    console.log(exception);
+  }
+}
+ 
 
 module.exports.upload = upload;
 
