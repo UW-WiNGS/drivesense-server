@@ -85,24 +85,24 @@ function displayTrip(data, method) {
 }
 function drawChart(data, method) {
   var len = data.length;
-  
   var data_list = [];
   for(var i = 0; i < len; ++i){
     var point = data[i];
-    date = new Date(point.time * 1000) 
+    var init_time = parseFloat(data[0].time);
+    var current_time = parseFloat(point.time);
+    var time = (current_time - init_time)/60000.0;
     if(method == "speed") {
-      data_list.push([date, point.x2])
+      data_list.push([time, point.x2]);
     } else if(method=="score") {
-      data_list.push([date, point.x3])
+      data_list.push([time, point.x3]);
     } else if(method=="brake") {
-      data_list.push([date, point.x4])
+      data_list.push([time, point.x4]);
     } else {
       console.log("unknown method:" + method);
     }
-    data_list.push([])
-  }
- 
+  } 
   $('#chart').highcharts({
+        turboThreshold:10000,
         chart: {
             type: 'line'
         },
@@ -111,7 +111,7 @@ function drawChart(data, method) {
         },
         xAxis: {
             title: {
-                text: 'time'
+                text: 'time (minutes)'
             }
         },
         yAxis: {
