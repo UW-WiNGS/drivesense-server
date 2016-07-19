@@ -91,12 +91,24 @@ function drawChart(data, method) {
     var init_time = parseFloat(data[0].time);
     var current_time = parseFloat(point.time);
     var time = (current_time - init_time)/60000.0;
+    var chart_type;
+    var y_axis_text;
+    var title_text;
     if(method == "speed") {
       data_list.push([time, point.x2]);
+      title_text = "Speed";
+      y_axis_text = "Speed (mph)";
+      chart_type = "line";
     } else if(method=="score") {
+      title_text = "Score";
+      y_axis_text = "Score";
+      chart_type = "line";
       data_list.push([time, point.x3]);
     } else if(method=="brake") {
-      data_list.push([time, point.x4]);
+      title_text = "Brakes";
+      y_axis_text = "Braking";
+      chart_type = "scatter";
+      data_list.push([time, point.x4 * -1]);
     } else {
       console.log("unknown method:" + method);
     }
@@ -104,19 +116,19 @@ function drawChart(data, method) {
   $('#chart').highcharts({
         turboThreshold:10000,
         chart: {
-            type: 'line'
+            type: chart_type
         },
         title: {
-            text: method
+            text: title_text
         },
         xAxis: {
             title: {
-                text: 'time (minutes)'
+                text: 'Time (minutes)'
             }
         },
         yAxis: {
            title: {
-                text: method
+                text: y_axis_text
             }
         },
         series: [{
