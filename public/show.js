@@ -5,7 +5,7 @@ function initMap() {
 
 var getIcons = function() {
   var res = [];
-  var colors = ['green', 'blue', 'yellow', 'red'];
+  var colors = ['red', 'orange', 'yellow', 'lightgreen', 'green'];
   for(var i = 0; i < colors.length; ++i) {
     var color = colors[i];
     var circle ={
@@ -59,7 +59,7 @@ function displayTrip(data, method) {
     if(method == "speed") {
       index = Math.round(speed/5.0);
     } else if(method=="score") {
-      index = Math.round(10.0 - score);
+      index = Math.round(score/2.0);
     } else if(method=="brake") {
       if(brake < 0) index = 3;
       else index = 0;

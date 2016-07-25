@@ -33,8 +33,30 @@
       top:55px;
       background: rgba(255,255,255,.7);
     }
+    #legend {
+      position:absolute;
+      bottom:0px;
+      left 0px;
+      background: rgba(255,255,255,.7);
+    }
     #tripInformation{
       padding:20px;
+    }
+    .colored-box {
+      float: left;
+      width: 20px;
+      height: 20px;
+      margin: 5px;
+      border: 1px solid rgba(0, 0, 0, .2);
+    }
+    .red {
+      background: red;
+    }
+    .yellow {
+      background: yellow;
+    }
+    .green {
+      background: green;
     }
   </style>
 
@@ -43,14 +65,33 @@
 
   <div id="header"></div>
   <div id="map"></div>
-  
+  <div id="legend">
+    <table class="table">
+      <thead>
+        <tr>
+          <th id="legend-type">Selected</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td id="legend-high">High</td><td><div class="colored-box green"></div></td>
+        </tr>
+        <tr>
+          <td id="legend-medium">Med</td><td><div class="colored-box yellow"></div></td>
+        </tr>
+        <tr>
+          <td id="legend-low">Low</td><td><div class="colored-box red"></div></td>
+        </tr>
+      </tbody>
+    </table>
+  </div> 
   <div id="right-side" class="col-md-offset-9 col-sm-3">
     <div id="chart" style="width:100%;"></div>
     <div id="tripInformation" ng-app="displayTripsApp" ng-controller="displayTripsCtrl" ng-init="trip=0">
 
-      <form id="mainForm" name="mainForm">
-        Display on map:
-        <label class="radio-inline">
+      <form id="mainForm" name="mainForm" class="form-group">
+        <label for="trip-selection">Display on map:</label><br>
+        <label id="trip-selection" class="radio-inline">
           <input type="radio" name="rads" value="speed" ng-model="radioValue" ng-click="showTrip()" checked>Speed
         </label>
         <label class="radio-inline">
