@@ -37,7 +37,7 @@ function displayTrip(data, method) {
  
   drawChart(data,method);
   var madison = {lat: 43.073052, lng: -89.401230};
-  var map = new google.maps.Map(document.getElementById('map'), { zoom: 15, center: madison});
+  var map = new google.maps.Map(document.getElementById('map'), { streetViewControl:false, navigationControl:false, scaleControl: false, mapTypeControl:false, zoomControl:false, zoom: 15, center: madison});
   var latlngbounds = new google.maps.LatLngBounds();
   var icons = getIcons();
   var len = data.length;

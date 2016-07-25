@@ -20,9 +20,8 @@
       padding: 0;
     }
     #map {
-      height: 100%;
       position:absolute;
-      bottom:0;
+      height: 100%;
       top:0;
       left:0;
       right:0;
@@ -31,11 +30,8 @@
     }
     #right-side {
       position:absolute;
-      right:0;
       top:55px;
-      bottom: 0;
       background: rgba(255,255,255,.7);
-      width: 30%;
     }
     #tripInformation{
       padding:20px;
@@ -48,7 +44,7 @@
   <div id="header"></div>
   <div id="map"></div>
   
-  <div id="right-side">
+  <div id="right-side" class="col-md-offset-9 col-sm-3">
     <div id="chart" style="width:100%;"></div>
     <div id="tripInformation" ng-app="displayTripsApp" ng-controller="displayTripsCtrl" ng-init="trip=0">
 
