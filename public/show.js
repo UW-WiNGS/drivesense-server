@@ -56,11 +56,36 @@ function displayTrip(data, method) {
     var speed = point.x2;
     var score = point.x3;
     var brake = point.x4;
+    // Also changing legend here
     if(method == "speed") {
+      $("#legend-med").parent().show()
+      $("#legend-medhigh").parent().show()
+      $("#legend-medlow").parent().show()
+      $("#legend-type").html("Speed");
+      $("#legend-high").html(">15mph");
+      $("#legend-medhigh").html("10-15mph"); 
+      $("#legend-med").html("5-10mph");
+      $("#legend-medlow").html("0-5mph");
+      $("#legend-low").html("0mph");
       index = Math.round(speed/5.0);
     } else if(method=="score") {
+      $("#legend-med").parent().show()
+      $("#legend-medhigh").parent().show()
+      $("#legend-medlow").parent().show()
+      $("#legend-type").html("Score");
+      $("#legend-high").html("9-10");
+      $("#legend-medhigh").html("7-8");
+      $("#legend-med").html("5-6");
+      $("#legend-medlow").html("3-4");
+      $("#legend-low").html("1-2");
       index = Math.round(score/2.0);
     } else if(method=="brake") {
+      $("#legend-med").parent().hide()
+      $("#legend-medhigh").parent().hide()
+      $("#legend-medlow").parent().hide()
+      $("#legend-type").html("Brake");
+      $("#legend-high").html("Braking");
+      $("#legend-low").html("Not braking");
       if(brake < 0) index = 3;
       else index = 0;
     } else {
