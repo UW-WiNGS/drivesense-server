@@ -42,6 +42,38 @@ function displayTrip(data, method) {
   var icons = getIcons();
   var len = data.length;
   var summary = {distance: 0, score: data[len-1].x3, duration: (data[len - 1].time - data[0].time)}; 
+   
+  if(method == "speed") {
+    $("#legend-med").parent().show()
+    $("#legend-medhigh").parent().show()
+    $("#legend-medlow").parent().show()
+    $("#legend-type").html("Speed");
+    $("#legend-high").html(">15mph");
+    $("#legend-medhigh").html("10-15mph");
+    $("#legend-med").html("5-10mph");
+    $("#legend-medlow").html("0-5mph");
+    $("#legend-low").html("0mph");
+  } else if(method=="score") {
+    $("#legend-med").parent().show()
+    $("#legend-medhigh").parent().show()
+    $("#legend-medlow").parent().show()
+    $("#legend-type").html("Score");
+    $("#legend-high").html("9-10");
+    $("#legend-medhigh").html("7-8");
+    $("#legend-med").html("5-6");
+    $("#legend-medlow").html("3-4");
+    $("#legend-low").html("1-2");
+  } else if(method=="brake") {
+    $("#legend-med").parent().hide()
+    $("#legend-medhigh").parent().hide()
+    $("#legend-medlow").parent().hide()
+    $("#legend-type").html("Brake");
+    $("#legend-high").html("Braking");
+    $("#legend-low").html("Not braking");
+  } else {
+    console.log("unknown method:" + method);
+  }
+
   for(var i = 0; i < len; ++i) {
     var point = data[i];
     var latlng = new google.maps.LatLng(point.x0, point.x1);
@@ -56,36 +88,11 @@ function displayTrip(data, method) {
     var speed = point.x2;
     var score = point.x3;
     var brake = point.x4;
-    // Also changing legend here
     if(method == "speed") {
-      $("#legend-med").parent().show()
-      $("#legend-medhigh").parent().show()
-      $("#legend-medlow").parent().show()
-      $("#legend-type").html("Speed");
-      $("#legend-high").html(">15mph");
-      $("#legend-medhigh").html("10-15mph"); 
-      $("#legend-med").html("5-10mph");
-      $("#legend-medlow").html("0-5mph");
-      $("#legend-low").html("0mph");
       index = Math.round(speed/5.0);
     } else if(method=="score") {
-      $("#legend-med").parent().show()
-      $("#legend-medhigh").parent().show()
-      $("#legend-medlow").parent().show()
-      $("#legend-type").html("Score");
-      $("#legend-high").html("9-10");
-      $("#legend-medhigh").html("7-8");
-      $("#legend-med").html("5-6");
-      $("#legend-medlow").html("3-4");
-      $("#legend-low").html("1-2");
       index = Math.round(score/2.0);
     } else if(method=="brake") {
-      $("#legend-med").parent().hide()
-      $("#legend-medhigh").parent().hide()
-      $("#legend-medlow").parent().hide()
-      $("#legend-type").html("Brake");
-      $("#legend-high").html("Braking");
-      $("#legend-low").html("Not braking");
       if(brake < 0) index = 3;
       else index = 0;
     } else {
