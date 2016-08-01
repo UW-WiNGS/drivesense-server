@@ -29,8 +29,9 @@
     .table{
     }
     #right-side {
+      bottom: 0;
+      right: 0;
       position:absolute;
-      top:55px;
       background: rgba(255,255,255,.7);
     }
     #legend {
@@ -97,7 +98,7 @@
       </tbody>
     </table>
   </div> 
-  <div id="right-side" class="col-md-offset-9 col-sm-3">
+  <div id="right-side">
     <div id="chart" style="width:100%;"></div>
     <div id="tripInformation" ng-app="displayTripsApp" ng-controller="displayTripsCtrl" ng-init="trip=0">
 

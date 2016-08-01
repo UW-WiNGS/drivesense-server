@@ -159,7 +159,9 @@ function drawChart(data, method) {
             enabled: false
         },
         chart: {
-            type: chart_type
+            type: chart_type,
+            height: 300,
+            width: 400
         },
         title: {
             text: title_text
