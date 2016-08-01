@@ -82,7 +82,6 @@ function displayTrip(data, method) {
     if(i > 0) {
       summary.distance += distance(data[i - 1].x0, data[i - 1].x1, point.x0, point.x1);
     }
-
     var index = 0;
 
     var speed = point.x2;
@@ -105,11 +104,17 @@ function displayTrip(data, method) {
       index = 0; 
       console.log("index calculation error");
     }
-    var circle = icons[index].icon; 
+    var marker_icon = icons[index].icon;
+    if (i==0){
+      var marker_icon = 'img/starticon.png' 
+    }
+    else if  (i==len-1){
+      var marker_icon = 'img/stopicon.png'
+    }
     var marker = new google.maps.Marker({
       position: latlng,
       map: map,
-      icon: circle
+      icon: marker_icon
     });
   }
   map.fitBounds(latlngbounds);
@@ -147,6 +152,12 @@ function drawChart(data, method) {
   } 
   $('#chart').highcharts({
         turboThreshold:10000,
+        legend: {
+            enabled: false
+        },
+        credits: {
+            enabled: false
+        },
         chart: {
             type: chart_type
         },
