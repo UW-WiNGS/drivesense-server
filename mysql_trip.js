@@ -40,7 +40,7 @@ mysqltrip.prototype.deleteTrip = function (tripid, callback) {
 }
 
 mysqltrip.prototype.insertGPS = function (data, callback) {
-  var sql = "INSERT INTO gps (tripid, time, lat, lng, speed, score, event) VALUES ?";
+  var sql = "INSERT INTO gps (tripid, time, lat, lng, alt, speed, score, event) VALUES ?";
   var values = [
     ['demian', 'demian@gmail.com', 1],
     ['john', 'john@gmail.com', 2],
