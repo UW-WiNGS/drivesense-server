@@ -62,6 +62,7 @@ var submitSignIn = function() {
     if(status == "success") {
       console.log(msg);
       location.reload(); 
+      window.location = window.location.origin + "/mytrips.html" 
     } else {
       console.log(status);
     } 

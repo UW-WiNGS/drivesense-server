@@ -12,6 +12,9 @@ CREATE TABLE IF NOT EXISTS gps (
   lng          decimal(16, 8)
                  NOT NULL,
 
+  alt          decimal(16, 8)
+                 NOT NULL,
+
   speed         decimal(16, 8)
                   NOT NULL,
 
