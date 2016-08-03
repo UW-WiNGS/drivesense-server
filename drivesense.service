@@ -1,0 +1,14 @@
+[Unit]
+Description=test
+
+[Service]
+Environment= MY_ENVIRONMENT_VAR =/home/wirover/webs/drivesense-server/drivesense.conf
+WorkingDirectory=/home/wirover/webs/drivesense-server/
+ExecStart=/usr/bin/node main.js 
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
+
+
