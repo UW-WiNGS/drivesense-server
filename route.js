@@ -1,5 +1,7 @@
 var path = require('path');     //used for file path
 var mysqluser = require('./mysql_user.js');
+var mysqltrip = require('./mysql_trip.js');
+
 var User = require('./user.js');
 var Trip = require('./trip.js');
 
@@ -182,7 +184,7 @@ var upload = function (req, res, next) {
     mysqluser.getUserIDByEmail(fields.email, function(err, id){
       if(err) {
         console.log(err);
-        var msg = {status: 'fail', data: err};
+        var msg = {status: 'fail', data: err.toString()};
         res.json(msg);
         return;
       } 
@@ -190,18 +192,19 @@ var upload = function (req, res, next) {
       fs.mkdirp(folder, function (err) {
         if(err) {
           console.log(err);
-          var msg = {status: 'fail', data: err};
+          var msg = {status: 'fail', data: err.toString()};
           res.json(msg);
           return;
         }
         //insert the data into database
         fields.userid = id;
+
         insertTripIntoDatabase(fields, file.path, function(err) {/*we do not care about err at this point*/});
         //backup the data
         fs.copy(file.path, path.join(folder, file.name), function(err){
           if (err) {
             console.error(err);
-            var msg = {status: 'fail', data: err};
+            var msg = {status: 'fail', data: err.toString()};
             res.json(msg);
           } else {
             var msg = {status: 'success', data: ''};
@@ -225,30 +228,39 @@ var androidsync = function (req, res, next) {
         res.json(msg);
         return;
       }
-      var msg = {status: 'success', data: fields.tripnames};
+      var tnames = JSON.parse(fields.tripnames);
+      //delete the trips in the database
+      var msg = {status: 'success', data: JSON.stringify(tnames)};
       res.json(msg); 
     });
   });//end of paring form
 }
 
 var insertTripIntoDatabase = function (fields, dbfile, callback) {
-  console.log(fields);
   var trip = new Trip();
   trip.fromObject(fields);
-  console.log(trip);
-  try {
-    //get userid etc. by email 
+  mysqltrip.insertTrip(trip, function(err, tripid) {
+    if(err) {
+      if(err.code == "ER_DUP_ENTRY") {
+        callback(null);
+      } else {
+        callback(err);
+      }
+     // return;
+    }
+    tripid = 72;
     var db = new sqlite3.Database(dbfile);
     db.all("select * from gps;", function(err, rows) {
       if (err) { 
         console.log(err); 
       } else {
-        console.log(rows.length);
+        mysqltrip.insertGPS(tripid, rows, function(err){
+
+        }); 
       }
     });
-  } catch (exception) {
-    console.log(exception);
-  }
+  });
+    //get userid etc. by email 
 }
  
 

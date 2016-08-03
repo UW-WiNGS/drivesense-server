@@ -7,7 +7,7 @@ var mysqltrip = function() {
 
 mysqltrip.prototype.insertTrip = function (trip, callback) {
   var sql = "insert into trip set ? ";
-  conn.query(sql, user, function(err, rows, field){
+  conn.query(sql, trip, function(err, rows, field){
     if(err) {
       callback(err, null);
     } else {
@@ -39,16 +39,21 @@ mysqltrip.prototype.deleteTrip = function (tripid, callback) {
   });
 }
 
-mysqltrip.prototype.insertGPS = function (data, callback) {
+mysqltrip.prototype.insertGPS = function (tripid, data, callback) {
   var sql = "INSERT INTO gps (tripid, time, lat, lng, alt, speed, score, event) VALUES ?";
-  var values = [
-    ['demian', 'demian@gmail.com', 1],
-    ['john', 'john@gmail.com', 2],
-    ['mark', 'mark@gmail.com', 3],
-    ['pete', 'pete@gmail.com', 4]
-  ];
+  console.log(data);
+
+  var values = [];
+  for(var i = 0; i < data.length; ++i) {
+    var item = data[i];
+    var row = [tripid, item.time, item.x0, item.x1, item.x5, item.x2, item.x3, item.x4];
+    console.log(item.time);
+    values.push(row);
+  }
+
   conn.query(sql, [values], function(err) {
     if(err) {
+      console.log(err);
       callback(err, null);
     } else {
       callback(null, null);

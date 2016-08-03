@@ -2,7 +2,7 @@
 function Trip() {
 }
 
-Trip.keys = ['userid', 'deviceid', 'starttime', 'endtime', 'distance', 'score', 'tripstatus'];
+Trip.keys = ['userid', 'deviceid', 'model', 'starttime', 'endtime', 'distance', 'score', 'tripstatus'];
 
 Trip.prototype.fromObject = function(uobj) {
   var keys = Trip.keys;

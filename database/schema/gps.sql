@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS gps (
   tripid            INT UNSIGNED
                     NOT NULL,
 
-  time           INT UNSIGNED
+  time           BIGINT UNSIGNED
                     NOT NULL,
 
   lat           decimal(16, 8)
