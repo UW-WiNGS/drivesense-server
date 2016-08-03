@@ -213,6 +213,24 @@ var upload = function (req, res, next) {
   });//end of paring form
 }
 
+var androidsync = function (req, res, next) {
+  var form = new formidable.IncomingForm();
+  form.parse(req, function(err, fields, files) {
+    console.log(fields);
+    console.log(files);
+    mysqluser.getUserIDByEmail(fields.email, function(err, id){
+      if(err) {
+        console.log(err);
+        var msg = {status: 'fail', data: err};
+        res.json(msg);
+        return;
+      }
+      var msg = {status: 'success', data: fields.tripnames};
+      res.json(msg); 
+    });
+  });//end of paring form
+}
+
 var insertTripIntoDatabase = function (fields, dbfile, callback) {
   console.log(fields);
   var trip = new Trip();
@@ -235,6 +253,8 @@ var insertTripIntoDatabase = function (fields, dbfile, callback) {
  
 
 module.exports.upload = upload;
+module.exports.androidsync = androidsync;
+
 
 module.exports.showtrips = showtrips;
 module.exports.signup = signup;

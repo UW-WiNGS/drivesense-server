@@ -4,7 +4,7 @@ var mysql      = require('mysql');
 var connection = mysql.createConnection({
   host     : 'localhost',
   user     : 'root',
-  password : '',
+  password : 'drivesense',
   database : 'drivesense_wings',
   multipleStatements: true,
 });

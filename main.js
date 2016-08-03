@@ -17,7 +17,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public'))); 
 
 
-app.post('/upload', [route.upload]);
+
 app.post('/signup', route.signup);
 app.post('/signin', [route.signin]);
 app.get('/signout', [route.signout]);
@@ -29,7 +29,8 @@ app.get('/mytrips', [route.tokenverification, route.showtrips]);
 
 app.post('/androidsignin', route.androidsignin);
 app.post('/androidsignup', route.androidsignup);
-
+app.post('/upload', [route.upload]);
+app.post('/androidsync', [route.androidsync]);
 
 var server = app.listen(8000, function() {
     console.log('Listening on port %d', server.address().port);
