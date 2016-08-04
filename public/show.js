@@ -20,73 +20,32 @@ var getIcons = function() {
   }
   return res;
 }
-
-var distance = function(lat1, lon1, lat2, lon2) {
-  var p = 0.017453292519943295;    // Math.PI / 180
-  var c = Math.cos;
-  var a = 0.5 - c((lat2 - lat1) * p)/2 + 
-          c(lat1 * p) * c(lat2 * p) * 
-          (1 - c((lon2 - lon1) * p))/2;
-
-  return 12742 * Math.asin(Math.sqrt(a)) * 0.621371; // 2 * R; R = 6371 km; to miles
-}
-
-
-function displayTrip(data, method) {
-  if(!data) return null;
  
-  drawChart(data,method);
+
+
+function displayTrip(trip, method) {
+  if(!trip) return null;
+console.log(trip); 
+
+  drawChart(trip,method);
   var madison = {lat: 43.073052, lng: -89.401230};
   var map = new google.maps.Map(document.getElementById('map'), { streetViewControl:false, navigationControl:false, scaleControl: false, mapTypeControl:false, zoomControl:false, zoom: 15, center: madison});
   var latlngbounds = new google.maps.LatLngBounds();
   var icons = getIcons();
-  var len = data.length;
-  var summary = {distance: 0, score: data[len-1].x3, duration: (data[len - 1].time - data[0].time)}; 
-   
-  if(method == "speed") {
-    $("#legend-med").parent().show()
-    $("#legend-medhigh").parent().show()
-    $("#legend-medlow").parent().show()
-    $("#legend-type").html("Speed");
-    $("#legend-high").html(">15mph");
-    $("#legend-medhigh").html("10-15mph");
-    $("#legend-med").html("5-10mph");
-    $("#legend-medlow").html("0-5mph");
-    $("#legend-low").html("0mph");
-  } else if(method=="score") {
-    $("#legend-med").parent().show()
-    $("#legend-medhigh").parent().show()
-    $("#legend-medlow").parent().show()
-    $("#legend-type").html("Score");
-    $("#legend-high").html("9-10");
-    $("#legend-medhigh").html("7-8");
-    $("#legend-med").html("5-6");
-    $("#legend-medlow").html("3-4");
-    $("#legend-low").html("1-2");
-  } else if(method=="brake") {
-    $("#legend-med").parent().hide()
-    $("#legend-medhigh").parent().hide()
-    $("#legend-medlow").parent().hide()
-    $("#legend-type").html("Brake");
-    $("#legend-high").html("Braking");
-    $("#legend-low").html("Not braking");
-  } else {
-    console.log("unknown method:" + method);
-  }
-
+  var len = trip.gps.length;
+  var summary = {distance: trip.distance, score: trip.score, duration: (trip.endtime - trip.starttime)}; 
+  showLegend(method);
+ 
   for(var i = 0; i < len; ++i) {
-    var point = data[i];
-    var latlng = new google.maps.LatLng(point.x0, point.x1);
+    var point = trip.gps[i];
+    var latlng = new google.maps.LatLng(point.lat, point.lng);
     latlngbounds.extend(latlng);
     
-    if(i > 0) {
-      summary.distance += distance(data[i - 1].x0, data[i - 1].x1, point.x0, point.x1);
-    }
     var index = 0;
 
-    var speed = point.x2;
-    var score = point.x3;
-    var brake = point.x4;
+    var speed = point.speed;
+    var score = point.score;
+    var brake = point.brake;
     if(method == "speed") {
       index = Math.round(speed/5.0);
     } else if(method=="score") {
@@ -121,18 +80,18 @@ function displayTrip(data, method) {
   return summary;
 }
 function drawChart(data, method) {
-  var len = data.length;
+  var len = data.gps.length;
   var data_list = [];
+  var init_time = parseFloat(data.starttime);
   for(var i = 0; i < len; ++i){
-    var point = data[i];
-    var init_time = parseFloat(data[0].time);
+    var point = data.gps[i];
     var current_time = parseFloat(point.time);
     var time = (current_time - init_time)/60000.0;
     var chart_type;
     var y_axis_text;
     var title_text;
     if(method == "speed") {
-      data_list.push([time, point.x2]);
+      data_list.push([time, point.speed]);
       title_text = "Speed";
       y_axis_text = "Speed (mph)";
       chart_type = "line";
@@ -140,12 +99,12 @@ function drawChart(data, method) {
       title_text = "Score";
       y_axis_text = "Score";
       chart_type = "line";
-      data_list.push([time, point.x3]);
+      data_list.push([time, point.score]);
     } else if(method=="brake") {
       title_text = "Brakes";
       y_axis_text = "Braking";
       chart_type = "scatter";
-      data_list.push([time, point.x4 * -1]);
+      data_list.push([time, point.brake * -1]);
     } else {
       console.log("unknown method:" + method);
     }
@@ -183,3 +142,35 @@ function drawChart(data, method) {
 }
 
 
+function showLegend(method) {
+  if(method == "speed") {
+    $("#legend-med").parent().show()
+    $("#legend-medhigh").parent().show()
+    $("#legend-medlow").parent().show()
+    $("#legend-type").html("Speed");
+    $("#legend-high").html(">15mph");
+    $("#legend-medhigh").html("10-15mph");
+    $("#legend-med").html("5-10mph");
+    $("#legend-medlow").html("0-5mph");
+    $("#legend-low").html("0mph");
+  } else if(method=="score") {
+    $("#legend-med").parent().show()
+    $("#legend-medhigh").parent().show()
+    $("#legend-medlow").parent().show()
+    $("#legend-type").html("Score");
+    $("#legend-high").html("9-10");
+    $("#legend-medhigh").html("7-8");
+    $("#legend-med").html("5-6");
+    $("#legend-medlow").html("3-4");
+    $("#legend-low").html("1-2");
+  } else if(method=="brake") {
+    $("#legend-med").parent().hide()
+    $("#legend-medhigh").parent().hide()
+    $("#legend-medlow").parent().hide()
+    $("#legend-type").html("Brake");
+    $("#legend-high").html("Braking");
+    $("#legend-low").html("Not braking");
+  } else {
+    console.log("unknown method:" + method);
+  }
+}

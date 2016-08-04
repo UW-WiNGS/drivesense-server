@@ -1,11 +1,8 @@
 var path = require('path');     //used for file path
 var mysqluser = require('./mysql_user.js');
 var mysqltrip = require('./mysql_trip.js');
-
 var User = require('./user.js');
 var Trip = require('./trip.js');
-
-
 
 var fs = require('fs-extra');
 var jwt = require('jsonwebtoken');
@@ -14,6 +11,35 @@ var formidable = require('formidable');
 var sqlite3 = require('sqlite3').verbose();
 
 var showtrips = function (req, res, next) {
+  var userid = req.body.userid;
+  var trips = {};
+  mysqltrip.loadGPS(userid, function(err, rows){
+    if(err) {
+      var msg = {status: 'fail', data: err.toString()};
+      res.json(msg);
+      return;
+    }
+    for(var i = 0; i < rows.length; ++i) {
+      var row = rows[i];
+      if(row.tripid in trips) {
+        var gps = {time: row.time, lat: row.lat, lng: row.lng, alt: row.alt, speed: row.speed, score: row.score, brake: row.event}; 
+        trips[row.tripid].gps.push(gps);
+      } else {
+        var trip = new Trip();
+        trip.fromObject(row);  
+        trip.gps = [];
+        var gps = {time: row.time, lat: row.lat, lng: row.lng, alt: row.alt, speed: row.speed, score: row.score, brake: row.event};
+        trip.gps.push(gps);
+        trips[row.tripid] = trip; 
+      }
+    }
+    var msg = {status: 'success', data:trips};
+    res.json(msg);
+  }); 
+};
+
+
+var showtrips_old = function (req, res, next) {
   var userid = req.body.userid;
   var dir = path.join(__dirname, "../uploads/" + userid + "/");
   try {
@@ -246,16 +272,19 @@ var insertTripIntoDatabase = function (fields, dbfile, callback) {
       } else {
         callback(err);
       }
-     // return;
+      return;
     }
-    tripid = 72;
     var db = new sqlite3.Database(dbfile);
     db.all("select * from gps;", function(err, rows) {
       if (err) { 
         console.log(err); 
+        callback(err);
       } else {
         mysqltrip.insertGPS(tripid, rows, function(err){
-
+          if(err) {
+            console.log(err);
+          }
+          callback(err);
         }); 
       }
     });

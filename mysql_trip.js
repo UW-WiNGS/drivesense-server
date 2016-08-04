@@ -41,31 +41,25 @@ mysqltrip.prototype.deleteTrip = function (tripid, callback) {
 
 mysqltrip.prototype.insertGPS = function (tripid, data, callback) {
   var sql = "INSERT INTO gps (tripid, time, lat, lng, alt, speed, score, event) VALUES ?";
-  console.log(data);
-
   var values = [];
   for(var i = 0; i < data.length; ++i) {
     var item = data[i];
     var row = [tripid, item.time, item.x0, item.x1, item.x5, item.x2, item.x3, item.x4];
-    console.log(item.time);
     values.push(row);
   }
-
   conn.query(sql, [values], function(err) {
     if(err) {
-      console.log(err);
-      callback(err, null);
-    } else {
-      callback(null, null);
-    }
+      console.log(err); 
+    } 
+    callback(err, null); 
   });
 }
 
 mysqltrip.prototype.loadGPS = function (userid, callback) {
   var sql= "SELECT * FROM trip " +
            "INNER JOIN gps on gps.tripid = trip.tripid " +
-           "WHERE userid = " + userid + " and tripstatus >= 1;";
-  dbconn.executeQuery(sql, function(err, rows) {
+           "WHERE userid = " + userid + " and tripstatus = 1;";
+  conn.query(sql, function(err, rows) {
     if (err) {
       callback(err, null);
     } else if (rows) {
