@@ -120,7 +120,7 @@ function drawChart(data, method) {
         chart: {
             type: chart_type,
             height: 300,
-            width: 400
+            width: 600
         },
         title: {
             text: title_text

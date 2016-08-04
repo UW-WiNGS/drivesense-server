@@ -26,8 +26,6 @@
       left:0;
       right:0;
     }
-    .table{
-    }
     #chart_holder { 
       height: 300px;
       position: absolute;
@@ -71,13 +69,34 @@
     .green {
       background: green;
     }
+    ul {
+      height: 300px; 
+      overflow: auto;
+      list-style: none;
+    }
+    li {
+    display: block;
+    }
+    .trip-input {
+      visibility:hidden;
+    }
+    .trip-label {
+      cursor: pointer;
+    }
+    :checked + .trip-box {
+      background-color: lightgreen;
+    }
+    .trip-box {
+      padding:10px;
+     
+    }
   </style>
 
   </head>
   <body onload="showUserName();">
-
+  <div class = "row">
   <div id="header"></div>
-  <div id="map"></div>
+  <div id="map" class=col-md-9></div>
   <div id="legend">
     <table class="table">
       <thead>
@@ -107,28 +126,25 @@
   <div id="chart_holder">
     <div id="chart"></div>
   </div> 
-  <div id="right-side">
+  <div id="right-side" class="col-md-3">
     <div id="tripInformation" ng-app="displayTripsApp" ng-controller="displayTripsCtrl" ng-init="trip=0">
        <!--
        <div class="form-group">
          <label for="trips">Trip list:</label>
          <select class="form-control" id="trips" name="trips" 
            ng-options="option.name for option in data.availableOptions track by option.id"
-           ng-model="data.selectedOption" ng-change="showTrip()">
-         </select>
+         e/select>
        </div>
        -->
       <form id="trips" name="trips" class="form-group">
         <label for="trips">Trip list:</label>
-        <table>
-          <tr ng-repeat="option in data.availableOptions track by option.id">
-          
-          <td>{{option.name}}</td>
-          <td>
-            <input type="radio" ng-model="data.selectedOption" ng-value={{option}} ng-click="showTrip()">
-          </td>
-          </tr>
-        </table>
+        <ul>
+          <li class="trip-box" ng-repeat="option in data.availableOptions track by option.id">
+            <label class="trip-label">{{option.name}}
+              <input class="trip-input" type="radio" ng-model="data.selectedOption" ng-value={{option}} ng-click="showTrip()">
+            </label>
+          </li>
+        </ul>
       </form>
 
       <form id="mainForm" name="mainForm" class="form-group">
@@ -158,10 +174,16 @@
       </table>
     </div>
   </div>
-
+  </div>
   <script>
     $(document).ready(function(){
+      console.log("are we real");
       $("#header").load("navbar.html");
+      $(".trip-label").click(function() {
+        console.log("label clicked");
+        $(".trip-label").removeClass('lightgreen');
+        $(this).addClass('lightgreen');
+      });
     });
     var app = angular.module('displayTripsApp', []);
     app.service('tripformat', function () {
@@ -208,7 +230,7 @@
         var method = $scope.radioValue;
         var trip = tripformat.getTrip(tripOp.id);
         var summary = displayTrip(trip, method);
-        $scope.values = summary; 
+        $scope.values = summary;
       };
 
       $scope.data = {
