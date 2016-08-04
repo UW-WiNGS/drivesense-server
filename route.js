@@ -242,22 +242,39 @@ var upload = function (req, res, next) {
   });//end of paring form
 }
 
+
+/**
+ * synchronize deletion with Android
+ * handle two cases:
+ * 1. android delete ---> send to server, server delete
+ * 2. server delete ---> send to android --> step 1 
+ * 
+ */
 var androidsync = function (req, res, next) {
   var form = new formidable.IncomingForm();
-  form.parse(req, function(err, fields, files) {
-    console.log(fields);
-    console.log(files);
-    mysqluser.getUserIDByEmail(fields.email, function(err, id){
+  form.parse(req, function(err, fields, files) { 
+    var tnames = JSON.parse(fields.tripnames);
+    var deviceid = fields.deviceid;
+    mysqltrip.androidDeleteTrip(deviceid, tnames, function(err, sta) {
       if(err) {
-        console.log(err);
-        var msg = {status: 'fail', data: err};
-        res.json(msg);
+        var msg = {status: 'fail', data: err.toString()};
+        res.json(msg); 
         return;
-      }
-      var tnames = JSON.parse(fields.tripnames);
-      //delete the trips in the database
-      var msg = {status: 'success', data: JSON.stringify(tnames)};
-      res.json(msg); 
+      } 
+      mysqltrip.getDeletedTrips(deviceid, function(err, rows){
+        if(err) {
+          var msg = {status: 'fail', data: err.toString()};
+          res.json(msg); 
+          return;
+        }
+        console.log(rows);
+        var webdeletes = [];
+        for(var i = 0; i < rows.length; ++i) {
+          webdeletes.push(rows[i].starttime);
+        }
+        var msg = {status: 'success', data: JSON.stringify(webdeletes)};
+        res.json(msg); 
+      });    
     });
   });//end of paring form
 }

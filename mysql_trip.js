@@ -28,6 +28,37 @@ mysqltrip.prototype.getTripsByUserID = function (userid, callback) {
 }
 
 
+/**
+ * deleted by Android 
+ */
+mysqltrip.prototype.androidDeleteTrip = function (deviceid, starttimes, callback) {
+  var sql = "UPDATE trip SET tripstatus = -1 WHERE deviceid = '" + deviceid + "' and starttime in (?);";  
+  conn.query(sql, [starttimes], function(err, rows, field){
+    if(err) {
+      console.log("androidDeleteTrip");
+      console.log(err);
+    } 
+    callback(err, null); 
+  });
+}
+
+mysqltrip.prototype.getDeletedTrips = function (deviceid, callback) {
+  var sql = "select starttime from trip where deviceid = '" + deviceid + "' and tripstatus = 0;"; 
+  conn.query(sql, function(err, rows, field){
+    if(err) {
+      console.log("getDeletedTrips");
+      console.log(err);
+      callback(err, null);
+    } else {
+      callback(null, rows);
+    }
+  });
+}
+
+
+
+
+//deleted by website
 mysqltrip.prototype.deleteTrip = function (tripid, callback) {
   var sql = "UPDATE trip SET tripstatus = 0 WHERE tripid = " + tripid + ";";  
   conn.query(sql, function(err, rows, field){
