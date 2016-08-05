@@ -27,7 +27,6 @@
       right:0;
     }
     #chart_holder { 
-      height: 300px;
       position: absolute;
       bottom: 0;
       left: 0;
@@ -87,8 +86,7 @@
       background-color: lightgreen;
     }
     .trip-box {
-      padding:10px;
-     
+      padding:10px; 
     }
   </style>
 
@@ -138,10 +136,10 @@
        -->
       <form id="trips" name="trips" class="form-group">
         <label for="trips">Trip list:</label>
-        <ul>
-          <li class="trip-box" ng-repeat="option in data.availableOptions track by option.id">
+        <ul class="list-group">
+          <li class="trip-box list-item" ng-repeat="option in data.availableOptions track by option.id">
             <label class="trip-label">{{option.name}}
-              <input class="trip-input" type="radio" ng-model="data.selectedOption" ng-value={{option}} ng-click="showTrip()">
+              <input class="trip-input" type="radio" ng-model="data.selectedOption" ng-value={{option}} ng-click="showTrip()"/>
             </label>
           </li>
         </ul>
@@ -177,12 +175,11 @@
   </div>
   <script>
     $(document).ready(function(){
-      console.log("are we real");
       $("#header").load("navbar.html");
       $(".trip-label").click(function() {
         console.log("label clicked");
-        $(".trip-label").removeClass('lightgreen');
-        $(this).addClass('lightgreen');
+        $(".trip-label").parent().removeClass('list-group-item-success');
+        $(this).parent().addClass('list-group-item-success');
       });
     });
     var app = angular.module('displayTripsApp', []);
