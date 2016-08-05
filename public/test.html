@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+  <head>
+<!--
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+-->
+  <meta charset="utf-8">
+  <title>Show Trip</title>
+  <link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/carousel.css">
+  <link href="/car.jpg" rel="shortcut icon" type="image/x-icon">
+  <script src="/bower_components/jquery/dist/jquery.min.js"></script> 
+  <script src="/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+  <script src="/bower_components/angular/angular.js"></script>
+  <script src="/bower_components/highcharts/highcharts.js"></script>
+  <style>
+  </style>
+
+  </head>
+  <body onload="showUserName();">
+  <div id="header"></div> 
+
+  <div class = "container col-lg-12" style="">
+
+  <!-- all about the map -->
+  <div id="map-container" class="map col-xs-12 col-sm-12 col-md-8 col-lg-8" style="height:600px;position:relative;padding-bottom:50px;">
+    <div id="map" class="col-lg-12" style="height:100%"></div>
+    <div id="chart" class="col-lg-12" style="height:300px;"></div>
+  </div>
+
+  <div id="right-side" class="container col-xs-12 col-sm-12 col-md-4 col-lg-4">
+    <div id="tripInformation" ng-app="displayTripsApp" ng-controller="displayTripsCtrl" ng-init="trip=0">
+       
+      <form id="mainForm" name="mainForm" class="form-group">
+        <label for="trip-selection">Display on map:</label><br>
+        <label id="trip-selection" class="radio-inline">
+          <input type="radio" name="rads" value="speed" ng-model="radioValue" ng-click="showTrip()" checked>Speed
+        </label>
+        <label class="radio-inline">
+          <input type="radio" name="rads" value="score" ng-model="radioValue" ng-click="showTrip()">Score
+        </label>
+        <label class="radio-inline">
+          <input type="radio" name="rads" value="brake" ng-model="radioValue" ng-click="showTrip()">Brakes
+        </label>
+      </form>
+
+
+     <form id="trips" name="trips" class="form-group" style="overflow:scroll; height:600px;">
+        <label for="trips">Trip list:</label>
+        <ul>
+          <li class="trip-box" ng-repeat="option in data.availableOptions track by option.id">
+            <label class="trip-label">{{option.name}}
+              <input class="trip-input" type="radio" ng-model="data.selectedOption" ng-value={{option}} ng-click="showTrip()">
+            </label>
+          </li>
+        </ul>
+      </form>
+
+      <label for="summary">Trip summary:</label>
+      <table class="table">
+        <tr>
+          <td>Distance</td><td>{{ values.distance.toFixed(2) }} miles</td>
+        </tr>
+        <tr> 
+           <td>Duration</td> <td>{{ (values.duration/60000).toFixed(2) }} minutes</td>
+        </tr>
+        <tr> 
+           <td>Score</td> <td>{{ values.score.toFixed(2) }} out of 10.0</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+  <!-- the end of right-side -->
+
+
+</div>
+
+  <script>
+    $(document).ready(function(){
+      console.log("are we real");
+      $("#header").load("navbar.html");
+      $(".trip-label").click(function() {
+        console.log("label clicked");
+        $(".trip-label").removeClass('lightgreen');
+        $(this).addClass('lightgreen');
+      });
+    });
+    var app = angular.module('displayTripsApp', []);
+    app.service('tripformat', function () {
+      var trips = {};
+      this.getTrips = function() {
+        return trips;
+      }
+      this.getTrip = function(key) {
+        return trips[key];
+      }
+      this.getKeys = function() {
+        return Object.keys(trips);
+      } 
+      this.setData = function(value) {
+        trips = value;
+      }
+    });
+
+   app.controller('displayTripsCtrl', function($scope, $http, tripformat){ 
+      $http.get("/mytrips").then(function(res){
+        if(res.status == 200) {
+          var response = res.data;
+          if(response.status == "fail") {
+            $scope.data.availableOptions[0] = {id: 0, name: "No trip uploaded yet!"};           
+            $scope.data.selectedOption = $scope.data.availableOptions[0]; 
+            return;
+          }
+          tripformat.setData(response.data);
+          var trips = tripformat.getTrips();           
+          var keys = tripformat.getKeys(); 
+          for(var i = 0; i < keys.length; i++) {
+            var tripid = keys[i];
+            var cur = new Date(trips[tripid].starttime);
+            $scope.data.availableOptions[keys.length - i - 1] = {id: tripid, name: cur.toString()};
+          }
+          $scope.data.selectedOption = $scope.data.availableOptions[0]; 
+          $scope.showTrip();
+        }
+      });
+      $scope.showTrip = function() {
+        var tripOp = $scope.data.selectedOption;
+        var cur = $scope.data.selectedOption.name;
+        console.log($scope.data.selectedOption);
+        var method = $scope.radioValue;
+        var trip = tripformat.getTrip(tripOp.id);
+        var summary = displayTrip(trip, method);
+        $scope.values = summary;
+      };
+
+      $scope.data = {
+        availableOptions: [],
+        selectedOption: {} 
+      };
+      $scope.radioValue = "speed";
+
+    });
+   
+  </script>
+
+    
+  <script src="/show.js"></script> 
+  <script src="/user.js"></script>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB3dwDzOBKBdFmKH9yn5yvp72lw09kW01M&callback=initMap"></script> 
+</body>
+</html>
+
+

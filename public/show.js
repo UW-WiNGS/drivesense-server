@@ -25,16 +25,17 @@ var getIcons = function() {
 
 function displayTrip(trip, method) {
   if(!trip) return null;
-console.log(trip); 
 
+  showLegend(method);
   drawChart(trip,method);
+
   var madison = {lat: 43.073052, lng: -89.401230};
-  var map = new google.maps.Map(document.getElementById('map'), { streetViewControl:false, navigationControl:false, scaleControl: false, mapTypeControl:false, zoomControl:false, zoom: 15, center: madison});
+  var map = new google.maps.Map(document.getElementById('map'), { streetViewControl:true, navigationControl:false, scaleControl: false, mapTypeControl:true, zoomControl:true, zoom: 15, center: madison});
   var latlngbounds = new google.maps.LatLngBounds();
   var icons = getIcons();
   var len = trip.gps.length;
   var summary = {distance: trip.distance, score: trip.score, duration: (trip.endtime - trip.starttime)}; 
-  showLegend(method);
+
  
   for(var i = 0; i < len; ++i) {
     var point = trip.gps[i];
@@ -79,6 +80,9 @@ console.log(trip);
   map.fitBounds(latlngbounds);
   return summary;
 }
+
+
+
 function drawChart(data, method) {
   var len = data.gps.length;
   var data_list = [];
@@ -119,8 +123,6 @@ function drawChart(data, method) {
         },
         chart: {
             type: chart_type,
-            height: 300,
-            width: 600
         },
         title: {
             text: title_text
