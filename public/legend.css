@@ -1,0 +1,32 @@
+#legend {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  background: rgba(255,255,255,.7);
+}
+#tripInformation{
+  padding:20px;
+}
+.colored-box {
+  float: left;
+  width: 20px;
+  height: 20px;
+  margin: 5px;
+  border: 1px solid rgba(0, 0, 0, .2);
+}
+.red {
+  background: red;
+}
+.orange{
+  background: orange;
+}
+.yellow {
+  background: yellow;
+}
+.lightgreen{
+  background: lightgreen;
+}
+.green {
+  background: green;
+}
+
