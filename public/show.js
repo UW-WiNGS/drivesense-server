@@ -34,9 +34,7 @@ function displayTrip(trip, method) {
   var latlngbounds = new google.maps.LatLngBounds();
   var icons = getIcons();
   var len = trip.gps.length;
-  var summary = {distance: trip.distance, score: trip.score, duration: (trip.endtime - trip.starttime)}; 
 
- 
   for(var i = 0; i < len; ++i) {
     var point = trip.gps[i];
     var latlng = new google.maps.LatLng(point.lat, point.lng);
@@ -65,10 +63,10 @@ function displayTrip(trip, method) {
       console.log("index calculation error");
     }
     var marker_icon = icons[index].icon;
-    if (i==0){
+    if (i==0) {
       var marker_icon = 'img/starticon.png' 
     }
-    else if  (i==len-1){
+    if (i==len-1) {
       var marker_icon = 'img/stopicon.png'
     }
     var marker = new google.maps.Marker({
@@ -78,7 +76,6 @@ function displayTrip(trip, method) {
     });
   }
   map.fitBounds(latlngbounds);
-  return summary;
 }
 
 
@@ -114,32 +111,32 @@ function drawChart(data, method) {
     }
   } 
   $('#chart').highcharts({
-        turboThreshold:10000,
-        legend: {
-            enabled: false
-        },
-        credits: {
-            enabled: false
-        },
-        chart: {
-            type: chart_type,
-        },
+    turboThreshold:10000,
+    legend: {
+        enabled: false
+    },
+    credits: {
+        enabled: false
+    },
+    chart: {
+        type: chart_type,
+    },
+    title: {
+        text: title_text
+    },
+    xAxis: {
         title: {
-            text: title_text
-        },
-        xAxis: {
-            title: {
-                text: 'Time (minutes)'
-            }
-        },
-        yAxis: {
-           title: {
-                text: y_axis_text
-            }
-        },
-        series: [{
-            data: data_list
-        }]
+            text: 'Time (minutes)'
+        }
+    },
+    yAxis: {
+       title: {
+            text: y_axis_text
+        }
+    },
+    series: [{
+        data: data_list
+    }]
   });
 }
 
