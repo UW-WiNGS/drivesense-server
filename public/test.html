@@ -70,13 +70,13 @@
         <label for="trips">Trip list:</label>
 
         <table class="table">
-        <tr><td>Index</td><td>Time</td><td>Distance</td><td>Duration</td><td>Score</td></tr>
+        <tr><td>Index</td><td>Time</td><td>Distance (mile)</td><td>Duration (mins)</td><td>Score</td></tr>
         <tr ng-repeat="curtrip in trips" ng-click="showTrip(curtrip);setClickedRow($index);" ng-class="{'selected':$index == selectedRow}">
           <td>{{ $index + 1 }}</td>
-          <td>{{ curtrip.starttime }}</td>
-          <td>{{ curtrip.distance }}</td>
-          <td>{{ curtrip.endtime - curtrip.starttime }}</td>
-          <td>{{ curtrip.score }}</td>
+          <td>{{ curtrip.displaytime }}</td>
+          <td>{{ (curtrip.distance).toFixed(2) }}</td>
+          <td>{{ ((curtrip.endtime - curtrip.starttime)/60000).toFixed(2) }}</td>
+          <td>{{ (curtrip.score).toFixed(2) }}</td>
         </tr>
         </table>
      </form>
@@ -109,7 +109,14 @@
         return Object.keys(trips);
       } 
       this.setData = function(value) {
-        trips = value;
+        for(var tripid in value) {
+          var trip = value[tripid]; 
+          var time = new Date(trip.starttime);
+          var postfix = "am";
+          if(time.getHours() >= 12) postfix = "pm";
+          trip.displaytime = (time.getMonth() + 1) + "/" + time.getDate() + "-" + time.getHours() + ":" + time.getMinutes() + postfix;
+          trips[tripid] = trip; 
+        }
       }
     });
 
