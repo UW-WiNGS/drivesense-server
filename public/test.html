@@ -109,13 +109,15 @@
         return Object.keys(trips);
       } 
       this.setData = function(value) {
+        var len = Object.keys(value).length;
+        var i = len - 1;
         for(var tripid in value) {
           var trip = value[tripid]; 
           var time = new Date(trip.starttime);
           var postfix = "am";
           if(time.getHours() >= 12) postfix = "pm";
           trip.displaytime = (time.getMonth() + 1) + "/" + time.getDate() + "-" + time.getHours() + ":" + time.getMinutes() + postfix;
-          trips[tripid] = trip; 
+          trips[i--] = trip; 
         }
       }
     });
