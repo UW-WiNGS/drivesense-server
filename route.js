@@ -10,6 +10,21 @@ var util = require('util');
 var formidable = require('formidable');
 var sqlite3 = require('sqlite3').verbose();
 
+
+var removetrip = function (req, res, next) {
+  var userid = req.body.userid;
+  var tripid = req.body.tripid;
+  mysqltrip.deleteTrip(userid, tripid, function(err, value){
+    if(err) {
+       var msg = {status: 'fail', data: err.toString()};
+       res.json(msg);  
+    } else {
+       var msg = {status: 'success', data: null};
+       res.json(msg);   
+    }
+  });  
+}
+
 var showtrips = function (req, res, next) {
   var userid = req.body.userid;
   var trips = {};
@@ -272,7 +287,7 @@ var insertTripIntoDatabase = function (fields, dbfile, callback) {
 module.exports.upload = upload;
 module.exports.androidsync = androidsync;
 
-
+module.exports.removetrip = removetrip;
 module.exports.showtrips = showtrips;
 module.exports.signup = signup;
 module.exports.signin = signin;

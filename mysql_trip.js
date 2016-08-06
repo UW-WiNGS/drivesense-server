@@ -59,8 +59,8 @@ mysqltrip.prototype.getDeletedTrips = function (deviceid, callback) {
 
 
 //deleted by website
-mysqltrip.prototype.deleteTrip = function (tripid, callback) {
-  var sql = "UPDATE trip SET tripstatus = 0 WHERE tripid = " + tripid + ";";  
+mysqltrip.prototype.deleteTrip = function (userid, tripid, callback) {
+  var sql = "UPDATE trip SET tripstatus = 0 WHERE tripid = " + tripid + " and userid = "+ userid + ";";  
   conn.query(sql, function(err, rows, field){
     if(err) {
       callback(err, null);

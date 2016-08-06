@@ -25,6 +25,8 @@ app.get('/signout', [route.signout]);
 
 app.get('/signinstatus', [route.tokenverification, route.signinstatus]);
 app.get('/mytrips', [route.tokenverification, route.showtrips]);
+app.post('/removetrip', [route.tokenverification, route.removetrip]);
+
 
 
 app.post('/androidsignin', route.androidsignin);
