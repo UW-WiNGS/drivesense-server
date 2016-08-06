@@ -39,47 +39,6 @@ var showtrips = function (req, res, next) {
 };
 
 
-var showtrips_old = function (req, res, next) {
-  var userid = req.body.userid;
-  var dir = path.join(__dirname, "../uploads/" + userid + "/");
-  try {
-    var files = fs.readdirSync(dir);
-  } catch(err) {
-    var msg = {status: 'fail', data: err};
-    res.json(msg);
-    return;
-  }
-  var trips = {};
-  var index = 0;
-  var len = files.length;
-  (function loadTrip() {
-    var dbfile = dir + files[index];
-    if(index == len) {
-      var msg = {status: 'success', data:trips};
-      res.json(msg);
-      return;
-    }
-    try {
-      var db = new sqlite3.Database(dbfile);
-      db.all("select * from gps;", function(err, rows) {
-        if (err) { 
-          console.log(err); 
-        } else {
-          trips[files[index].substr(0, 13)] = rows;
-          index++;
-          loadTrip();
-        }
-      });
-    } catch (exception) {
-      console.log(exception);
-      var msg = {status: 'fail', data: exception};
-      res.json(msg);     
-      return;
-    }
-  })();
-
-};
-
 
 var signout = function(req, res, next) {
   res.clearCookie('token');

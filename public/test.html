@@ -67,11 +67,14 @@
       </form>
 
      <form id="trips" name="trips" class="form-group" style="overflow:scroll; height:800px;">
+        <button ng-click="deletTrip()"> </button>
         <label for="trips">Trip list:</label>
 
         <table class="table">
-        <tr><td>Index</td><td>Time</td><td>Distance (mile)</td><td>Duration (mins)</td><td>Score</td></tr>
+        <tr><td>Delete</td><td>Index</td><td>Time</td><td>Distance (mile)</td><td>Duration (mins)</td><td>Score</td></tr>
         <tr ng-repeat="curtrip in trips" ng-click="showTrip(curtrip);setClickedRow($index);" ng-class="{'selected':$index == selectedRow}">
+
+          <td><input type="checkbox" checklist-value="index"></td>
           <td>{{ $index + 1 }}</td>
           <td>{{ curtrip.displaytime }}</td>
           <td>{{ (curtrip.distance).toFixed(2) }}</td>
@@ -148,7 +151,10 @@
       $scope.setClickedRow = function(index){
         $scope.selectedRow = index;
       }
- 
+
+      $scope.deleteTrip = function() {
+        
+      } 
     });
    
   </script>
