@@ -35,8 +35,8 @@
 /* Carousel base class */
 .carousel {
   background-color: #a1a1a1;
-  height: 500px;
-  margin-top: -20px;
+  height: 400px;
+  margin-top:-20px;
   margin-bottom: 60px;
 }
 /* Since positioning the image, we need to help out the caption */
