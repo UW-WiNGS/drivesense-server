@@ -11,6 +11,7 @@ app.service('tripformat', function () {
     return Object.keys(trips);
   } 
   this.setData = function(value) {
+    trips = [];
     var len = Object.keys(value).length;
     var i = len - 1;
     for(var tripid in value) {
@@ -27,30 +28,64 @@ app.service('tripformat', function () {
 
 
 app.controller('displayTripsCtrl', function($scope, $http, tripformat){ 
-  $http.get("/mytrips").then(function(res){
-    if(res.status == 200) {
-      var response = res.data;
-      if(response.status == "fail") {
-        return;
-      }
-      tripformat.setData(response.data);
-      $scope.trips = tripformat.getTrips();       
-      $scope.curtrip = $scope.trips[0];  
-      $scope.showTrip($scope.curtrip);
-      $scope.setClickedRow(0);
-   }
-  });
   $scope.showTrip = function($curtrip) {
     var method = $scope.radioValue;
     displayTrip($curtrip, method); 
   };
-  $scope.radioValue = "speed";
+  $scope.showMetric = function() {
+    var method = $scope.radioValue;
+    displayTrip($scope.curtrip, method); 
+  };
+
+
+  $scope.search = function(date) {
+    var next;
+    if (date.getMonth() == 11) {
+      next = new Date(date.getFullYear() + 1, 0, 1);
+    } else {
+      next = new Date(date.getFullYear(), date.getMonth() + 1, 1);
+    }
+    console.log("search from:" + date.getTime() + " to:" + next.getTime());
+    $http({
+      url: '/searchtrips',
+      method: "POST",
+      data: {'start':date.getTime(), 'end':next.getTime() }
+    }).then(function(res) {
+       console.log(res);
+      if(res.data.status == "success") {
+        console.log(res.data.data);
+        tripformat.setData(res.data.data);
+        $scope.trips = tripformat.getTrips();       
+        $scope.curtrip = $scope.trips[0];  
+        $scope.showTrip($scope.curtrip);
+        $scope.setClickedRow(0); 
+      } else {
+        alert("search failed on the server, try again later!");
+      } 
+    });  
+  };
+
+
+  $scope.init = function() {
+    $scope.radioValue = "speed";
+    var date = new Date();
+    var firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+    var lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+    $scope.dateDropDownInput = firstDay;
+    $scope.dateDropDownDisplay = (date.getMonth() + 1) + "/" + date.getFullYear();
+    $scope.search(firstDay);
+  };
+  $scope.init();
+
+
+  $scope.onTimeSet = function(date, oldDate) {
+    $scope.dateDropDownDisplay = (date.getMonth() + 1) + "/" + date.getFullYear();
+  };
 
 
   $scope.setClickedRow = function(index){
     $scope.selectedRow = index;
   }
-
   $scope.removeTrip = function(index) {
     var deletetrip = confirm('Are you sure you want to delete (unrecoverable)?');
     if (!deletetrip) {

@@ -100,6 +100,23 @@ mysqltrip.prototype.loadGPS = function (userid, callback) {
     }
   });
 }
+mysqltrip.prototype.searchTrips = function (userid, start, end, callback) {
+  var sql= "SELECT * FROM trip " +
+           "INNER JOIN gps on gps.tripid = trip.tripid " +
+           "WHERE userid = " + userid + " and tripstatus = 1 " + 
+           "and starttime >= " + start +" and endtime <= " + end + " ;";
+
+  conn.query(sql, function(err, rows) {
+    if (err) {
+      callback(err, null);
+    } else if (rows) {
+      callback(null, rows);
+    } else {
+      callback(null, null);
+    }
+  });
+}
+
 
 
 module.exports = new mysqltrip();

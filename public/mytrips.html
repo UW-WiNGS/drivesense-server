@@ -40,10 +40,9 @@
   <body onload="showUserName();">
   <div id="header"></div> 
 
-  <div class = "container col-lg-12" style="">
-  <div class = "row">
+<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" id="tripInformation" ng-app="displayTripsApp" ng-controller="displayTripsCtrl" ng-init="trip=0">
   <!-- all about the map -->
-  <div id="map-container" class="map col-xs-12 col-sm-12 col-md-8 col-lg-8" style="height:600px;position:relative;padding-bottom:50px;">
+  <div id="map-container" class="map col-xs-12 col-sm-12 col-md-8 col-lg-8" style="height:500px;position:relative;padding-bottom:50px;">
     <div id="map" class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="height:100%"></div>
     <div id="legend" class="col-lg-2">
     <table class="table">
@@ -57,44 +56,52 @@
       </tbody>
     </table>
     </div>
-
+    
+   <div class="container col-xs-12 col-sm-12 col-md-12 col-lg-12" style="text-align: center;">
+     <form id="mainForm" name="mainForm" class="form-group">
+        <label id="trip-selection" class="radio-inline">
+          <input type="radio" name="rads" value="speed" ng-model="radioValue" ng-click="showMetric()" checked>Speed
+        </label>
+        <label class="radio-inline">
+          <input type="radio" name="rads" value="score" ng-model="radioValue" ng-click="showMetric()">Score
+        </label>
+        <label class="radio-inline">
+          <input type="radio" name="rads" value="brake" ng-model="radioValue" ng-click="showMetric()">Brakes
+        </label>
+      </form>
+    </div>
     <div id="chart" class="container col-xs-12 col-sm-12 col-lg-12" style="height:300px;"></div>
+ 
   </div>
   <!--end of the map -->
 
   <div id="right-side" class="container col-xs-12 col-sm-12 col-md-4 col-lg-4">
-    <div id="tripInformation" ng-app="displayTripsApp" ng-controller="displayTripsCtrl" ng-init="trip=0">
-       
-      <form id="mainForm" name="mainForm" class="form-group">
-        <label for="trip-selection">Display on map:</label><br>
-        <label id="trip-selection" class="radio-inline">
-          <input type="radio" name="rads" value="speed" ng-model="radioValue" ng-click="showTrip()" checked>Speed
-        </label>
-        <label class="radio-inline">
-          <input type="radio" name="rads" value="score" ng-model="radioValue" ng-click="showTrip()">Score
-        </label>
-        <label class="radio-inline">
-          <input type="radio" name="rads" value="brake" ng-model="radioValue" ng-click="showTrip()">Brakes
-        </label>
-      </form>
+      <!--Search based on month -->  
+      <div class="row">
+        <div class="col-sm-12 col-lg-12 well">
+            <div class="dropdown input-group"> 
+               <a class="dropdown-toggle" id="dropdown2" role="button" data-toggle="dropdown" data-target="#" href="#">
+               <input type="text" class="form-control" data-ng-model="dateDropDownDisplay">
+                </a>
+                 <span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
+               <span class="input-group-btn"><button type="submit" class="btn btn-info" ng-click="search(dateDropDownInput)">Monthly Search</button></span>
+               <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+                 <datetimepicker data-ng-model="dateDropDownInput" data-on-set-time="onTimeSet(newDate, oldDate)" data-datetimepicker-config="{ dropdownSelector: '#dropdown2', startView: 'month', minView: 'month'}"></datetimepicker>
+               </ul>
+           </div>           
+        </div>
+      </div>
 
-<br>
+      <form id="trips" name="trips" class="form-group" style="overflow:scroll; height:600px;">
 
-<div class="dropdown">
-    <a class="dropdown-toggle" id="dLabel" role="button" data-toggle="dropdown" data-target="#" href="">
-       Prepared for Search 
-    </a>
-    <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
-        <datetimepicker data-ng-model="data.date"
-                        data-datetimepicker-config="{ dropdownSelector: '.dropdown-toggle' }"></datetimepicker>
-    </ul>
-</div>
-<br>
-     <form id="trips" name="trips" class="form-group" style="overflow:scroll; height:800px;">
-        <label for="trips">Trip list:</label>
+        <!--display month by month -->
+        <ul class="pager">
+          <li class="previous"><a href="#"><span aria-hidden="true">&larr;</span>Last Month</a></li>
+          <li class="next"><a href="#">Next Month<span aria-hidden="true">&rarr;</span></a></li>
+        </ul>
 
         <table class="table">
-        <tr><td>Index</td><td>Time</td><td>Distance (mile)</td><td>Duration (mins)</td><td>Score</td><td></td></tr>
+        <tr><td>Trips</td><td>Time</td><td>Distance (mile)</td><td>Duration (mins)</td><td>Score</td><td></td></tr>
         <tr ng-repeat="curtrip in trips" ng-click="showTrip(curtrip);setClickedRow($index);" ng-class="{'selected':$index == selectedRow}">
           <td>{{ $index + 1 }}</td>
           <td>{{ curtrip.displaytime }}</td>
@@ -106,12 +113,10 @@
               <span class="glyphicon glyphicon-trash"></span></button></p></td>
         </tr>
         </table>
-     </form>
- 
-   </div>
+    </form>
   </div>
   <!-- the end of right-side -->
-  </div>
+
 </div>
 
   <script>

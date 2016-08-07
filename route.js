@@ -25,6 +25,37 @@ var removetrip = function (req, res, next) {
   });  
 }
 
+var searchtrips = function (req, res, next) {
+  var userid = req.body.userid;
+  var start = req.body.start;
+  var end = req.body.end;
+  var trips = {};
+  console.log(req.body);
+  mysqltrip.searchTrips(userid, start, end, function(err, rows){
+    if(err) {
+      var msg = {status: 'fail', data: err.toString()};
+      res.json(msg);
+      return;
+    }
+    for(var i = 0; i < rows.length; ++i) {
+      var row = rows[i];
+      if(row.tripid in trips) {
+        var gps = {time: row.time, lat: row.lat, lng: row.lng, alt: row.alt, speed: row.speed, score: row.score, brake: row.event}; 
+        trips[row.tripid].gps.push(gps);
+      } else {
+        var trip = new Trip();
+        trip.fromObject(row);  
+        trip.gps = [];
+        var gps = {time: row.time, lat: row.lat, lng: row.lng, alt: row.alt, speed: row.speed, score: row.score, brake: row.event};
+        trip.gps.push(gps);
+        trips[row.tripid] = trip; 
+      }
+    }
+    var msg = {status: 'success', data:trips};
+    res.json(msg);
+  });  
+};
+
 var showtrips = function (req, res, next) {
   var userid = req.body.userid;
   var trips = {};
@@ -287,6 +318,7 @@ var insertTripIntoDatabase = function (fields, dbfile, callback) {
 module.exports.upload = upload;
 module.exports.androidsync = androidsync;
 
+module.exports.searchtrips = searchtrips;
 module.exports.removetrip = removetrip;
 module.exports.showtrips = showtrips;
 module.exports.signup = signup;
