@@ -51,22 +51,20 @@ app.controller('displayTripsCtrl', function($scope, $http, tripformat){
       method: "POST",
       data: {'start':date.getTime(), 'end':next.getTime() }
     }).then(function(res) {
-       console.log(res);
       if(res.data.status == "success") {
-        console.log(res.data.data);
         tripformat.setData(res.data.data);
         $scope.trips = tripformat.getTrips();       
         $scope.curtrip = $scope.trips[0];  
         $scope.showTrip($scope.curtrip);
         $scope.setClickedRow(0); 
+        $scope.onTimeSet(date, next);
       } else {
         alert("search failed on the server, try again later!");
       } 
     });  
   };
 
-
-  $scope.init = function() {
+ $scope.init = function() {
     $scope.radioValue = "speed";
     var date = new Date();
     var firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
@@ -79,10 +77,33 @@ app.controller('displayTripsCtrl', function($scope, $http, tripformat){
 
 
   $scope.onTimeSet = function(date, oldDate) {
+    $scope.dateDropDownInput = date;
     $scope.dateDropDownDisplay = (date.getMonth() + 1) + "/" + date.getFullYear();
   };
 
+  $scope.searchLastMonth = function() {
+    var date = $scope.dateDropDownInput;
+    var last;  
+    if (date.getMonth() == 0) {
+      last = new Date(date.getFullYear() - 1, 12, 1);
+    } else {
+      last = new Date(date.getFullYear(), date.getMonth() - 1, 1);
+    } 
+    $scope.search(last);
+  }
 
+  $scope.searchNextMonth = function() {
+    var date = $scope.dateDropDownInput;
+    var next;  
+    if (date.getMonth() == 11) {
+      next = new Date(date.getFullYear() + 1, 0, 1);
+    } else {
+      next = new Date(date.getFullYear(), date.getMonth() + 1, 1);
+    }
+    $scope.search(next);
+  }
+
+ 
   $scope.setClickedRow = function(index){
     $scope.selectedRow = index;
   }
