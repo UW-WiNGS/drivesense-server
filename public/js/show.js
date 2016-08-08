@@ -46,7 +46,7 @@ function displayTrip(trip, method) {
     var score = point.score;
     var brake = point.brake;
     if(method == "speed") {
-      index = Math.round(speed/5.0);
+      index = Math.round(speed/10.0);
     } else if(method=="score") {
       index = Math.round(score/2.0);
     } else if(method=="brake") {
@@ -147,11 +147,11 @@ function showLegend(method) {
     $("#legend-medhigh").parent().show()
     $("#legend-medlow").parent().show()
     $("#legend-type").html("Speed");
-    $("#legend-high").html(">15mph");
-    $("#legend-medhigh").html("10-15mph");
-    $("#legend-med").html("5-10mph");
-    $("#legend-medlow").html("0-5mph");
-    $("#legend-low").html("0mph");
+    $("#legend-high").html(">40mph");
+    $("#legend-medhigh").html("30-40mph");
+    $("#legend-med").html("20-30mph");
+    $("#legend-medlow").html("10-20mph");
+    $("#legend-low").html("0-10mph");
   } else if(method=="score") {
     $("#legend-med").parent().show()
     $("#legend-medhigh").parent().show()
