@@ -40,13 +40,13 @@ var searchtrips = function (req, res, next) {
     for(var i = 0; i < rows.length; ++i) {
       var row = rows[i];
       if(row.tripid in trips) {
-        var gps = {time: row.time, lat: row.lat, lng: row.lng, alt: row.alt, speed: row.speed, score: row.score, brake: row.event}; 
+        var gps = {time: row.time, lat: row.lat, lng: row.lng, alt: row.alt, curspeed: row.curspeed, curscore: row.curscore, curevent: row.curevent}; 
         trips[row.tripid].gps.push(gps);
       } else {
         var trip = new Trip();
         trip.fromObject(row);  
         trip.gps = [];
-        var gps = {time: row.time, lat: row.lat, lng: row.lng, alt: row.alt, speed: row.speed, score: row.score, brake: row.event};
+        var gps = {time: row.time, lat: row.lat, lng: row.lng, alt: row.alt, curspeed: row.curspeed, curscore: row.curscore, curevent: row.curevent};
         trip.gps.push(gps);
         trips[row.tripid] = trip; 
       }

@@ -15,12 +15,12 @@ CREATE TABLE IF NOT EXISTS gps (
   alt          decimal(16, 8)
                  NOT NULL,
 
-  speed         decimal(16, 8)
+  curspeed         decimal(16, 8)
                   NOT NULL,
 
-  score         decimal(16, 8)
+  curscore         decimal(16, 8)
                   NOT NULL,
 
 
-  event         INT SIGNED
+  curevent         INT SIGNED
 );

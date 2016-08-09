@@ -41,10 +41,9 @@ function displayTrip(trip, method) {
     latlngbounds.extend(latlng);
     
     var index = 0;
-
-    var speed = point.speed;
-    var score = point.score;
-    var brake = point.brake;
+    var speed = point.curspeed * 2.23694;
+    var score = point.curscore;
+    var brake = point.curevent;
     if(method == "speed") {
       index = Math.round(speed/10.0);
     } else if(method=="score") {
@@ -92,7 +91,7 @@ function drawChart(data, method) {
     var y_axis_text;
     var title_text;
     if(method == "speed") {
-      data_list.push([time, point.speed]);
+      data_list.push([time, point.curspeed * 2.23694]);
       title_text = "Speed";
       y_axis_text = "Speed (mph)";
       chart_type = "line";
@@ -100,12 +99,12 @@ function drawChart(data, method) {
       title_text = "Score";
       y_axis_text = "Score";
       chart_type = "line";
-      data_list.push([time, point.score]);
+      data_list.push([time, point.curscore]);
     } else if(method=="brake") {
       title_text = "Brakes";
       y_axis_text = "Braking";
       chart_type = "scatter";
-      data_list.push([time, point.brake * -1]);
+      data_list.push([time, point.curevent * -1]);
     } else {
       console.log("unknown method:" + method);
     }
