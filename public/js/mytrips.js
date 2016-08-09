@@ -54,8 +54,6 @@ app.controller('displayTripsCtrl', function($scope, $http, tripformat){
       if(res.data.status == "success") {
         tripformat.setData(res.data.data);
         $scope.trips = tripformat.getTrips();       
-        $scope.curtrip = $scope.trips[0];  
-        $scope.showTrip($scope.curtrip);
         $scope.setClickedRow(0); 
         $scope.onTimeSet(date, next);
       } else {
@@ -106,6 +104,8 @@ app.controller('displayTripsCtrl', function($scope, $http, tripformat){
  
   $scope.setClickedRow = function(index){
     $scope.selectedRow = index;
+    $scope.curtrip = $scope.trips[index];  
+    $scope.showTrip($scope.curtrip);
   }
   $scope.removeTrip = function(index) {
     var deletetrip = confirm('Are you sure you want to delete (unrecoverable)?');
