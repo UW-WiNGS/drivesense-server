@@ -71,11 +71,11 @@ mysqltrip.prototype.deleteTrip = function (userid, tripid, callback) {
 }
 
 mysqltrip.prototype.insertGPS = function (tripid, data, callback) {
-  var sql = "INSERT INTO gps (tripid, time, lat, lng, alt, curspeed, curscore, curevent) VALUES ?";
+  var sql = "INSERT INTO gps (tripid, time, lat, lng, alt, curspeed, curscore, curevent, curtilt) VALUES ?";
   var values = [];
   for(var i = 0; i < data.length; ++i) {
     var item = data[i];
-    var row = [tripid, item.time, item.x0, item.x1, item.x5, item.x2, item.x3, item.x4];
+    var row = [tripid, item.time, item.x0, item.x1, item.x5, item.x2, item.x3, item.x4, item.x6];
     values.push(row);
   }
   conn.query(sql, [values], function(err) {

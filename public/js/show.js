@@ -44,6 +44,7 @@ function displayTrip(trip, method) {
     var speed = point.curspeed * 2.23694;
     var score = point.curscore;
     var brake = point.curevent;
+    var tilt = point.curtilt;
     if(method == "speed") {
       index = Math.round(speed/10.0);
     } else if(method=="score") {
@@ -51,6 +52,12 @@ function displayTrip(trip, method) {
     } else if(method=="brake") {
       if(brake < 0) index = 3;
       else index = 0;
+    } else if(method=="tilt") {
+      if(tilt < -5) index = 0;
+      else if(tilt < -1) index = 1;
+      else if(tilt > 5) index = 4;
+      else if(tilt > 1) index = 3;
+      else index = 2;
     } else {
       console.log("unknown method:" + method);
     }
@@ -105,6 +112,11 @@ function drawChart(data, method) {
       y_axis_text = "Braking";
       chart_type = "scatter";
       data_list.push([time, point.curevent * -1]);
+    } else if(method=="tilt") {
+      title_text = "Tilt";
+      y_axis_text = "Tilt (Degree)";
+      chart_type = "line";
+      data_list.push([time, point.curtilt]);
     } else {
       console.log("unknown method:" + method);
     }
@@ -168,6 +180,16 @@ function showLegend(method) {
     $("#legend-type").html("Brake");
     $("#legend-high").html("Braking");
     $("#legend-low").html("Not braking");
+  } else if(method=="tilt") {
+    $("#legend-med").parent().show()
+    $("#legend-medhigh").parent().show()
+    $("#legend-medlow").parent().show()
+    $("#legend-type").html("Tilt");
+    $("#legend-high").html("-5 ~ -10 \xB0");
+    $("#legend-medhigh").html("-1 ~ -5 \xB0");
+    $("#legend-med").html("-1 ~ 1 \xB0");
+    $("#legend-medlow").html("1 ~ 5 \xB0");
+    $("#legend-low").html("5 ~ 10 \xB0"); 
   } else {
     console.log("unknown method:" + method);
   }

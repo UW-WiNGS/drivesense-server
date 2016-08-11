@@ -96,7 +96,7 @@
 @media (min-width: 768px) {
   /* Navbar positioning foo */
   .navbar-wrapper {
-    margin-top: 20px;
+    margin-top: 10px;
   }
   .navbar-wrapper .container {
     padding-right: 15px;

@@ -30,7 +30,6 @@ var searchtrips = function (req, res, next) {
   var start = req.body.start;
   var end = req.body.end;
   var trips = {};
-  console.log(req.body);
   mysqltrip.searchTrips(userid, start, end, function(err, rows){
     if(err) {
       var msg = {status: 'fail', data: err.toString()};
@@ -40,13 +39,13 @@ var searchtrips = function (req, res, next) {
     for(var i = 0; i < rows.length; ++i) {
       var row = rows[i];
       if(row.tripid in trips) {
-        var gps = {time: row.time, lat: row.lat, lng: row.lng, alt: row.alt, curspeed: row.curspeed, curscore: row.curscore, curevent: row.curevent}; 
+        var gps = {time: row.time, lat: row.lat, lng: row.lng, alt: row.alt, curspeed: row.curspeed, curscore: row.curscore, curevent: row.curevent, curtilt: row.curtilt}; 
         trips[row.tripid].gps.push(gps);
       } else {
         var trip = new Trip();
         trip.fromObject(row);  
         trip.gps = [];
-        var gps = {time: row.time, lat: row.lat, lng: row.lng, alt: row.alt, curspeed: row.curspeed, curscore: row.curscore, curevent: row.curevent};
+        var gps = {time: row.time, lat: row.lat, lng: row.lng, alt: row.alt, curspeed: row.curspeed, curscore: row.curscore, curevent: row.curevent, curtilt: row.curtilt};
         trip.gps.push(gps);
         trips[row.tripid] = trip; 
       }

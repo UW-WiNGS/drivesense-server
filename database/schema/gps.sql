@@ -21,6 +21,8 @@ CREATE TABLE IF NOT EXISTS gps (
   curscore         decimal(16, 8)
                   NOT NULL,
 
+  curevent         INT SIGNED,
 
-  curevent         INT SIGNED
+  curtilt         decimal(16, 8)
+                  NOT NULL
 );
