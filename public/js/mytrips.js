@@ -32,11 +32,6 @@ app.controller('displayTripsCtrl', function($scope, $http, tripformat){
     var method = $scope.radioValue;
     displayTrip($curtrip, method); 
   };
-  $scope.showMetric = function() {
-    var method = $scope.radioValue;
-    displayTrip($scope.curtrip, method); 
-  };
-
 
   $scope.search = function(date) {
     var next;
@@ -105,6 +100,7 @@ app.controller('displayTripsCtrl', function($scope, $http, tripformat){
   $scope.setClickedRow = function(index){
     $scope.selectedRow = index;
     $scope.curtrip = $scope.trips[index];  
+    console.log(index + " is clicked");
     $scope.showTrip($scope.curtrip);
   }
   $scope.removeTrip = function(index) {
