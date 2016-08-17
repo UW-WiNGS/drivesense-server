@@ -35,6 +35,7 @@ function displayTrip(trip, method) {
   var icons = getIcons();
   var len = trip.gps.length;
 
+
   var rate = parseInt(len/1200) + 1;
   for(var i = 0; i < len; i += rate) {
     var point = trip.gps[i];
