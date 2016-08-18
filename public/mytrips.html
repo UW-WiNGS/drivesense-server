@@ -48,11 +48,11 @@
     <table class="table">
       <thead><tr><th id="legend-type">Selected</th><th></th></tr></thead>
       <tbody>
-        <tr><td id="legend-high">High</td><td><div class="colored-box green"></div></td></tr>
-        <tr><td id="legend-medhigh">Med High</td><td><div class="colored-box lightgreen"></div></td></tr>
+        <tr><td id="legend-high">High</td><td><div class="colored-box red"></div></td></tr>
+        <tr><td id="legend-medhigh">Med High</td><td><div class="colored-box orange"></div></td></tr>
         <tr><td id="legend-med">Med</td><td><div class="colored-box yellow"></div></td></tr>
-        <tr><td id="legend-medlow">Med Low</td><td><div class="colored-box orange"></div></td></tr>
-        <tr><td id="legend-low">Low</td><td><div class="colored-box red"></div></td></tr>
+        <tr><td id="legend-medlow">Med Low</td><td><div class="colored-box lightgreen"></div></td></tr>
+        <tr><td id="legend-low">Low</td><td><div class="colored-box green"></div></td></tr>
       </tbody>
     </table>
     </div>
@@ -60,16 +60,16 @@
    <div class="container col-xs-12 col-sm-12 col-md-12 col-lg-12" style="text-align: center;">
      <form id="mainForm" name="mainForm" class="form-group">
         <label id="trip-selection" class="radio-inline">
-          <input type="radio" name="rads" value="speed" ng-model="radioValue" ng-click="showMetric()" checked>Speed
+          <input type="radio" name="rads" value="speed" ng-model="radioValue" ng-click="showTrip()" checked>Speed
         </label>
         <label class="radio-inline">
-          <input type="radio" name="rads" value="score" ng-model="radioValue" ng-click="showMetric()">Score
+          <input type="radio" name="rads" value="score" ng-model="radioValue" ng-click="showTrip()">Score
         </label>
         <label class="radio-inline">
-          <input type="radio" name="rads" value="brake" ng-model="radioValue" ng-click="showMetric()">Brakes
+          <input type="radio" name="rads" value="brake" ng-model="radioValue" ng-click="showTrip()">Brakes
         </label>
         <label class="radio-inline">
-          <input type="radio" name="rads" value="tilt" ng-model="radioValue" ng-click="showMetric()">Tilt (Motorcycle Only)
+          <input type="radio" name="rads" value="tilt" ng-model="radioValue" ng-click="showTrip()">Lean (Motorcycle Only)
         </label>
       </form>
     </div>
@@ -108,7 +108,7 @@
         <tr ng-repeat="curtrip in trips" ng-click="setClickedRow($index);" ng-class="{'selected':$index == selectedRow}">
           <td>{{ $index + 1 }}</td>
           <td>{{ curtrip.displaytime }}</td>
-          <td>{{ (curtrip.distance).toFixed(2) }}</td>
+          <td>{{ (curtrip.distance / 1609.34).toFixed(2) }}</td>
           <td>{{ ((curtrip.endtime - curtrip.starttime)/60000).toFixed(2) }}</td>
           <td>{{ (curtrip.score).toFixed(2) }}</td>
           <td><p data-placement="top" data-toggle="tooltip" title="Delete">

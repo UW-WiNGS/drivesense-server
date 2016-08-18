@@ -49,9 +49,9 @@ app.service('tripformat', function () {
 
 
 app.controller('displayTripsCtrl', function($scope, $http, tripformat){ 
-  $scope.showTrip = function($curtrip) {
+  $scope.showTrip = function() {
     var method = $scope.radioValue;
-    displayTrip($curtrip, method); 
+    displayTrip($scope.curtrip, method); 
   };
 
   $scope.search = function(date) {
@@ -122,7 +122,7 @@ app.controller('displayTripsCtrl', function($scope, $http, tripformat){
     $scope.selectedRow = index;
     $scope.curtrip = $scope.trips[index];  
     console.log(index + " is clicked");
-    $scope.showTrip($scope.curtrip);
+    $scope.showTrip();
   }
   $scope.removeTrip = function(index) {
     var deletetrip = confirm('Are you sure you want to delete (unrecoverable)?');
@@ -139,7 +139,7 @@ app.controller('displayTripsCtrl', function($scope, $http, tripformat){
         $scope.trips.splice(index, 1);    
         var len = Object.keys($scope.trips).length;
         $scope.curtrip = $scope.trips[index%len];  
-        $scope.showTrip($scope.curtrip);
+        $scope.showTrip();
         $scope.setClickedRow(index%len);
       } else {
         alert("delete failed on the server, try again later!");

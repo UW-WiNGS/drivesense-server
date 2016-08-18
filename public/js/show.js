@@ -5,7 +5,8 @@ function initMap() {
 
 var getIcons = function() {
   var res = [];
-  var colors = ['red', 'orange', 'yellow', 'lightgreen', 'green'];
+//  var colors = ['red', 'orange', 'yellow', 'lightgreen', 'green'];
+  var colors = ['green', 'lightgreen', 'yellow', 'orange', 'red'];
   for(var i = 0; i < colors.length; ++i) {
     var color = colors[i];
     var circle ={
