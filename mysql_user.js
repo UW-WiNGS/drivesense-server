@@ -1,19 +1,21 @@
 var conn = require('./mysql').dbcon;
-
+var User = require('./user.js');
 
 var mysqluser = function() {
 
 }
 
-mysqluser.prototype.getUserIDByEmail = function (email, callback) {
-  var sql = "select userid from user where email like binary '" + email + "'";
-  conn.query(sql, function(err, rows, field){
+mysqluser.prototype.getUserByEmail = function (email, callback) {
+  var sql = "select * from user where email like ?";
+  conn.query(sql, [email], function(err, rows, field){
     if(err) {
       callback(err, null);
     } else if(rows.length == 0) {
-      callback(new Error("no user has email:" + email), null);
+      callback(null, null);
     } else {
-      callback(null, rows[0].userid);
+      var user = new User();
+      user.fromObject(rows[0]);
+      callback(null, user);
     }
   });
 }
@@ -31,28 +33,32 @@ mysqluser.prototype.userSignUp = function (user, callback) {
 }
 
 mysqluser.prototype.getUserByID = function (userid, callback) {
-  var sql = "select * from user where userid = " + userid + ";"; 
-  conn.query(sql, function(err, rows, field){
+  var sql = "select * from user where userid = ?;"; 
+  conn.query(sql, [userid], function(err, rows, field){
     if(err) {
       callback(err, null);
     } else if(rows.length == 0) {
-      callback(new Error("not registered"), null);
+      callback(null, null);
     } else {
-      callback(null, rows[0]);
+      var user = new User();
+      user.fromObject(rows[0]);
+      callback(null, user);
     }
   });
 }
 
 
-mysqluser.prototype.userSignIn = function (user, callback) {
-  var sql = "select * from user where email like binary '" + user.email + "' and password like binary '" + user.password + "'";
-  conn.query(sql, user, function(err, rows, field){
+mysqluser.prototype.userSignIn = function (email, password, callback) {
+  var sql = "select * from user where email like ? and password like ?";
+  conn.query(sql, [email, password], function(err, rows, field){
     if(err) {
       callback(err, null);
     } else if(rows.length == 0) {
-      callback(new Error("not registered"), null);
+      callback(null, null);
     } else {
-      callback(null, rows[0]);
+      var user = new User();
+      user.fromObject(rows[0]);
+      callback(null, user);
     }
   });
 }

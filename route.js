@@ -86,7 +86,7 @@ var showtrips = function (req, res, next) {
 
 
 var signout = function(req, res, next) {
-  res.clearCookie('token');
+  req.logout();
   var msg = {status:'success', data:'token cleared'};
   res.json(msg);
 };
@@ -108,6 +108,7 @@ var signinstatus = function (req, res, next) {
 
 var tokenverification = function (req, res, next) {
    var token = req.cookies.token || req.body.token || req.query.token || req.headers['x-access-token'];
+   var googletoken = req.cookies.googletoken;
   // decode token
   if (token) {
     // verifies secret and checks exp
@@ -122,6 +123,8 @@ var tokenverification = function (req, res, next) {
       }
     });
 
+  } else if (googletoken) {
+
   } else {
     // if there is no token
     // return an error
@@ -133,23 +136,9 @@ var tokenverification = function (req, res, next) {
 };
 
 var signin = function (req, res, next) {
-  var user = new User();
-  user.fromObject(req.body);
-  mysqluser.userSignIn(user, function(err, row) {
-    var msg = {};
-    if(err) {
-      console.log(err);
-      msg = {status: 'fail', data: err};
-    } else {
-      var token = jwt.sign({userid:row.userid}, 'secret', {expiresIn: '1d'});
-      res.cookie('token', token);
-      msg = {status: 'success', data: {firstname: row.firstname, lastname: row.lastname}};
-    }
+    msg = {status: 'success', data: {firstname: req.user.firstname, lastname: req.user.lastname}};
     res.json(msg);
-  });
 };
-
-
 
 var signup = function (req, res, next) {
   var query = req.body; 

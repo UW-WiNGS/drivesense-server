@@ -4,22 +4,25 @@ var path = require('path');     //used for file path
 
 
 var express = require('express');    //Express Web Server 
+var session = require('express-session')
 var bodyparser = require('body-parser');
 var cookieParser = require('cookie-parser');
 
 var route = require('./route');
+var auth = require('./auth');
 var app = express();
-
 
 app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public'))); 
-
+app.use(auth.passport.initialize());
+app.use(auth.passport.session());
 
 
 app.post('/signup', route.signup);
-app.post('/signin', [route.signin]);
+app.post('/signin', [auth.passport.authenticate('local'), route.signin]);
+app.post('/auth/google',auth.passport.authenticate('google-id-token'), route.signin);
 app.get('/signout', [route.signout]);
 
 
