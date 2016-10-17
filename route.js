@@ -26,7 +26,7 @@ var removetrip = function (req, res, next) {
 }
 
 var searchtrips = function (req, res, next) {
-  var userid = req.body.userid;
+  var userid = req.user.userid;
   var start = req.body.start;
   var end = req.body.end;
   var trips = {};
@@ -81,63 +81,6 @@ var showtrips = function (req, res, next) {
     var msg = {status: 'success', data:trips};
     res.json(msg);
   }); 
-};
-
-
-
-var signout = function(req, res, next) {
-  req.logout();
-  var msg = {status:'success', data:'token cleared'};
-  res.json(msg);
-};
-
-
-var signinstatus = function (req, res, next) {
-  var userid = req.body.userid;
-  mysqluser.getUserByID(userid, function(err, user) {
-    var msg = {};
-    if(err) {
-      msg = {status: 'fail', data: err.message}; 
-    } else {
-      msg = {status: 'success', data: {firstname: user.firstname, lastname:user.lastname}};
-    }
-    res.json(msg);
-  });
-};
-
-
-var tokenverification = function (req, res, next) {
-   var token = req.cookies.token || req.body.token || req.query.token || req.headers['x-access-token'];
-   var googletoken = req.cookies.googletoken;
-  // decode token
-  if (token) {
-    // verifies secret and checks exp
-    jwt.verify(token, 'secret', function(err, decoded) {      
-      if (err) {
-        var msg = {status: 'fail', data: 'Failed to authenticate token.'};    
-        res.json(msg);
-      } else {
-        // if everything is good, save to request for use in other routes
-        req.body.userid = decoded.userid;    
-        next(); 
-      }
-    });
-
-  } else if (googletoken) {
-
-  } else {
-    // if there is no token
-    // return an error
-    return res.status(403).send({ 
-        status: 'fail', 
-        data: 'No token provided.' 
-    }); 
-  }
-};
-
-var signin = function (req, res, next) {
-    msg = {status: 'success', data: {firstname: req.user.firstname, lastname: req.user.lastname}};
-    res.json(msg);
 };
 
 var signup = function (req, res, next) {
@@ -310,11 +253,6 @@ module.exports.searchtrips = searchtrips;
 module.exports.removetrip = removetrip;
 module.exports.showtrips = showtrips;
 module.exports.signup = signup;
-module.exports.signin = signin;
-module.exports.signout = signout;
-
-module.exports.signinstatus = signinstatus;
-module.exports.tokenverification = tokenverification;
 
 module.exports.androidsignin = androidsignin;
 module.exports.androidsignup = androidsignup;

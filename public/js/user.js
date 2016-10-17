@@ -61,8 +61,9 @@ var submitSignIn = function() {
   signinpost.success(function(msg, status){
     if(status == "success") {
       console.log(msg);
-      location.reload(); 
-      window.location = window.location.origin + "/mytrips.html" 
+      window.localStorage['jwtToken'] = msg.data.token;
+      // location.reload(); 
+      // window.location = window.location.origin + "/mytrips.html" 
     } else {
       console.log(status);
     } 
