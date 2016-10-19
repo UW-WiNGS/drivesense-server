@@ -83,30 +83,6 @@ var showtrips = function (req, res, next) {
   }); 
 };
 
-var signup = function (req, res, next) {
-  var query = req.body; 
-  var user = new User();
-  user.fromObject(query);
-  console.log(user);
-  mysqluser.userSignUp(user,function(err, id) {
-    if(err) {
-      console.log(err.code);
-      var msg = {};
-      if(err.code == "ER_DUP_ENTRY") {
-        msg = {status: 'fail', data: err.code};
-      } else {
-        msg = {status: 'fail', data: 'unknown'}; 
-      }
-      res.json(msg);
-    } else {
-      var token = jwt.sign({userid:id}, 'secret', {expiresIn: '1d'});
-      res.cookie('token', token);
-      var msg = {status: 'success', data: {firstname: user.firstname, lastname:user.lastname}};
-      res.json(msg);
-    }
-  }); 
-};
-
 
 var androidsignin = function(req, res, next) {
   var form = new formidable.IncomingForm();
@@ -252,7 +228,7 @@ module.exports.androidsync = androidsync;
 module.exports.searchtrips = searchtrips;
 module.exports.removetrip = removetrip;
 module.exports.showtrips = showtrips;
-module.exports.signup = signup;
+
 
 module.exports.androidsignin = androidsignin;
 module.exports.androidsignup = androidsignup;

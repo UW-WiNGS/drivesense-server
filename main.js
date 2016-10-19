@@ -17,8 +17,8 @@ app.use(bodyparser.urlencoded({ extended: true })); // for parsing application/x
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public'))); 
 
-app.post('/signup', route.signup);
-app.post('/signin', [auth.passport.authenticate('local', {session:false}), auth.signin]);
+app.post('/auth/signup', auth.signup, auth.signin);
+app.post('/auth/signin', [auth.passport.authenticate('local', {session:false}), auth.signin]);
 app.post('/auth/google',[auth.passport.authenticate('google-id-token', {session:false}), auth.signin]);
 
 

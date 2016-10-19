@@ -59,17 +59,40 @@ passport.use(new JwtStrategy(opts, function(jwt_payload, done) {
 // Auth routes:
 
 var signinstatus = function (req, res, next) {
-  msg = {status: 'success', data: {firstname: req.user.firstname, lastname: req.user.lastname}};
+  msg = {firstname: req.user.firstname, lastname: req.user.lastname};
   res.json(msg);
 };
 
 var signin = function (req, res, next) {
-  var token = jwt.sign({userid:req.user.userid}, 'secret', {expiresIn: '1d'});
-  msg = {status: 'success', data:{token:token}};
+  var token = jwt.sign({userid:req.user.userid, firstname:req.user.firstname, lastname: req.user.lastname}, 'secret', {expiresIn: '1d'});
+  msg = {token:token};
   res.json(msg);
 };
 
+var signup = function (req, res, next) {
+  var query = req.body; 
+  var user = new User();
+  user.fromObject(query);
+  console.log(user);
+  mysqluser.userSignUp(user,function(err, id) {
+    if(err) {
+      console.log(err.code);
+      var msg = {};
+      if(err.code == "ER_DUP_ENTRY") {
+        msg = {status: 'fail', data: err.code};
+      } else {
+        msg = {status: 'fail', data: 'unknown'}; 
+      }
+      res.json(msg);
+    } else {
+      user.userid = id;
+      req.user = user;
+      next();
+    }
+  }); 
+};
 
 module.exports.passport = passport;
 module.exports.signin = signin;
 module.exports.signinstatus = signinstatus;
+module.exports.signup = signup;

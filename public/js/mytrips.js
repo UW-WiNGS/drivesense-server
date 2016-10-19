@@ -1,43 +1,5 @@
-function authService($window) {
-  var self = this;
-  self.saveToken = function(token) {
-    $window.localStorage['jwtToken'] = token;
-  }
-
-  self.getToken = function() {
-    return $window.localStorage['jwtToken'];
-  }
-}
-
-var authInterceptor = function(auth, API) {
-  return {
-    // automatically attach Authorization header
-    request: function(config) {
-      console.log(config);
-      var token = auth.getToken();
-      if(config.url.indexOf(API) === 0 && token) {
-        config.headers.Authorization = 'JWT ' + token;
-      }
-
-      return config;
-    },
-
-    // If a token was sent back, save it
-    response: function(res) {
-      if(res.config.url.indexOf(API) === 0 && res.data.token) {
-        auth.saveToken(res.data.token);
-      }
-
-      return res;
-    }
-  }
-}
-
-var app = angular.module('displayTripsApp', ['ui.bootstrap.datetimepicker'])
-  .factory('authInterceptor', authInterceptor)
-  .service('auth', authService)
-  .constant('API', 'http://drivesensetest.wirover.com:8000')
-  .config(function($httpProvider) {$httpProvider.interceptors.push('authInterceptor')});
+var app = angular.module('displayTripsApp', ['auth','ui.bootstrap.datetimepicker'])
+  .constant('API', 'http://drivesensetest.wirover.com:8000');
 
 function timeStamp(now) {
 // Create an array with the current month, day and time
