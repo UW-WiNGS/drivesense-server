@@ -18,6 +18,7 @@
   "homepage": "https://github.com/kanglei1130/drivesense-server#readme",
   "dependencies": {
     "angular": "^1.5.8",
+    "angular-carousel": "^1.0.1",
     "angular-ui-router": "^0.3.1",
     "bootstrap": "^3.3.7",
     "highcharts": "^5.0.0",

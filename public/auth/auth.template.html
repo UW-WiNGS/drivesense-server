@@ -1,7 +1,7 @@
 <nav class="navbar navbar-inverse navbar-static-top">
   <div class="container-fluid">
     <div class="navbar-header">
-       <a class="navbar-brand" href="index.html" style="font-size:30px;">DriveSense</a>
+       <a class="navbar-brand" href="/" style="font-size:30px;">DriveSense</a>
     </div>
     <div id="navbar" class="collapse navbar-collapse">
       <div id="signinup" class="nav navbar-nav navbar-right" ng-hide="$ctrl.isAuthed()">
@@ -9,8 +9,8 @@
         <button type="button" class="btn btn-info navbar-btn btn-lg" data-toggle="modal" data-target="#signup" ng-click="$ctrl.showSignup()">Sign up</button>
       </div>
       <div id="username" class="nav navbar-nav navbar-right" ng-show="$ctrl.isAuthed()">
-        <a class="navbar-text" href="mytrips.html" id="mytrips" style="text-align:bottom;font-size:20px;color:white;">My Trips</a>
-        <a class="navbar-text" href="mytrips.html" id="user" style="text-align:bottom;font-size:20px;color:white;">{{$ctrl.user().firstname}} {{$ctrl.user().lastname}}</a> 
+        <a class="navbar-text" href="#/mytrips" id="mytrips" style="text-align:bottom;font-size:20px;color:white;">My Trips</a>
+        <a class="navbar-text" href="#/mytrips" id="user" style="text-align:bottom;font-size:20px;color:white;">{{$ctrl.user().firstname}} {{$ctrl.user().lastname}}</a> 
         <button type="button" class="btn btn-info navbar-btn btn-lg" ng-click="$ctrl.logout()">Sign Out</button>
       </div> 
     </div>

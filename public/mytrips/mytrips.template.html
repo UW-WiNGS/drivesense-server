@@ -1,32 +1,4 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="google-signin-client_id" content="83228343356-ooeejimtmb7cn3bsnkr06ve67nip7e6o.apps.googleusercontent.com">
-    <title>Show Trip</title>
-    <link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/carousel.css">
-    <link rel="stylesheet" href="/legend.css">
-    <link href="/car.jpg" rel="shortcut icon" type="image/x-icon">
-    <script src="/bower_components/jquery/dist/jquery.min.js"></script> 
-    <script src="/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
-    <script src="/bower_components/angular/angular.js"></script>
-    <script src="/bower_components/highcharts/highcharts.js"></script>
-
-    <link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.css">
-    <link rel="stylesheet" href="/bower_components/angular-bootstrap-datetimepicker/src/css/datetimepicker.css"/>
-    <script type="text/javascript" src="/bower_components/moment/moment.js"></script>
-    <script type="text/javascript" src="/bower_components/angular-bootstrap-datetimepicker/src/js/datetimepicker.js"></script>
-    <script type="text/javascript" src="/bower_components/angular-bootstrap-datetimepicker/src/js/datetimepicker.templates.js"></script>
-    <script src="https://apis.google.com/js/platform.js"></script>
-    <script src="/js/mytrips.js"></script>
-    <script src="/auth/auth.module.js"></script>
-    <script src="/auth/auth.component.js"></script>
-  </head>
-  <body ng-app="displayTripsApp">
-  <div id="header"><auth></auth></div> 
-
-<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" id="tripInformation" ng-controller="displayTripsCtrl" ng-init="trip=0">
+<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" id="tripInformation" ng-init="trip=0">
   <!-- all about the map -->
   <div id="map-container" class="map col-xs-12 col-sm-12 col-md-8 col-lg-8" style="height:500px;position:relative;padding-bottom:50px;">
     <div id="map" class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="height:100%"></div>
@@ -107,10 +79,3 @@
   <!-- the end of right-side -->
 
 </div>
-    
-  <script src="/js/show.js"></script> 
-  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB3dwDzOBKBdFmKH9yn5yvp72lw09kW01M&callback=initMap"></script> 
-</body>
-</html>
-
-
