@@ -88,7 +88,7 @@ var androidsignin = function(req, res, next) {
   var form = new formidable.IncomingForm();
   form.parse(req, function(err, fields, files) {
     var user = fields;     
-    mysqluser.userSignIn(user, function(err) {
+    mysqluser.userSignIn(fields.email, fields.password, function(err) {
       if(err) {
         var msg = {status: 'fail', data: err};         
       } else {

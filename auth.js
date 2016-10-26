@@ -7,6 +7,7 @@ var JwtStrategy = require('passport-jwt').Strategy,
 var mysqluser = require('./mysql_user.js');
 var User = require('./user.js');
 var jwt = require('jsonwebtoken');
+var config     = require('./config');
 
 passport.use(new LocalStrategy({
         usernameField: 'email'
@@ -21,7 +22,7 @@ passport.use(new LocalStrategy({
 ));
 
 passport.use(new GoogleTokenStrategy({
-    clientID: "83228343356-ooeejimtmb7cn3bsnkr06ve67nip7e6o.apps.googleusercontent.com",
+    clientID: config.google.clientID,
   },
   function(parsedToken, googleId, done) {
     mysqluser.getUserByEmail(parsedToken.payload.email, function (err, user) {
@@ -41,9 +42,10 @@ passport.use(new GoogleTokenStrategy({
 ));
 
 passport.use(new FacebookTokenStrategy({
-    clientID: "dink",
-    clientSecret: "dink"
+    clientID: config.facebook.clientID,
+    clientSecret: config.facebook.clientSecret,
   }, function(accessToken, refreshToken, profile, done) {
+    console.log(profile);
     mysqluser.getUserByEmail(profile.emails[0], function (err, user) {
       if (err) { return done(err); }
       if (!user) { 

@@ -1,27 +1,14 @@
 //mysql -u drivesense -h mysql.cs.wisc.edu -p --skip-secure-auth
 
 var mysql      = require('mysql');
-// var connection = mysql.createConnection({
-//   host     : 'localhost',
-//   user     : 'root',
-//   password : 'drivesense',
-//   database : 'drivesense_wings',
-//   multipleStatements: true,
-// });
+var config     = require('./config');
 
-// connection.connect(function(err) {
-//   if (err) {
-//     console.error('error connecting: ' + err.stack);
-//     return;
-//   }
-//   console.log('connected as id ' + connection.threadId);
-// });
 
 var pool  = mysql.createPool({
-  host     : 'localhost',
-  user     : 'wirover',
-  password : '',
-  database : 'drivesense_wings',
+  host     : config.database.host,
+  user     : config.database.user,
+  password : config.database.password,
+  database : config.database.db,
   multipleStatements: true,
 });
 
