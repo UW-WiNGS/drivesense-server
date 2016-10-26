@@ -1,4 +1,4 @@
-var app = angular.module('driveSenseApp', ['ui.router', 'auth']);
+var app = angular.module('driveSenseApp', ['ui.router', 'auth', 'ui.bootstrap.datetimepicker']);
 
 app.constant('API', 'http://drivesensetest.wirover.com:8000');
 

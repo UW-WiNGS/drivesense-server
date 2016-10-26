@@ -18,16 +18,16 @@
    <div class="container col-xs-12 col-sm-12 col-md-12 col-lg-12" style="text-align: center;">
      <form id="mainForm" name="mainForm" class="form-group">
         <label id="trip-selection" class="radio-inline">
-          <input type="radio" name="rads" value="speed" ng-model="radioValue" ng-click="showTrip()" checked>Speed
+          <input type="radio" name="rads" value="speed" ng-model="$ctrl.radioValue" ng-click="$ctrl.showTrip()" checked>Speed
         </label>
         <label class="radio-inline">
-          <input type="radio" name="rads" value="score" ng-model="radioValue" ng-click="showTrip()">Score
+          <input type="radio" name="rads" value="score" ng-model="$ctrl.radioValue" ng-click="$ctrl.showTrip()">Score
         </label>
         <label class="radio-inline">
-          <input type="radio" name="rads" value="brake" ng-model="radioValue" ng-click="showTrip()">Brakes
+          <input type="radio" name="rads" value="brake" ng-model="$ctrl.radioValue" ng-click="$ctrl.showTrip()">Brakes
         </label>
         <label class="radio-inline">
-          <input type="radio" name="rads" value="tilt" ng-model="radioValue" ng-click="showTrip()">Lean (Motorcycle Only)
+          <input type="radio" name="rads" value="tilt" ng-model="$ctrl.radioValue" ng-click="$ctrl.showTrip()">Lean (Motorcycle Only)
         </label>
       </form>
     </div>
@@ -41,13 +41,13 @@
       <div class="row">
         <div class="col-sm-12 col-lg-12 well">
             <div class="dropdown input-group"> 
-               <a class="dropdown-toggle" id="dropdown2" role="button" data-toggle="dropdown" data-target="#" href="#">
-               <input type="text" class="form-control" data-ng-model="dateDropDownDisplay">
+               <a class="dropdown-toggle" id="dropdown2" role="button" data-toggle="dropdown" data-target="#">
+               <input type="text" class="form-control" data-ng-model="$ctrl.dateDropDownDisplay">
                 </a>
                  <span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
-               <span class="input-group-btn"><button type="submit" class="btn btn-info" ng-click="search(dateDropDownInput)">Monthly Search</button></span>
+               <span class="input-group-btn"><button type="submit" class="btn btn-info" ng-click="$ctrl.search($ctrl.dateDropDownInput)">Monthly Search</button></span>
                <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
-                 <datetimepicker data-ng-model="dateDropDownInput" data-on-set-time="onTimeSet(newDate, oldDate)" data-datetimepicker-config="{ dropdownSelector: '#dropdown2', startView: 'month', minView: 'month'}"></datetimepicker>
+                 <datetimepicker data-ng-model="$ctrl.dateDropDownInput" data-on-set-time="$ctrl.onTimeSet(newDate, oldDate)" data-datetimepicker-config="{ dropdownSelector: '#dropdown2', startView: 'month', minView: 'month'}"></datetimepicker>
                </ul>
            </div>           
         </div>
@@ -57,20 +57,20 @@
 
         <!--display month by month -->
         <ul class="pager">
-          <li class="previous"><a href="" ng-click="searchLastMonth()"><span aria-hidden="true">&larr;</span>Last Month</a></li>
-          <li class="next"><a href="" ng-click="searchNextMonth()">Next Month<span aria-hidden="true">&rarr;</span></a></li>
+          <li class="previous"><a href="" ng-click="$ctrl.searchLastMonth()"><span aria-hidden="true">&larr;</span>Last Month</a></li>
+          <li class="next"><a href="" ng-click="$ctrl.searchNextMonth()">Next Month<span aria-hidden="true">&rarr;</span></a></li>
         </ul>
 
         <table class="table">
         <tr><td>Trips</td><td>Time</td><td>Distance (mile)</td><td>Duration (mins)</td><td>Score</td><td></td></tr>
-        <tr ng-repeat="curtrip in trips" ng-click="setClickedRow($index);" ng-class="{'selected':$index == selectedRow}">
+        <tr ng-repeat="curtrip in trips" ng-click="$ctrl.setClickedRow($index);" ng-class="{'selected':$index == selectedRow}">
           <td>{{ $index + 1 }}</td>
           <td>{{ curtrip.displaytime }}</td>
           <td>{{ (curtrip.distance / 1609.34).toFixed(2) }}</td>
           <td>{{ ((curtrip.endtime - curtrip.starttime)/60000).toFixed(2) }}</td>
           <td>{{ (curtrip.score).toFixed(2) }}</td>
           <td><p data-placement="top" data-toggle="tooltip" title="Delete">
-              <button class="btn btn-danger btn-xs" data-title="Delete" ng-click="removeTrip($index)">
+              <button class="btn btn-danger btn-xs" data-title="Delete" ng-click="$ctrl.removeTrip($index)">
               <span class="glyphicon glyphicon-trash"></span></button></p></td>
         </tr>
         </table>

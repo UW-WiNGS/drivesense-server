@@ -18,11 +18,12 @@
   "homepage": "https://github.com/kanglei1130/drivesense-server#readme",
   "dependencies": {
     "angular": "^1.5.8",
+    "angular-bootstrap-datetimepicker": "^1.1.3",
     "angular-carousel": "^1.0.1",
     "angular-ui-router": "^0.3.1",
     "bootstrap": "^3.3.7",
     "highcharts": "^5.0.0",
-    "jquery": "^3.1.1",
+    "jquery": "^2.2.4",
     "moment": "^2.15.1"
   }
 }

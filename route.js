@@ -119,14 +119,15 @@ var upload = function (req, res, next) {
   var form = new formidable.IncomingForm();
   form.parse(req, function(err, fields, files) {
     var file = files.uploads;
-    mysqluser.getUserIDByEmail(fields.email, function(err, id){
+    console.log(fields.email)
+    mysqluser.getUserByEmail(fields.email, function(err, user){
       if(err) {
         console.log(err);
         var msg = {status: 'fail', data: err.toString()};
         res.json(msg);
         return;
       } 
-      var folder = path.join(__dirname, '../uploads/' + id + '/');
+      var folder = path.join(__dirname, '../uploads/' + user.userid + '/');
       fs.mkdirp(folder, function (err) {
         if(err) {
           console.log(err);
@@ -135,7 +136,7 @@ var upload = function (req, res, next) {
           return;
         }
         //insert the data into database
-        fields.userid = id;
+        fields.userid = user.userid;
 
         insertTripIntoDatabase(fields, file.path, function(err) {/*we do not care about err at this point*/});
         //backup the data

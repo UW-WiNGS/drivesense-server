@@ -3,7 +3,7 @@ angular.
   module('auth').
   component('auth', {
     templateUrl: 'auth/auth.template.html',
-    controller: function AuthController(authService, userService) {
+    controller: function AuthController(authService, userService, $state) {
       var auth2;
       gapi.load('auth2', function() {
         auth2 = gapi.auth2.init();
@@ -22,7 +22,7 @@ angular.
       }
       function onGoogleSigninSuccess(googleUser) {
           var id_token = googleUser.getAuthResponse().id_token;
-          userService.googleLogin(id_token).then(null, handleFailure);
+          userService.googleLogin(id_token).then(closeSignin, handleFailure);
       }
       function onGoogleFailure(error) {
         console.log(error);
@@ -43,6 +43,7 @@ angular.
       }
       function closeSignin() {
         $('#signin').modal('hide')
+        $state.transitionTo('myTrips');
       }
       function closeSignup() {
         $('#signup').modal('hide')

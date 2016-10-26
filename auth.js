@@ -1,6 +1,7 @@
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var GoogleTokenStrategy = require('passport-google-id-token');
+var FacebookTokenStrategy = require('passport-facebook-token');
 var JwtStrategy = require('passport-jwt').Strategy,
     ExtractJwt = require('passport-jwt').ExtractJwt;
 var mysqluser = require('./mysql_user.js');
@@ -27,6 +28,26 @@ passport.use(new GoogleTokenStrategy({
       if (err) { return done(err); }
       if (!user) { 
         user = new User(parsedToken.payload.given_name,parsedToken.payload.family_name, parsedToken.payload.email);
+        mysqluser.userSignUp(user, function (err, id) {
+          if (err) { return done(err); }
+          user.userid = id;
+          return done(null, user);
+        });
+      } else {
+        return done(null, user);
+      }      
+    });
+  }
+));
+
+passport.use(new FacebookTokenStrategy({
+    clientID: "dink",
+    clientSecret: "dink"
+  }, function(accessToken, refreshToken, profile, done) {
+    mysqluser.getUserByEmail(profile.emails[0], function (err, user) {
+      if (err) { return done(err); }
+      if (!user) { 
+        user = new User(profile.name.given_name, profile.name.family_name, profile.emails[0]);
         mysqluser.userSignUp(user, function (err, id) {
           if (err) { return done(err); }
           user.userid = id;

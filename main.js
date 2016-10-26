@@ -20,6 +20,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.post('/auth/signup', auth.signup, auth.signin);
 app.post('/auth/signin', [auth.passport.authenticate('local', {session:false}), auth.signin]);
 app.post('/auth/google',[auth.passport.authenticate('google-id-token', {session:false}), auth.signin]);
+app.post('/auth/facebook',[auth.passport.authenticate('facebook-token', {session:false}), auth.signin]);
 
 
 app.get('/signinstatus', [auth.passport.authenticate('jwt', { session: false}), auth.signinstatus]);
