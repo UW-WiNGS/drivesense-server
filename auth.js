@@ -46,7 +46,7 @@ passport.use(new FacebookTokenStrategy({
     clientSecret: config.facebook.clientSecret,
   }, function(accessToken, refreshToken, profile, done) {
     console.log(profile);
-    mysqluser.getUserByEmail(profile.emails[0], function (err, user) {
+    mysqluser.getUserByEmail(profile.emails[0].value, function (err, user) {
       if (err) { return done(err); }
       if (!user) { 
         user = new User(profile.name.given_name, profile.name.family_name, profile.emails[0]);
