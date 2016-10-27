@@ -63,7 +63,7 @@
 
         <table class="table">
         <tr><td>Trips</td><td>Time</td><td>Distance (mile)</td><td>Duration (mins)</td><td>Score</td><td></td></tr>
-        <tr ng-repeat="curtrip in trips" ng-click="$ctrl.setClickedRow($index);" ng-class="{'selected':$index == selectedRow}">
+        <tr ng-repeat="curtrip in $ctrl.trips" ng-click="$ctrl.setClickedRow($index);" ng-class="{'selected':$index == selectedRow}">
           <td>{{ $index + 1 }}</td>
           <td>{{ curtrip.displaytime }}</td>
           <td>{{ (curtrip.distance / 1609.34).toFixed(2) }}</td>
