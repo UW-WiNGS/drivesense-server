@@ -12,13 +12,19 @@ var route = require('./route');
 var auth = require('./auth');
 var app = express();
 
+
+var myLogger = function (req, res, next) {
+  console.log(req.body);
+  next();
+};
+
 app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public'))); 
 
 app.post('/auth/signup', auth.signup, auth.signin);
-app.post('/auth/signin', [auth.passport.authenticate('local', {session:false}), auth.signin]);
+app.post('/auth/signin', [myLogger, auth.passport.authenticate('local', {session:false}), auth.signin]);
 app.post('/auth/google',[auth.passport.authenticate('google-id-token', {session:false}), auth.signin]);
 app.post('/auth/facebook',[auth.passport.authenticate('facebook-token', {session:false}), auth.signin]);
 

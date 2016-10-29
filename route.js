@@ -87,6 +87,7 @@ var showtrips = function (req, res, next) {
 var androidsignin = function(req, res, next) {
   var form = new formidable.IncomingForm();
   form.parse(req, function(err, fields, files) {
+    console.log(fields);
     var user = fields;     
     mysqluser.userSignIn(fields.email, fields.password, function(err) {
       if(err) {

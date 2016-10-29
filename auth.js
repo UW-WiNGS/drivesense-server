@@ -13,6 +13,7 @@ passport.use(new LocalStrategy({
         usernameField: 'email'
     },
     function(email, password, done) {
+      console.log("Sign in attempt for " + email)
       mysqluser.userSignIn(email, password, function(err, user) {
           if (err) { return done(err); }
           if (!user) { return done(null, false, { message: 'Incorrect username or password.' }); }
@@ -87,7 +88,7 @@ var signinstatus = function (req, res, next) {
 };
 
 var signin = function (req, res, next) {
-  var token = jwt.sign({userid:req.user.userid, firstname:req.user.firstname, lastname: req.user.lastname}, 'secret', {expiresIn: '1d'});
+  var token = jwt.sign({userid:req.user.userid, firstname:req.user.firstname, lastname: req.user.lastname}, 'secret', {expiresIn: '30d'});
   msg = {token:token};
   res.json(msg);
 };
