@@ -88,7 +88,7 @@ var signinstatus = function (req, res, next) {
 };
 
 var signin = function (req, res, next) {
-  var token = jwt.sign({userid:req.user.userid, firstname:req.user.firstname, lastname: req.user.lastname}, 'secret', {expiresIn: '30d'});
+  var token = jwt.sign({userid:req.user.userid, firstname:req.user.firstname, lastname: req.user.lastname, email:req.user.email}, 'secret', {expiresIn: '30d'});
   msg = {token:token};
   res.json(msg);
 };
