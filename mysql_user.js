@@ -68,29 +68,6 @@ mysqluser.prototype.getUserByID = function (userid, callback) {
   });
 }
 
-
-mysqluser.prototype.userSignIn = function (email, password, callback) {
-  mysql.getConnection(function(err, conn) {
-    if(err) {
-      callback(err, null);
-      return;
-    }
-    var sql = "select * from user where email like ? and password like ?";
-    conn.query(sql, [email, password], function(err, rows, field){
-      if(err) {
-        callback(err, null);
-      } else if(rows.length == 0) {
-        callback(null, null);
-      } else {
-        var user = new User();
-        user.fromObject(rows[0]);
-        callback(null, user);
-      }
-      conn.release();
-    });
-  });
-}
-
 module.exports = new mysqluser();
 
 

@@ -8,18 +8,24 @@ var mysqluser = require('./mysql_user.js');
 var User = require('./user.js');
 var jwt = require('jsonwebtoken');
 var config     = require('./config');
+var bcrypt = require('bcrypt-nodejs');
 
 passport.use(new LocalStrategy({
-        usernameField: 'email'
-    },
-    function(email, password, done) {
-      console.log("Sign in attempt for " + email)
-      mysqluser.userSignIn(email, password, function(err, user) {
-          if (err) { return done(err); }
-          if (!user) { return done(null, false, { message: 'Incorrect username or password.' }); }
-          return done(null, user);
-      });
-    }
+      usernameField: 'email'
+  },
+  function(email, password, done) {
+    console.log("Sign in attempt for " + email);
+    mysqluser.getUserByEmail(email, function(err, user){
+      if(err) {
+        return done(err);
+      }
+      if(bcrypt.compareSync(password, user.password)) {
+        return done(null, user);
+      } else {
+        return done(null, false, { message: 'Incorrect username or password.' }); 
+      }
+    });
+  }
 ));
 
 passport.use(new GoogleTokenStrategy({
@@ -97,7 +103,8 @@ var signup = function (req, res, next) {
   var query = req.body; 
   var user = new User();
   user.fromObject(query);
-  console.log(user);
+  user.password = bcrypt.hashSync(user.password);
+  console.log("New signup: "+user.email);
   mysqluser.userSignUp(user,function(err, id) {
     if(err) {
       console.log(err.code);
