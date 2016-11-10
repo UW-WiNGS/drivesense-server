@@ -1,23 +1,14 @@
-CREATE TABLE IF NOT EXISTS user (
--- User ID.
-  userid            INT UNSIGNED
-                    NOT NULL
-                    AUTO_INCREMENT
-                    PRIMARY KEY,
+CREATE TABLE `user` (
+  `userid` int(10) UNSIGNED NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `password` varchar(100) DEFAULT NULL,
+  `firstname` varchar(100) DEFAULT NULL,
+  `lastname` varchar(100) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- User's email address.
-  email         VARCHAR(100)
-                    NOT NULL
-                    UNIQUE,
+ALTER TABLE `user`
+  ADD PRIMARY KEY (`userid`),
+  ADD UNIQUE KEY `email` (`email`);
 
--- The hash of user's password.
-  password   VARCHAR(100), 
-
--- User first name
-  firstname    VARCHAR(100),  
-
--- User last name
-
-  lastname    VARCHAR(100)
-
-);
+ALTER TABLE `user`
+  MODIFY `userid` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;

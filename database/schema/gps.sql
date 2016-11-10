@@ -1,28 +1,11 @@
-CREATE TABLE IF NOT EXISTS gps (
--- Trip ID.
-  tripid            INT UNSIGNED
-                    NOT NULL,
+CREATE TABLE `gps_trace` (
+  `tripid` int(10) UNSIGNED NOT NULL,
+  `time` bigint(20) UNSIGNED NOT NULL,
+  `lat` decimal(16,8) NOT NULL,
+  `lng` decimal(16,8) NOT NULL,
+  `alt` decimal(16,8) NOT NULL,
+  `speed` decimal(16,8) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-  time           BIGINT UNSIGNED
-                    NOT NULL,
-
-  lat           decimal(16, 8)
-                   NOT NULL,
-
-  lng          decimal(16, 8)
-                 NOT NULL,
-
-  alt          decimal(16, 8)
-                 NOT NULL,
-
-  curspeed         decimal(16, 8)
-                  NOT NULL,
-
-  curscore         decimal(16, 8)
-                  NOT NULL,
-
-  curevent         INT SIGNED,
-
-  curtilt         decimal(16, 8)
-                  NOT NULL
-);
+ALTER TABLE `gps_trace`
+  ADD PRIMARY KEY (`tripid`,`time`) USING BTREE;

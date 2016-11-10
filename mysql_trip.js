@@ -156,7 +156,7 @@ mysqltrip.prototype.searchTrips = function (userid, start, end, callback) {
       return;
     }
     var sql= "SELECT * FROM trip " +
-           "INNER JOIN gps on gps.tripid = trip.tripid " +
+           "INNER JOIN trip_trace on trip_trace.tripid = trip.tripid " +
            "WHERE userid = " + userid + " and tripstatus = 1 " + 
            "and starttime >= " + start +" and endtime <= " + end + " ;";
 

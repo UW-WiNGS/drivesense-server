@@ -38,49 +38,18 @@ var searchtrips = function (req, res, next) {
     }
     for(var i = 0; i < rows.length; ++i) {
       var row = rows[i];
-      if(row.tripid in trips) {
-        var gps = {time: row.time, lat: row.lat, lng: row.lng, alt: row.alt, curspeed: row.curspeed, curscore: row.curscore, curevent: row.curevent, curtilt: row.curtilt}; 
-        trips[row.tripid].gps.push(gps);
-      } else {
+      if(!(row.tripid in trips)) {
         var trip = new Trip();
         trip.fromObject(row);  
         trip.gps = [];
-        var gps = {time: row.time, lat: row.lat, lng: row.lng, alt: row.alt, curspeed: row.curspeed, curscore: row.curscore, curevent: row.curevent, curtilt: row.curtilt};
-        trip.gps.push(gps);
         trips[row.tripid] = trip; 
       }
+      var gps = {time: row.time, lat: row.lat, lng: row.lng, alt: row.alt, curspeed: row.speed, curscore: row.score, curevent: row.brake, curtilt: row.tilt}; 
+      trips[row.tripid].gps.push(gps);
     }
     var msg = {status: 'success', data:trips};
     res.json(msg);
   });  
-};
-
-var showtrips = function (req, res, next) {
-  var userid = req.body.userid;
-  var trips = {};
-  mysqltrip.loadGPS(userid, function(err, rows){
-    if(err) {
-      var msg = {status: 'fail', data: err.toString()};
-      res.json(msg);
-      return;
-    }
-    for(var i = 0; i < rows.length; ++i) {
-      var row = rows[i];
-      if(row.tripid in trips) {
-        var gps = {time: row.time, lat: row.lat, lng: row.lng, alt: row.alt, speed: row.speed, score: row.score, brake: row.event}; 
-        trips[row.tripid].gps.push(gps);
-      } else {
-        var trip = new Trip();
-        trip.fromObject(row);  
-        trip.gps = [];
-        var gps = {time: row.time, lat: row.lat, lng: row.lng, alt: row.alt, speed: row.speed, score: row.score, brake: row.event};
-        trip.gps.push(gps);
-        trips[row.tripid] = trip; 
-      }
-    }
-    var msg = {status: 'success', data:trips};
-    res.json(msg);
-  }); 
 };
 
 var upload = function (req, res, next) {
@@ -196,7 +165,6 @@ module.exports.androidsync = androidsync;
 
 module.exports.searchtrips = searchtrips;
 module.exports.removetrip = removetrip;
-module.exports.showtrips = showtrips;
 
 
 
