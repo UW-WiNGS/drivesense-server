@@ -1,3 +1,7 @@
-TODO
-/public
-where all front end code
+/public/
+========
+All front end code for the DriveSense HTML5 client resides here.
+
+Installation
+============
+npm update

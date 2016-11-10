@@ -5,34 +5,31 @@ var path = require('path');     //used for file path
 
 var express = require('express');    //Express Web Server 
 var bodyparser = require('body-parser');
-var cookieParser = require('cookie-parser');
 
 var route = require('./route');
+var auth = require('./auth');
 var app = express();
 
 
+var bodyLogger = function (req, res, next) {
+  console.log(req.body);
+  next();
+};
+
 app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
-app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public'))); 
 
+app.post('/auth/signup', auth.signup, auth.signin);
+app.post('/auth/signin', [bodyLogger, auth.passport.authenticate('local', {session:false}), auth.signin]);
+app.post('/auth/google',[auth.passport.authenticate('google-id-token', {session:false}), auth.signin]);
+app.post('/auth/facebook',[auth.passport.authenticate('facebook-token', {session:false}), auth.signin]);
 
 
-app.post('/signup', route.signup);
-app.post('/signin', [route.signin]);
-app.get('/signout', [route.signout]);
+app.get('/signinstatus', [auth.passport.authenticate('jwt', { session: false}), auth.signinstatus]);
+app.post('/removetrip', [auth.passport.authenticate('jwt', { session: false}), route.removetrip]);
+app.post('/searchtrips', [auth.passport.authenticate('jwt', { session: false}), route.searchtrips]);
 
-
-app.get('/signinstatus', [route.tokenverification, route.signinstatus]);
-app.get('/mytrips', [route.tokenverification, route.showtrips]);
-app.post('/removetrip', [route.tokenverification, route.removetrip]);
-app.post('/searchtrips', [route.tokenverification, route.searchtrips]);
-
-
-
-
-app.post('/androidsignin', route.androidsignin);
-app.post('/androidsignup', route.androidsignup);
 app.post('/upload', [route.upload]);
 app.post('/androidsync', [route.androidsync]);
 

@@ -1,0 +1,5 @@
+var config     = require('./config');
+
+//Place deployment specific config values in here. Do not commit sensitive information.
+config.database.user = "test";
+config.facebook.clientSecret = "test";

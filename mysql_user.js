@@ -1,59 +1,70 @@
-var conn = require('./mysql').dbcon;
-
+var mysql = require('./mysql.js');
+var User = require('./user.js');
 
 var mysqluser = function() {
 
 }
 
-mysqluser.prototype.getUserIDByEmail = function (email, callback) {
-  var sql = "select userid from user where email like binary '" + email + "'";
-  conn.query(sql, function(err, rows, field){
+mysqluser.prototype.getUserByEmail = function (email, callback) {
+  mysql.getConnection(function(err, conn) {
     if(err) {
       callback(err, null);
-    } else if(rows.length == 0) {
-      callback(new Error("no user has email:" + email), null);
-    } else {
-      callback(null, rows[0].userid);
+      return;
     }
+    var sql = "select * from user where email like ?";
+    conn.query(sql, [email], function(err, rows, field){
+      if(err) {
+        callback(err, null);
+      } else if(rows.length == 0) {
+        callback(null, null);
+      } else {
+        var user = new User();
+        user.fromObject(rows[0]);
+        callback(null, user);
+      }
+      conn.release();
+    });
   });
 }
 
 
 mysqluser.prototype.userSignUp = function (user, callback) {
-  var sql = "insert into user set ? ";
-  conn.query(sql, user, function(err, rows, field){
+  mysql.getConnection(function(err, conn) {
     if(err) {
       callback(err, null);
-    } else {
-      callback(null, rows.insertId);
+      return;
     }
+    var sql = "insert into user set ? ";
+    conn.query(sql, user, function(err, rows, field){
+      if(err) {
+        callback(err, null);
+      } else {
+        callback(null, rows.insertId);
+      }
+      conn.release();
+    });
   });
 }
 
 mysqluser.prototype.getUserByID = function (userid, callback) {
-  var sql = "select * from user where userid = " + userid + ";"; 
-  conn.query(sql, function(err, rows, field){
+  mysql.getConnection(function(err, conn) {
     if(err) {
       callback(err, null);
-    } else if(rows.length == 0) {
-      callback(new Error("not registered"), null);
-    } else {
-      callback(null, rows[0]);
+      return;
     }
-  });
-}
-
-
-mysqluser.prototype.userSignIn = function (user, callback) {
-  var sql = "select * from user where email like binary '" + user.email + "' and password like binary '" + user.password + "'";
-  conn.query(sql, user, function(err, rows, field){
-    if(err) {
-      callback(err, null);
-    } else if(rows.length == 0) {
-      callback(new Error("not registered"), null);
-    } else {
-      callback(null, rows[0]);
-    }
+    var sql = "select * from user where userid = ?;"; 
+    conn.query(sql, [userid], function(err, rows, field){
+      if(err) {
+        callback(err, null);
+      } else if(rows.length == 0) {
+        callback(null, null);
+      } else {
+        var user = new User();
+        user.fromObject(rows[0]);
+        callback(null, user);
+      }
+      conn.release();
+    });
   });
 }
 

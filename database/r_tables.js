@@ -2,7 +2,7 @@ var conn = require("../mysql.js").dbcon;
 var fs = require("fs");
 
 //var tables = ["user"];
-var tables = ["trip", "gps"];
+var tables = ["trip", "gps", "user"];
 
 
 
