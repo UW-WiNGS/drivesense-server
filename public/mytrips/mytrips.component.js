@@ -48,6 +48,7 @@ angular.
     templateUrl: 'mytrips/mytrips.template.html',
     controller: function($scope, $http, tripformat, API) {
       var self = this;
+
       self.showTrip = function() {
         var method = self.radioValue;
         displayTrip(self.curtrip, method); 
@@ -79,6 +80,15 @@ angular.
 
      self.init = function() {
         self.radioValue = "speed";
+        self.slider = {
+          options: {
+            translate: function(value) {
+              return ((value-self.slider.options.floor)/(60.0*1000)).toFixed(1);
+            },
+            onEnd:self.showTrip,
+            showTicksValues:1000*60,
+          }
+        };
         var date = new Date();
         var firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
         var lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
@@ -148,46 +158,39 @@ angular.
       } 
       function initMap() {
         var madison = {lat: 43.073052, lng: -89.401230};
-        var map = new google.maps.Map(document.getElementById('map'), { zoom: 15, center: madison});
+        self.map = new google.maps.Map(document.getElementById('map'), { zoom: 15, center: madison});
+        self.mapOverlays = [];
       }
-
-      var getIcons = function() {
-        var res = [];
-      //  var colors = ['red', 'orange', 'yellow', 'lightgreen', 'green'];
-        var colors = ['green', 'lightgreen', 'yellow', 'orange', 'red'];
-        for(var i = 0; i < colors.length; ++i) {
-          var color = colors[i];
-          var circle ={
-            path: google.maps.SymbolPath.CIRCLE,
-            fillColor: color,
-            fillOpacity: 0.8, //0.1 --1.0
-            scale: 2.5,
-            strokeColor: 'white',
-            strokeWeight: 0 
-          };
-          res[i] = {color: color, icon: circle};
-        }
-        return res;
-      }
-       
-
 
       function displayTrip(trip, method) {
         if(!trip) return null;
+        console.log( trip);
+
+        self.slider.options.floor=trip.gps[0].time,
+        self.slider.options.ceil=trip.gps[trip.gps.length-1].time,
 
         showLegend(method);
-        drawChart(trip,method);
 
-        var madison = {lat: 43.073052, lng: -89.401230};
-        var map = new google.maps.Map(document.getElementById('map'), { streetViewControl:true, navigationControl:false, scaleControl: false, mapTypeControl:true, zoomControl:true, zoom: 15, center: madison});
+        var filteredtrip = trip.gps.filter(function(point, index) {return (point.time >= trip.starttime && point.time <= trip.endtime)});
+
+        drawChart(filteredtrip,method);
+
         var latlngbounds = new google.maps.LatLngBounds();
-        var icons = getIcons();
         var len = trip.gps.length;
 
+        //clear all circles and markers from the map
+        while(self.mapOverlays[0])
+        {
+          var tmp = self.mapOverlays.pop();
+          tmp.setMap(null);
+        }
 
-        var rate = parseInt(len/1200) + 1;
+        var colors = ['green', 'lightgreen', 'yellow', 'orange', 'red'];
+
+        var len = filteredtrip.length;
+        var rate = parseInt(len/600) + 1;
         for(var i = 0; i < len; i += rate) {
-          var point = trip.gps[i];
+          var point = filteredtrip[i];
           var latlng = new google.maps.LatLng(point.lat, point.lng);
           latlngbounds.extend(latlng);
           
@@ -212,37 +215,52 @@ angular.
           } else {
             console.log("unknown method:" + method);
           }
-          if(index >= icons.length) {
-            index = icons.length - 1; 
+          if(index >= colors.length) {
+            index = colors.length - 1; 
           }
           if(isNaN(index)) {
             index = 0; 
             console.log("index calculation error");
           }
-          var marker_icon = icons[index].icon;
           if (i==0) {
             var marker_icon = 'img/starticon.png' 
+            self.mapOverlays.push(new google.maps.Marker({
+              position: latlng,
+              map: self.map,
+              icon: marker_icon
+            }));
           }
           if (i==len-1) {
             var marker_icon = 'img/stopicon.png'
+            self.mapOverlays.push(new google.maps.Marker({
+              position: latlng,
+              map: self.map,
+              icon: marker_icon
+            }));
           }
-          var marker = new google.maps.Marker({
-            position: latlng,
-            map: map,
-            icon: marker_icon
-          });
+          self.mapOverlays.push(new google.maps.Circle({
+            strokeOpacity: 0,
+            fillColor: colors[index],
+            fillOpacity: 1,
+            map: self.map,
+            center: latlng,
+            radius: 20
+          }));
+
+        
         }
-        map.fitBounds(latlngbounds);
+        self.map.fitBounds(latlngbounds);
       }
 
 
 
       function drawChart(data, method) {
-        var len = data.gps.length;
+        var len = data.length;
         var data_list = [];
-        var init_time = parseFloat(data.starttime);
-        for(var i = 0; i < len; ++i){
-          var point = data.gps[i];
+        var init_time = parseFloat(data[0].time);
+        var rate = parseInt(len/600) + 1;
+        for(var i = 0; i < len; i+=rate){
+          var point = data[i];
           var current_time = parseFloat(point.time);
           var time = (current_time - init_time)/60000.0;
           var chart_type;

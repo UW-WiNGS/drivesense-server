@@ -27,7 +27,6 @@ app.post('/auth/facebook',[auth.passport.authenticate('facebook-token', {session
 
 
 app.get('/signinstatus', [auth.passport.authenticate('jwt', { session: false}), auth.signinstatus]);
-app.get('/mytrips', [auth.passport.authenticate('jwt', { session: false}), route.showtrips]);
 app.post('/removetrip', [auth.passport.authenticate('jwt', { session: false}), route.removetrip]);
 app.post('/searchtrips', [auth.passport.authenticate('jwt', { session: false}), route.searchtrips]);
 

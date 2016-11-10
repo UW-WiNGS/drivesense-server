@@ -56,6 +56,7 @@ passport.use(new FacebookTokenStrategy({
     mysqluser.getUserByEmail(profile.emails[0].value, function (err, user) {
       if (err) { return done(err); }
       if (!user) { 
+        console.log("User not found in database, creating new drivesense account.")
         user = new User(profile.name.given_name, profile.name.family_name, profile.emails[0]);
         mysqluser.userSignUp(user, function (err, id) {
           if (err) { return done(err); }
