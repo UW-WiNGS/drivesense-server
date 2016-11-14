@@ -117,6 +117,7 @@ var signup = function (req, res, next) {
       }
       res.json(msg);
     } else {
+      //user has been populated with all info except for ID
       user.userid = id;
       req.user = user;
       next();

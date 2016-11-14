@@ -11,19 +11,6 @@ var formidable = require('formidable');
 var sqlite3 = require('sqlite3').verbose();
 
 
-var removetrip = function (req, res, next) {
-  var userid = req.body.userid;
-  var tripid = req.body.tripid;
-  mysqltrip.deleteTrip(userid, tripid, function(err, value){
-    if(err) {
-       var msg = {status: 'fail', data: err.toString()};
-       res.json(msg);  
-    } else {
-       var msg = {status: 'success', data: null};
-       res.json(msg);   
-    }
-  });  
-}
 
 var searchtrips = function (req, res, next) {
   var userid = req.user.userid;
@@ -52,119 +39,39 @@ var searchtrips = function (req, res, next) {
   });  
 };
 
-var upload = function (req, res, next) {
-  var form = new formidable.IncomingForm();
-  form.parse(req, function(err, fields, files) {
-    var file = files.uploads;
-    console.log(fields.email)
-    mysqluser.getUserByEmail(fields.email, function(err, user){
-      if(err) {
-        console.log(err);
-        var msg = {status: 'fail', data: err.toString()};
-        res.json(msg);
-        return;
-      } 
-      var folder = path.join(__dirname, '../uploads/' + user.userid + '/');
-      fs.mkdirp(folder, function (err) {
-        if(err) {
-          console.log(err);
-          var msg = {status: 'fail', data: err.toString()};
-          res.json(msg);
-          return;
-        }
-        //insert the data into database
-        fields.userid = user.userid;
-
-        insertTripIntoDatabase(fields, file.path, function(err) {/*we do not care about err at this point*/});
-        //backup the data
-        fs.copy(file.path, path.join(folder, file.name), function(err){
-          if (err) {
-            console.error(err);
-            var msg = {status: 'fail', data: err.toString()};
-            res.json(msg);
-          } else {
-            var msg = {status: 'success', data: ''};
-            res.json(msg);
-          } 
-        }); 
-      });
-    });
-  });//end of paring form
-}
-
-
-/**
- * synchronize deletion with Android
- * handle two cases:
- * 1. android delete ---> send to server, server delete
- * 2. server delete ---> send to android --> step 1 
- * 
- */
-var androidsync = function (req, res, next) {
-  var form = new formidable.IncomingForm();
-  form.parse(req, function(err, fields, files) { 
-    var tnames = JSON.parse(fields.tripnames);
-    var deviceid = fields.deviceid;
-    mysqltrip.androidDeleteTrip(deviceid, tnames, function(err, sta) {
-      if(err) {
-        var msg = {status: 'fail', data: err.toString()};
-        res.json(msg); 
-        return;
-      } 
-      mysqltrip.getDeletedTrips(deviceid, function(err, rows){
-        if(err) {
-          var msg = {status: 'fail', data: err.toString()};
-          res.json(msg); 
-          return;
-        }
-        console.log(rows);
-        var webdeletes = [];
-        for(var i = 0; i < rows.length; ++i) {
-          webdeletes.push(rows[i].starttime);
-        }
-        var msg = {status: 'success', data: JSON.stringify(webdeletes)};
-        res.json(msg); 
-      });    
-    });
-  });//end of paring form
-}
-
-var insertTripIntoDatabase = function (fields, dbfile, callback) {
-  var trip = new Trip();
-  trip.fromObject(fields);
-  mysqltrip.insertTrip(trip, function(err, tripid) {
+// Get the trip attributes for all of the currently logged in user's trips
+// Does not include the traces for the trips
+var allTrips = function (req, res, next) {
+  var userid = req.user.userid;
+  mysqltrip.getTripsByUserID(userid, function(err, rows) {
     if(err) {
-      if(err.code == "ER_DUP_ENTRY") {
-        callback(null);
-      } else {
-        callback(err);
-      }
+      var msg = {status: 'fail', data: err.toString()};
+      res.json(msg);
       return;
     }
-    var db = new sqlite3.Database(dbfile);
-    db.all("select * from gps;", function(err, rows) {
-      if (err) { 
-        console.log(err); 
-        callback(err);
-      } else {
-        mysqltrip.insertGPS(tripid, rows, function(err){
-          if(err) {
-            console.log(err);
-          }
-          callback(err);
-        }); 
-      }
-    });
+    res.json(rows);
   });
-    //get userid etc. by email 
 }
- 
 
-module.exports.upload = upload;
-module.exports.androidsync = androidsync;
+// Update the actual values of a trip row (deleted, finalized, starttime, etc)
+// If the trip does not exist it will be created
+// If trip traces are included in the "traces" key, they will be added to the trip
+// Return value:
+// JSON representation of the trip
+// Hint: An empty update (no changes) simply returns the current state of the trip
+var updateTrip = function(req, res, next) {
+  var trip = new Trip();
+  trip.fromObjectSafe(req.body);
+  mysqltrip.updateOrCreateTrip(trip, req.user, function(err, trip) {
+    res.json(trip)
+  });
+}
 
+
+module.exports.allTrips = allTrips;
+module.exports.updateTrip = updateTrip;
 module.exports.searchtrips = searchtrips;
-module.exports.removetrip = removetrip;
+
 
 
 
