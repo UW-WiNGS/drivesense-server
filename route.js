@@ -63,7 +63,27 @@ var updateTrip = function(req, res, next) {
   var trip = new Trip();
   trip.fromObjectSafe(req.body);
   mysqltrip.updateOrCreateTrip(trip, req.user, function(err, trip) {
-    res.json(trip)
+    if(err) {
+      res.status(500)
+      var msg = {status: 'fail', data: err.toString()};
+      res.json(msg);
+      return;
+    } else if(req.body.traces) {
+      //trip was successfully updated or created
+      //and we have new traces to add to it
+      console.log("Adding traces to trip "+trip.guid);
+      mysqltrip.addTracesToTrip(req.body.traces, trip, function(err) {
+        if(err) {
+          res.status(500)
+          res.json({status: 'fail', data: err.toString()})
+        } else {
+          res.json(trip.user_facing_vals());
+        }
+      });
+    } else {
+      // no new traces to add, return trip object
+      res.json(trip.user_facing_vals());
+    }
   });
 }
 
