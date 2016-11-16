@@ -2,7 +2,7 @@
 function TripTrace() {
 }
 
-TripTrace.user_facing = ['time', 'score', 'tilt', 'brake', 'lat', 'lon', 'alt', 'speed'];
+TripTrace.user_facing = ['time', 'score', 'tilt', 'brake', 'lat', 'lng', 'alt', 'speed'];
 TripTrace.private = ['tripid']
 
 //Fill in this trip object using the keys in uobj
