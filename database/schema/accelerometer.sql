@@ -6,5 +6,6 @@ CREATE TABLE `accelerometer_trace` (
   `z` float NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+
 ALTER TABLE `accelerometer_trace`
   ADD PRIMARY KEY (`tripid`,`time`);

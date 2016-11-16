@@ -10,5 +10,6 @@ CREATE TABLE `trip_trace` (
   `speed` float NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+
 ALTER TABLE `trip_trace`
   ADD PRIMARY KEY (`tripid`,`time`);
