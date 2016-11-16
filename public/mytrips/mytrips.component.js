@@ -71,7 +71,7 @@ angular.
             tripformat.setData(res.data.data);
             self.trips = tripformat.getTrips();       
             self.setClickedRow(0); 
-            self.onTimeSet(date, next);
+            self.onTimeSet(date);
           } else {
             alert("search failed on the server, try again later!");
           } 
@@ -100,7 +100,7 @@ angular.
       self.init();
 
 
-      self.onTimeSet = function(date, oldDate) {
+      self.onTimeSet = function(date) {
         self.dateDropDownInput = date;
         self.dateDropDownDisplay = (date.getMonth() + 1) + "/" + date.getFullYear();
       };
@@ -195,10 +195,10 @@ angular.
           latlngbounds.extend(latlng);
           
           var index = 0;
-          var speed = point.curspeed * 2.23694;
-          var score = point.curscore;
-          var brake = point.curevent;
-          var tilt = point.curtilt;
+          var speed = point.speed * 2.23694;
+          var score = point.score;
+          var brake = point.brake;
+          var tilt = point.tilt;
           if(method == "speed") {
             index = Math.round(speed/10.0);
           } else if(method=="score") {
@@ -267,7 +267,7 @@ angular.
           var y_axis_text;
           var title_text;
           if(method == "speed") {
-            data_list.push([time, point.curspeed * 2.23694]);
+            data_list.push([time, point.speed * 2.23694]);
             title_text = "Speed";
             y_axis_text = "Speed (mph)";
             chart_type = "line";
@@ -275,17 +275,17 @@ angular.
             title_text = "Score";
             y_axis_text = "Score";
             chart_type = "line";
-            data_list.push([time, point.curscore]);
+            data_list.push([time, point.score]);
           } else if(method=="brake") {
             title_text = "Brakes";
             y_axis_text = "Braking";
             chart_type = "scatter";
-            data_list.push([time, point.curevent * -1]);
+            data_list.push([time, point.brake * -1]);
           } else if(method=="tilt") {
             title_text = "Tilt";
             y_axis_text = "Tilt (Degree)";
             chart_type = "line";
-            data_list.push([time, point.curtilt]);
+            data_list.push([time, point.tilt]);
           } else {
             console.log("unknown method:" + method);
           }

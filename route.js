@@ -3,6 +3,7 @@ var mysqluser = require('./mysql_user.js');
 var mysqltrip = require('./mysql_trip.js');
 var User = require('./user.js');
 var Trip = require('./trip.js');
+var TripTrace = require('./traces/trip_trace.js');
 
 var fs = require('fs-extra');
 var jwt = require('jsonwebtoken');
@@ -25,14 +26,15 @@ var searchtrips = function (req, res, next) {
     }
     for(var i = 0; i < rows.length; ++i) {
       var row = rows[i];
-      if(!(row.tripid in trips)) {
+      if(!(row.guid in trips)) {
         var trip = new Trip();
-        trip.fromObject(row);  
+        trip.fromObjectSafe(row);  
         trip.gps = [];
-        trips[row.tripid] = trip; 
+        trips[row.guid] = trip; 
       }
-      var gps = {time: row.time, lat: row.lat, lng: row.lng, alt: row.alt, curspeed: row.speed, curscore: row.score, curevent: row.brake, curtilt: row.tilt}; 
-      trips[row.tripid].gps.push(gps);
+      var gps = new TripTrace();
+      gps.fromObjectSafe(row);
+      trips[row.guid].gps.push(gps);
     }
     var msg = {status: 'success', data:trips};
     res.json(msg);
