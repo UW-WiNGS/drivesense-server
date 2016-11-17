@@ -50,6 +50,8 @@ mysqltrip.prototype.addTracesToTrip = function(trace_messages, trip, callback) {
         trace.fromObjectSafe(value);
         trace.tripid = trip.tripid;
         traces.push(trace)
+      } else if(type == "Rotation") {
+        console.log(value);
       }
     }
     if(traces.length!=0) {
@@ -89,7 +91,6 @@ mysqltrip.prototype.updateOrCreateTrip = function (trip, user, callback) {
             } else {
               //trip was inserted
               trip.tripid=rows.insertId;
-              console.log(rows.insertId);
               callandrelease(null, trip);
             }
           });
