@@ -53,7 +53,7 @@ mysqltrip.prototype.addTracesToTrip = function(trace_messages, trip, callback) {
       }
     }
     if(traces.length!=0) {
-      conn.query(sqls, traces, function(err, rows, field) {
+      conn.query(sqls, traces, function(err, rows) {
         callandrelease(err);
       });
     } else {
@@ -75,19 +75,21 @@ mysqltrip.prototype.updateOrCreateTrip = function (trip, user, callback) {
         callback(err, trip);
       }
       var sql = "SELECT * FROM `trip` WHERE `guid` LIKE ?;";
-      conn.query(sql, trip.guid, function(err, rows, field) {
+      conn.query(sql, trip.guid, function(err, rows) {
         if(err) {
           callandrelease(err, null);
         } else if (rows.length==0) {
           //trip with this guid does not exist
           var sql = "INSERT INTO `trip` SET ?;";
           console.log("Trip guid "+trip.guid+" is new, inserting it ")
-          conn.query(sql, [trip], function(err, rows, field){
+          conn.query(sql, [trip], function(err, rows){
             if(err) {
               console.log(err);
               callandrelease(err, null);
             } else {
               //trip was inserted
+              trip.tripid=rows.insertId;
+              console.log(rows.insertId);
               callandrelease(null, trip);
             }
           });
@@ -96,7 +98,7 @@ mysqltrip.prototype.updateOrCreateTrip = function (trip, user, callback) {
           if(rows[0].userid == user.userid) {
             console.log("Trip guid "+trip.guid+" exists, updating it ")
             var sql="UPDATE `trip` SET ? WHERE `trip`.`guid` = ?; SELECT * FROM `trip` WHERE `guid` LIKE ?;"
-            conn.query(sql, [trip.user_facing_vals(), trip.guid, trip.guid], function(err, rows, field){
+            conn.query(sql, [trip.user_facing_vals(), trip.guid, trip.guid], function(err, rows){
               if(err) {
                 console.log(err);
                 callandrelease(err, null);
@@ -124,7 +126,7 @@ mysqltrip.prototype.getTrip = function (guid, callback) {
       return;
     }
     var sql = "SELECT * FROM `trip` WHERE `guid` LIKE ?;";
-    conn.query(sql, guid, function(err, rows, field) {
+    conn.query(sql, guid, function(err, rows) {
       if(err) {
         callback(err, null);
       } else if (rows.length!=1) {

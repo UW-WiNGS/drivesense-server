@@ -30,7 +30,7 @@ Trip.prototype.user_facing_vals = function() {
   var output = {};
   for (var i = 0; i < Trip.user_facing.length; ++i) {
     var key = Trip.user_facing[i];
-    if(this[key]) {
+    if(this[key] !== undefined) {
       output[key] = this[key];
     }
   }
