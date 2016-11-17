@@ -35,9 +35,16 @@ angular.
       trips = [];
       var len = Object.keys(value).length;
       var i = len - 1;
-      for(var tripid in value) {
-        var trip = value[tripid]; 
-        trip.tripid = tripid;
+      for(var guid in value) {
+        var trip = value[guid]; 
+        if(trip.gps.length>0){
+          if(!trip.starttime) {
+            trip.starttime=trip.gps[0].time;
+          }
+          if(!trip.endtime) {
+            trip.endtime=trip.gps[trip.gps.length-1].time;
+          }
+        }
         var time = new Date(trip.starttime);
         trip.displaytime = timeStamp(time); 
         trips[i--] = trip; 
@@ -48,6 +55,7 @@ angular.
     templateUrl: 'mytrips/mytrips.template.html',
     controller: function($scope, $http, tripformat, API) {
       var self = this;
+      var MAX_ZOOM = 17;
 
       self.showTrip = function() {
         var method = self.radioValue;
@@ -140,11 +148,12 @@ angular.
           return; 
         }  
         $http({
-            url: API + '/removetrip',
+            url: API + '/updateTrip',
             method: "POST",
-            data: { 'tripid' : self.trips[index].tripid }
+            data: { 'guid' : self.trips[index].guid,
+                    'tripstatus' : 0 }
         }).then(function(res) {
-          if(res.data.status == "success") {
+          if(res.data.tripstatus == 0) {
             //delete locally
             self.trips.splice(index, 1);    
             var len = Object.keys(self.trips).length;
@@ -152,7 +161,7 @@ angular.
             self.showTrip();
             self.setClickedRow(index%len);
           } else {
-            alert("delete failed on the server, try again later!");
+            alert("Delete failed on the server, try again later!");
           } 
         });  
       } 
@@ -250,6 +259,9 @@ angular.
         
         }
         self.map.fitBounds(latlngbounds);
+        if(self.map.getZoom() > MAX_ZOOM) {
+          self.map.setZoom(MAX_ZOOM);
+        }
       }
 
 

@@ -1,7 +1,7 @@
 <div class="row" id="tripInformation" ng-init="trip=0">
   <!-- all about the map -->
   <div id="map-container" class="map col-xs-12 col-sm-12 col-md-8 col-lg-8">
-    <div id="map" class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="height:500px"></div>
+    <div id="map" style="height:500px"></div>
     <div id="legend" class="col-lg-2">
     <table class="table">
       <thead><tr><th id="legend-type">Selected</th><th></th></tr></thead>
@@ -15,7 +15,7 @@
     </table>
     </div>
     
-   <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="text-align: center;">
+   <div style="text-align: center;">
      <form id="mainForm" name="mainForm" class="form-group">
         <label id="trip-selection" class="radio-inline">
           <input type="radio" name="rads" value="speed" ng-model="$ctrl.radioValue" ng-click="$ctrl.showTrip()" checked>Speed
@@ -34,7 +34,7 @@
     <div style="padding-bottom: 25px;">
       <rzslider rz-slider-model="$ctrl.curtrip.starttime" rz-slider-high="$ctrl.curtrip.endtime" rz-slider-options="$ctrl.slider.options"></rzslider>
     </div>
-    <div id="chart" class="col-xs-12 col-sm-12 col-lg-12" style="height:300px;"></div>
+    <div id="chart" style="height:300px;"></div>
  
   </div>
   <!--end of the map -->
@@ -42,7 +42,7 @@
   <div id="right-side" class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
       <!--Search based on month -->  
       <div class="row">
-        <div class="col-sm-12 col-lg-12 well">
+        <div class="well">
             <div class="dropdown input-group"> 
                <a class="dropdown-toggle" id="dropdown2" role="button" data-toggle="dropdown" data-target="#">
                <input type="text" class="form-control" data-ng-model="$ctrl.dateDropDownDisplay">

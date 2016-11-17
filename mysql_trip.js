@@ -161,7 +161,7 @@ mysqltrip.prototype.getDeletedTrips = function (deviceid, callback) {
       callback(err, null);
       return;
     }
-    var sql = "select starttime from trip where deviceid = '" + deviceid + "' and tripstatus = 0;"; 
+    var sql = "select guid from trip where deviceid = '" + deviceid + "' and tripstatus = 0;"; 
     conn.query(sql, function(err, rows, field){
       if(err) {
         console.log("getDeletedTrips");
@@ -175,29 +175,6 @@ mysqltrip.prototype.getDeletedTrips = function (deviceid, callback) {
   });
 }
 
-
-
-
-//deleted by website
-mysqltrip.prototype.deleteTrip = function (userid, tripid, callback) {
-  mysql.getConnection(function(err, conn) {
-    if(err) {
-      callback(err, null);
-      return;
-    }
-    var sql = "UPDATE trip SET tripstatus = 0 WHERE tripid = " + tripid + " and userid = "+ userid + ";";  
-    conn.query(sql, function(err, rows, field){
-      if(err) {
-        callback(err, null);
-      } else {
-        callback(null, null);
-      }
-      conn.release();
-    });
-  });
-}
-
-
 mysqltrip.prototype.searchTrips = function (userid, start, end, callback) {
   mysql.getConnection(function(err, conn) {
     if(err) {
@@ -206,7 +183,7 @@ mysqltrip.prototype.searchTrips = function (userid, start, end, callback) {
     }
     var sql = "SELECT * FROM trip INNER JOIN trip_trace on trip_trace.tripid = trip.tripid"+
     " WHERE trip.tripid IN (SELECT tripid FROM trip_trace GROUP BY tripid "+
-    "HAVING min(time) >= " + start +" and MIN(time) <= " + end + ") and userid = " + userid + " and tripstatus = 1";
+    "HAVING min(time) >= " + start +" and MIN(time) <= " + end + ") and userid = " + userid + " and tripstatus >= 1";
 
     conn.query(sql, function(err, rows) {
       if (err) {
