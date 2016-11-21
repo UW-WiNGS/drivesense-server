@@ -2,7 +2,7 @@ var mysql = require("../mysql.js");
 var fs = require("fs");
 
 //var tables = ["user"];
-var tables = ["trip", "trip_trace", "user", "gyroscope", "accelerometer", "rotation"];
+var tables = ["trip", "trip_trace", "user", "gyroscope", "accelerometer", "rotation", "trip_view"];
 
 
 mysql.getConnection(function(err, conn) {

@@ -24,22 +24,22 @@ var searchtrips = function (req, res, next) {
       res.json(msg);
       return;
     }
-    for(var i = 0; i < rows.length; ++i) {
-      var row = rows[i];
-      if(!(row.guid in trips)) {
-        var trip = new Trip();
-        trip.fromObjectSafe(row);  
-        trip.gps = [];
-        trips[row.guid] = trip; 
-      }
-      var gps = new TripTrace();
-      gps.fromObjectSafe(row);
-      trips[row.guid].gps.push(gps);
-    }
-    var msg = {status: 'success', data:trips};
+    var msg = {status: 'success', data:rows};
     res.json(msg);
   });  
 };
+
+var tripTraces = function (req, res, next) {
+  var userid = req.user.userid;
+  mysqltrip.getTripTraces(userid, req.body.guid, req.body.type, req.body.start, function(err, traces) {
+    if(err) {
+      var msg = {status: 'fail', data: err.toString()};
+      res.json(msg);
+      return;
+    }
+    res.json(traces);
+  });
+}
 
 // Get the trip attributes for all of the currently logged in user's trips
 // Does not include the traces for the trips
@@ -47,6 +47,7 @@ var allTrips = function (req, res, next) {
   var userid = req.user.userid;
   mysqltrip.getTripsByUserID(userid, function(err, rows) {
     if(err) {
+      res.status(500)
       var msg = {status: 'fail', data: err.toString()};
       res.json(msg);
       return;
@@ -91,6 +92,7 @@ var updateTrip = function(req, res, next) {
 
 
 module.exports.allTrips = allTrips;
+module.exports.tripTraces = tripTraces;
 module.exports.updateTrip = updateTrip;
 module.exports.searchtrips = searchtrips;
 

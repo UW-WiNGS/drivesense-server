@@ -1,26 +1,6 @@
 angular.
   module('driveSenseApp')
-  .service('tripformat', function () { //TODO this can be refactored out of a service
-    function timeStamp(now) {
-    // Create an array with the current month, day and time
-      var date = [ now.getMonth() + 1, now.getDate(), now.getFullYear() ];
-    // Create an array with the current hour, minute and second
-      var time = [ now.getHours(), now.getMinutes()];
-    // Determine AM or PM suffix based on the hour
-      var suffix = ( time[0] < 12 ) ? "AM" : "PM";
-    // Convert hour from military time
-      time[0] = ( time[0] < 12 ) ? time[0] : time[0] - 12;
-    // If hour is 0, set it to 12
-      time[0] = time[0] || 12;
-    // If seconds and minutes are less than 10, add a zero
-      for ( var i = 1; i < 3; i++ ) {
-        if ( time[i] < 10 ) {
-          time[i] = "0" + time[i];
-        }
-      }
-    // Return the formatted string
-      return date.join("/") + " " + time.join(":") + " " + suffix;
-    }
+  .service('tripService', function ($http, API, $q) { //TODO this can be refactored out of a service
     var trips = [];
     this.getTrips = function() {
       return trips;
@@ -34,50 +14,67 @@ angular.
     this.setData = function(value) {
       trips = [];
       var len = Object.keys(value).length;
-      var i = len - 1;
+      var i = 0;
       for(var guid in value) {
         var trip = value[guid]; 
-        if(trip.gps.length>0){
-          if(!trip.starttime) {
-            trip.starttime=trip.gps[0].time;
-          }
-          if(!trip.endtime) {
-            trip.endtime=trip.gps[trip.gps.length-1].time;
-          }
+        if(!trip.starttime) {
+          trip.starttime=trip.data_starttime;
         }
+        if(!trip.endtime) {
+          trip.endtime=trip.data_endtime;
+        }
+        
         var time = new Date(trip.starttime);
-        trip.displaytime = timeStamp(time); 
-        trips[i--] = trip; 
+        trip.displaytime = moment(trip.starttime).format('MMM Do, h:mma');
+        trip.displayduration = Math.floor((trip.endtime - trip.starttime) / 60000) + ":" + Math.round((((trip.endtime - trip.starttime) / 60000)%1)*60);
+        trips[i] = trip; 
+        i+=1;
       }
+    }
+    //Returns a promise for when the trip is populated
+    this.getTripGPS = function(trip, start) {
+      return $http({
+          url: API + '/tripTraces',
+          method: "POST",
+          data: {'start':start, 'type':'Trip', 'guid':trip.guid }
+      }).then(function(res) {
+        console.log("Loaded "+res.data.length+" rows of new trip data for "+trip.guid)
+        trip.gps = res.data;
+        return trip;
+      });
     }
   })
   .component('tripComponent', {
     templateUrl: 'mytrips/mytrips.template.html',
-    controller: function($scope, $http, tripformat, API) {
+    controller: function($scope, $http, tripService, API) {
       var self = this;
       var MAX_ZOOM = 17;
 
       self.showTrip = function() {
-        var method = self.radioValue;
-        displayTrip(self.curtrip, method); 
+        
+        if(!self.curtrip.gps) {
+          tripService.getTripGPS(self.curtrip, self.curtrip.data_starttime).then(function(trip) {
+            displayTrip(trip)
+          }, function(res){
+            alert("GPS load failed");
+          });
+        } else {
+          displayTrip(self.curtrip); 
+        }
       };
 
       self.search = function(date) {
-        var next;
-        if (date.getMonth() == 11) {
-          next = new Date(date.getFullYear() + 1, 0, 1);
-        } else {
-          next = new Date(date.getFullYear(), date.getMonth() + 1, 1);
-        }
-        console.log("search from:" + date.getTime() + " to:" + next.getTime());
+        var start = moment(date).startOf('month').valueOf();
+        var end = moment(date).endOf('month').valueOf();
+        console.log("search from:" + start + " to:" + end);
         $http({
           url: API + '/searchtrips',
           method: "POST",
-          data: {'start':date.getTime(), 'end':next.getTime() }
+          data: {'start':start, 'end':end }
         }).then(function(res) {
           if(res.data.status == "success") {
-            tripformat.setData(res.data.data);
-            self.trips = tripformat.getTrips();       
+            tripService.setData(res.data.data);
+            self.trips = tripService.getTrips();       
             self.setClickedRow(0); 
             self.onTimeSet(date);
           } else {
@@ -171,12 +168,13 @@ angular.
         self.mapOverlays = [];
       }
 
-      function displayTrip(trip, method) {
+      function displayTrip(trip) {
         if(!trip) return null;
-        console.log( trip);
+        var method = self.radioValue;
+        var live = trip.tripstatus == 1;
 
-        self.slider.options.floor=trip.gps[0].time,
-        self.slider.options.ceil=trip.gps[trip.gps.length-1].time,
+        self.slider.options.floor=trip.data_starttime,
+        self.slider.options.ceil=trip.data_endtime,
 
         showLegend(method);
 

@@ -4,6 +4,19 @@ var TripTrace = require('./traces/trip_trace.js');
 var AccelerometerTrace = require('./traces/accelerometer_trace.js');
 var GyroscopeTrace = require('./traces/gyroscope_trace.js');
 
+function traceTypeAndColumn(stringname) {
+  if(stringname == "Trip") {
+    return [TripTrace, "trip_trace"];
+  } else if(stringname == "Accel") {
+    return [AccelerometerTrace, "accelerometer_trace"];
+  } else if(stringname == "Gyro") {
+    return [GyroscopeTrace, "gyroscope_trace"];
+  } else if(stringname == "Rotation") {
+    return null;
+  } else {
+    return null;
+  }
+}
 
 var mysqltrip = function() {
 
@@ -32,26 +45,13 @@ mysqltrip.prototype.addTracesToTrip = function(trace_messages, trip, callback) {
       tracemessage = trace_messages[i];
       var type = tracemessage.type;
       var value = tracemessage.value;
-      if(type == "Trip") {
-        sqls += "INSERT INTO `trip_trace` SET ?;"
-        trace= new TripTrace();
+      var typeColumn = traceTypeAndColumn(type);
+      if(typeColumn) {
+        sqls += "INSERT INTO "+typeColumn[1]+" SET ?;"
+        trace= new typeColumn[0]();
         trace.fromObjectSafe(value);
         trace.tripid = trip.tripid;
         traces.push(trace)
-      } else if(type == "Accel") {
-        sqls += "INSERT INTO `accelerometer_trace` SET ?;"
-        trace= new AccelerometerTrace();
-        trace.fromObjectSafe(value);
-        trace.tripid = trip.tripid;
-        traces.push(trace)
-      } else if(type == "Gyro") {
-        sqls += "INSERT INTO `gyroscope_trace` SET ?;"
-        trace= new GyroscopeTrace();
-        trace.fromObjectSafe(value);
-        trace.tripid = trip.tripid;
-        traces.push(trace)
-      } else if(type == "Rotation") {
-        console.log(value);
       }
     }
     if(traces.length!=0) {
@@ -120,22 +120,33 @@ mysqltrip.prototype.updateOrCreateTrip = function (trip, user, callback) {
   }
 }
 
-mysqltrip.prototype.getTrip = function (guid, callback) {
+mysqltrip.prototype.getTripTraces = function (userid, tripguid, tracetypename, start, callback) {
+  var typeColumn = traceTypeAndColumn(tracetypename)
+  if(!typeColumn) {
+    callback("No valid type specified", null);
+    return;
+  }
   mysql.getConnection(function(err, conn) {
     if(err) {
       callback(err, null);
       return;
     }
-    var sql = "SELECT * FROM `trip` WHERE `guid` LIKE ?;";
-    conn.query(sql, guid, function(err, rows) {
-      if(err) {
-        callback(err, null);
-      } else if (rows.length!=1) {
-        callback(null, null);
-      } else {
-        callback(null, rows[0]);
-      }
+    function callandrelease(err, traces) {
       conn.release();
+      callback(err, traces);
+    }
+    var sql = "SELECT * FROM `trip` LEFT JOIN ?? as T ON T.tripid = trip.tripid WHERE trip.guid = ? AND T.time >= ? AND userid = ?";
+    conn.query(sql, [typeColumn[1], tripguid, start, userid], function(err, rows, field){
+      if(err) {
+        callandrelease(err, null);
+      } else {
+        var traces = rows.map(function(elem){
+          var trace = new typeColumn[0]();
+          trace.fromObjectSafe(elem);
+          return trace;
+        });
+        callandrelease(null, traces);
+      }
     });
   });
 }
@@ -184,15 +195,18 @@ mysqltrip.prototype.searchTrips = function (userid, start, end, callback) {
       callback(err, null);
       return;
     }
-    var sql = "SELECT * FROM trip INNER JOIN trip_trace on trip_trace.tripid = trip.tripid"+
-    " WHERE trip.tripid IN (SELECT tripid FROM trip_trace GROUP BY tripid "+
-    "HAVING min(time) >= " + start +" and MIN(time) <= " + end + ") and userid = " + userid + " and tripstatus >= 1";
+    var sql = "SELECT * FROM derived_trip WHERE data_starttime >= " + start +" and data_endtime <= " + end + " and userid = " + userid + " and tripstatus >= 1 ORDER BY data_endtime DESC";
 
     conn.query(sql, function(err, rows) {
       if (err) {
         callback(err, null);
       } else if (rows) {
-        callback(null, rows);
+        var trips = rows.map(function(elem){
+          var trip = new Trip();
+          trip.fromObjectSafe(elem);
+          return trip;
+        });
+        callback(null, trips);
       } else {
         callback(null, null);
       }
