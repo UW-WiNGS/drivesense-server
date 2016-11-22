@@ -157,7 +157,7 @@ mysqltrip.prototype.getTripsByUserID = function (userid, callback) {
       callback(err, null);
       return;
     }
-    var sql = "select ?? from trip where userid = ? and tripstatus >= 1;"; 
+    var sql = "select ?? from trip where userid = ? and status >= 1;"; 
     conn.query(sql, [Trip.user_facing, userid], function(err, rows, field){
       if(err) {
         callback(err, null);
@@ -175,7 +175,7 @@ mysqltrip.prototype.getDeletedTrips = function (deviceid, callback) {
       callback(err, null);
       return;
     }
-    var sql = "select guid from trip where deviceid = '" + deviceid + "' and tripstatus = 0;"; 
+    var sql = "select guid from trip where deviceid = '" + deviceid + "' and status = 0;"; 
     conn.query(sql, function(err, rows, field){
       if(err) {
         console.log("getDeletedTrips");
@@ -195,7 +195,7 @@ mysqltrip.prototype.searchTrips = function (userid, start, end, callback) {
       callback(err, null);
       return;
     }
-    var sql = "SELECT * FROM derived_trip WHERE data_starttime >= " + start +" and data_endtime <= " + end + " and userid = " + userid + " and tripstatus >= 1 ORDER BY data_endtime DESC";
+    var sql = "SELECT * FROM derived_trip WHERE data_starttime >= " + start +" and data_endtime <= " + end + " and userid = " + userid + " and status >= 1 ORDER BY data_endtime DESC";
 
     conn.query(sql, function(err, rows) {
       if (err) {

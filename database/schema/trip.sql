@@ -7,7 +7,7 @@ CREATE TABLE `trip` (
   `starttime` bigint(20) UNSIGNED DEFAULT NULL,
   `endtime` bigint(20) UNSIGNED DEFAULT NULL,
   `distance` decimal(16,8) DEFAULT NULL,
-  `tripstatus` int(11) DEFAULT '1'
+  `status` int(11) DEFAULT '1'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 

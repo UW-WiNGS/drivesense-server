@@ -11,6 +11,9 @@ angular.
     this.getKeys = function() {
       return Object.keys(trips);
     } 
+    this.deleteTrip = function(index) {
+      trips.splice(index, 1);  
+    }
     this.setData = function(value) {
       trips = [];
       var len = Object.keys(value).length;
@@ -26,7 +29,11 @@ angular.
         
         var time = new Date(trip.starttime);
         trip.displaytime = moment(trip.starttime).format('MMM Do, h:mma');
-        trip.displayduration = Math.floor((trip.endtime - trip.starttime) / 60000) + ":" + Math.round((((trip.endtime - trip.starttime) / 60000)%1)*60);
+        trip.displayduration = function() {
+          var date = new Date(null);
+          date.setSeconds((this.endtime - this.starttime)/1000); // specify value for SECONDS here
+          return date.toISOString().substr(11, 8);
+        }
         trips[i] = trip; 
         i+=1;
       }
@@ -39,29 +46,70 @@ angular.
           data: {'start':start, 'type':'Trip', 'guid':trip.guid }
       }).then(function(res) {
         console.log("Loaded "+res.data.length+" rows of new trip data for "+trip.guid)
-        trip.gps = res.data;
+        trip.data_endtime = res.data[res.data.length-1].time
+        trip.endtime = trip.data_endtime;
+        if(!trip.gps){
+          trip.gps = res.data;
+        } else {
+          trip.gps.concat(res.data);
+        }
+        
+        return trip;
+      });
+    }
+    this.updateTrip = function(trip) {
+      return $http({
+          url: API + '/updateTrip',
+          method: "POST",
+          data: {'guid':trip.guid }
+      }).then(function(res) {
+        console.log(res.data);
+        Object.assign(trip, res.data);
         return trip;
       });
     }
   })
   .component('tripComponent', {
     templateUrl: 'mytrips/mytrips.template.html',
-    controller: function($scope, $http, tripService, API) {
+    controller: function($scope, $http, tripService, API, $interval) {
       var self = this;
       var MAX_ZOOM = 17;
+      var liveUpdatePromise;
 
       self.showTrip = function() {
-        
+        if(liveUpdatePromise) {
+          $interval.cancel(liveUpdatePromise);
+          liveUpdatePromise = null;
+        }
         if(!self.curtrip.gps) {
           tripService.getTripGPS(self.curtrip, self.curtrip.data_starttime).then(function(trip) {
             displayTrip(trip)
+            scheduleLive()
           }, function(res){
             alert("GPS load failed");
           });
         } else {
           displayTrip(self.curtrip); 
+          scheduleLive();
         }
       };
+
+      function scheduleLive() {
+        if(self.curtrip.status == 1) {
+          liveUpdatePromise = $interval(self.liveUpdate, 5000, 1);
+        }
+      }
+
+      self.liveUpdate = function() {
+        console.log("Live update for trip "+self.curtrip.guid);
+        tripService.getTripGPS(self.curtrip, self.curtrip.data_endtime).then(function(trip) {
+          displayTrip(trip)
+          scheduleLive();
+        }, function(res){
+          console.log("Live GPS load failed");
+          scheduleLive();
+        });
+      }
 
       self.search = function(date) {
         var start = moment(date).startOf('month').valueOf();
@@ -74,7 +122,7 @@ angular.
         }).then(function(res) {
           if(res.data.status == "success") {
             tripService.setData(res.data.data);
-            self.trips = tripService.getTrips();       
+            self.trips = tripService.getTrips();         
             self.setClickedRow(0); 
             self.onTimeSet(date);
           } else {
@@ -135,8 +183,7 @@ angular.
      
       self.setClickedRow = function(index){
         self.selectedRow = index;
-        self.curtrip = self.trips[index];  
-        console.log(index + " is clicked");
+        self.curtrip = tripService.getTrip(index);
         self.showTrip();
       }
       self.removeTrip = function(index) {
@@ -147,14 +194,14 @@ angular.
         $http({
             url: API + '/updateTrip',
             method: "POST",
-            data: { 'guid' : self.trips[index].guid,
-                    'tripstatus' : 0 }
+            data: { 'guid' : tripService.getTrip(index).guid,
+                    'status' : 0 }
         }).then(function(res) {
-          if(res.data.tripstatus == 0) {
+          if(res.data.status == 0) {
             //delete locally
-            self.trips.splice(index, 1);    
-            var len = Object.keys(self.trips).length;
-            self.curtrip = self.trips[index%len];  
+            tripService.deleteTrip(index);    
+            var len = Object.keys(tripService.getTrips()).length;
+            self.curtrip = tripService.getTrip(index%len);  
             self.showTrip();
             self.setClickedRow(index%len);
           } else {
@@ -171,7 +218,7 @@ angular.
       function displayTrip(trip) {
         if(!trip) return null;
         var method = self.radioValue;
-        var live = trip.tripstatus == 1;
+        var live = trip.status == 1;
 
         self.slider.options.floor=trip.data_starttime,
         self.slider.options.ceil=trip.data_endtime,
@@ -183,7 +230,6 @@ angular.
         drawChart(filteredtrip,method);
 
         var latlngbounds = new google.maps.LatLngBounds();
-        var len = trip.gps.length;
 
         //clear all circles and markers from the map
         while(self.mapOverlays[0])
@@ -192,12 +238,30 @@ angular.
           tmp.setMap(null);
         }
 
-        var colors = ['green', 'lightgreen', 'yellow', 'orange', 'red'];
+        drawMapGPS(filteredtrip, latlngbounds, method);
+        
+        self.map.fitBounds(latlngbounds);
+        if(self.map.getZoom() > MAX_ZOOM) {
+          self.map.setZoom(MAX_ZOOM);
+        }
+      }
 
-        var len = filteredtrip.length;
+      function drawMapGPS(gpsPoints, latlngbounds, method) {
+        var colors = ['green', 'lightgreen', 'yellow', 'orange', 'red'];
+        var icons = colors.map(function(color) {
+          return {
+              path: google.maps.SymbolPath.CIRCLE,
+              scale: 2,
+              fillColor: color,
+              fillOpacity: 1,
+              strokeOpacity:0,
+            }
+        });
+
+        var len = gpsPoints.length;
         var rate = parseInt(len/600) + 1;
         for(var i = 0; i < len; i += rate) {
-          var point = filteredtrip[i];
+          var point = gpsPoints[i];
           var latlng = new google.maps.LatLng(point.lat, point.lng);
           latlngbounds.extend(latlng);
           
@@ -245,24 +309,24 @@ angular.
               icon: marker_icon
             }));
           }
-          self.mapOverlays.push(new google.maps.Circle({
-            strokeOpacity: 0,
-            fillColor: colors[index],
-            fillOpacity: 1,
+          self.mapOverlays.push(new google.maps.Marker({
             map: self.map,
-            center: latlng,
-            radius: 20
+            position: latlng,
+            clickable: false,
+            icon: icons[index],
           }));
+          // self.mapOverlays.push(new google.maps.Circle({
+          //   strokeOpacity: 0,
+          //   fillColor: colors[index],
+          //   fillOpacity: 1,
+          //   map: self.map,
+          //   center: latlng,
+          //   radius: 20
+          // }));
 
         
         }
-        self.map.fitBounds(latlngbounds);
-        if(self.map.getZoom() > MAX_ZOOM) {
-          self.map.setZoom(MAX_ZOOM);
-        }
       }
-
-
 
       function drawChart(data, method) {
         var len = data.length;

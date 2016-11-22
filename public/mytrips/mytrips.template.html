@@ -65,12 +65,12 @@
         </ul>
 
         <table class="table">
-        <tr><td>Trips</td><td>Time</td><td>Distance (mile)</td><td>Duration (mins)</td><td>Score</td><td></td></tr>
+        <tr><td>Trips</td><td>Time</td><td>Distance (mile)</td><td>Duration</td><td>Score</td><td></td></tr>
         <tr ng-repeat="curtrip in $ctrl.trips" ng-click="$ctrl.setClickedRow($index);" ng-class="{'selected':$index == selectedRow}">
-          <td>{{ $index + 1 }} <span class="glyphicon glyphicon-upload" style="color:green" ng-show="curtrip.tripstatus==1"></span></td>
+          <td>{{ $index + 1 }} <span class="glyphicon glyphicon-upload" style="color:green" ng-show="curtrip.status==1"></span></td>
           <td>{{ curtrip.displaytime }}</td>
           <td>{{ (curtrip.distance / 1609.34).toFixed(2) }}</td>
-          <td>{{ curtrip.displayduration }}</td>
+          <td>{{ curtrip.displayduration() }}</td>
           <td>{{ (curtrip.score).toFixed(2) }}</td>
           <td><p data-placement="top" data-toggle="tooltip" title="Delete">
               <button class="btn btn-danger btn-xs" data-title="Delete" ng-click="$ctrl.removeTrip($index)">
