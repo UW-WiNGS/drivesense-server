@@ -3,6 +3,7 @@ var Trip = require('./trip.js');
 var TripTrace = require('./traces/trip_trace.js');
 var AccelerometerTrace = require('./traces/accelerometer_trace.js');
 var GyroscopeTrace = require('./traces/gyroscope_trace.js');
+var Promise = require("bluebird");
 
 function traceTypeAndColumn(stringname) {
   if(stringname == "Trip") {
@@ -39,29 +40,48 @@ mysqltrip.prototype.addTracesToTrip = function(trace_messages, trip, callback) {
       conn.release();
     }
 
-    var sqls = "";
-    var traces = [];
+    var traces_to_insert = {};
     for (var i = trace_messages.length - 1; i >= 0; i--) {
       tracemessage = trace_messages[i];
-      var type = tracemessage.type;
+      var trace_type_name = tracemessage.type;
       var value = tracemessage.value;
-      var typeColumn = traceTypeAndColumn(type);
+      var typeColumn = traceTypeAndColumn(trace_type_name);
       if(typeColumn) {
-        sqls += "INSERT IGNORE INTO "+typeColumn[1]+" SET ?;"
-        trace= new typeColumn[0]();
+        var table_name = typeColumn[1];
+        var trace_class = typeColumn[0];
+        if(!traces_to_insert[table_name])
+        {
+          traces_to_insert[table_name] = {'trace_class':trace_class, 'values':[]}
+        }
+        trace= new trace_class();
         trace.fromObjectSafe(value);
         trace.tripid = trip.tripid;
-        traces.push(trace)
+        traces_to_insert[table_name].values.push(trace)
       }
     }
-    if(traces.length!=0) {
-      conn.query(sqls, traces, function(err, rows) {
-        console.log("added traces");
-        callandrelease(err);
-      });
-    } else {
-      callandrelease(null);
+    var query_promises = [];
+    var promise_query = Promise.promisify(conn.query, {context: conn});
+    for(var table_name in traces_to_insert) {
+      var trace_class = traces_to_insert[table_name].trace_class;
+      var column_names = trace_class.user_facing.concat(trace_class.private);
+      // console.log(traces_to_insert[table_name].values);
+      var values = [];
+      for (var i = 0; i < traces_to_insert[table_name].values.length; i++) {
+        var single_trace = traces_to_insert[table_name].values[i];
+        values.push(column_names.map(function(col) {return single_trace[col]}));
+      }
+      // console.log(table_name);
+      // console.log(column_names);
+      // console.log(values);
+      var sql = "INSERT INTO ?? (??) VALUES ?"
+      query_promises.push(promise_query(sql, [table_name,column_names, values]));
     }
+    Promise.all(query_promises).then(function() {
+      console.log("All the files traces were added");
+      callandrelease();
+    }, function(err) {
+      callandrelease(err);
+    });
   });
 }
 
