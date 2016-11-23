@@ -5,21 +5,24 @@ angular.
     this.getTrips = function() {
       return trips;
     }
-    this.getTrip = function(key) {
-      return trips[key];
+    this.tripCount = function() {
+      return Object.keys(trips).length;
+    }
+    this.getTrip = function(guid) {
+      return trips[guid];
     }
     this.getKeys = function() {
       return Object.keys(trips);
     } 
-    this.deleteTrip = function(index) {
-      trips.splice(index, 1);  
+    this.deleteTrip = function(guid) {
+      delete trips[guid]; 
     }
     this.setData = function(value) {
-      trips = [];
+      trips = {};
       var len = Object.keys(value).length;
-      var i = 0;
-      for(var guid in value) {
-        var trip = value[guid]; 
+      console.log(value);
+      for(var index in value) {
+        var trip = value[index]; 
         if(!trip.starttime) {
           trip.starttime=trip.data_starttime;
         }
@@ -34,8 +37,7 @@ angular.
           date.setSeconds((this.endtime - this.starttime)/1000); // specify value for SECONDS here
           return date.toISOString().substr(11, 8);
         }
-        trips[i] = trip; 
-        i+=1;
+        trips[trip.guid] = trip; 
       }
     }
     //Returns a promise for when the trip is populated
@@ -74,6 +76,7 @@ angular.
     templateUrl: 'mytrips/mytrips.template.html',
     controller: function($scope, $http, tripService, API, $interval) {
       var self = this;
+      self.tripService=tripService;
       var MAX_ZOOM = 17;
       var liveUpdatePromise;
 
@@ -123,8 +126,7 @@ angular.
         }).then(function(res) {
           if(res.data.status == "success") {
             tripService.setData(res.data.data);
-            self.trips = tripService.getTrips();         
-            self.setClickedRow(0); 
+            self.selectFirstTrip();
             self.onTimeSet(date);
           } else {
             alert("search failed on the server, try again later!");
@@ -181,13 +183,23 @@ angular.
         self.search(next);
       }
 
-     
-      self.setClickedRow = function(index){
-        self.selectedRow = index;
-        self.curtrip = tripService.getTrip(index);
-        self.showTrip();
+      self.selectFirstTrip = function() {
+        if(tripService.tripCount() > 0) {
+          self.setCurTrip(tripService.getKeys()[0]);
+        } else {
+          self.setCurTrip(null);
+        }
+      } 
+      self.setCurTrip = function(guid){
+        console.log("Select trip: "+guid);
+        if(guid == null) {
+          self.curtrip = null;
+        } else {
+          self.curtrip = tripService.getTrip(guid);    
+        }
+        self.showTrip(); 
       }
-      self.removeTrip = function(index) {
+      self.removeTrip = function(guid) {
         var deletetrip = confirm('Are you sure you want to delete (unrecoverable)?');
         if (!deletetrip) {
           return; 
@@ -195,16 +207,15 @@ angular.
         $http({
             url: API + '/updateTrip',
             method: "POST",
-            data: { 'guid' : tripService.getTrip(index).guid,
+            data: { 'guid' : guid,
                     'status' : 0 }
         }).then(function(res) {
           if(res.data.status == 0) {
             //delete locally
-            tripService.deleteTrip(index);    
-            var len = Object.keys(tripService.getTrips()).length;
-            self.curtrip = tripService.getTrip(index%len);  
-            self.showTrip();
-            self.setClickedRow(index%len);
+            tripService.deleteTrip(guid);
+            if(self.curtrip.guid == guid){
+              self.selectFirstTrip();
+            }
           } else {
             alert("Delete failed on the server, try again later!");
           } 
@@ -212,7 +223,7 @@ angular.
       } 
       function initMap() {
         var madison = {lat: 43.073052, lng: -89.401230};
-        self.map = new google.maps.Map(document.getElementById('map'), { zoom: 15, center: madison});
+        self.map = new google.maps.Map(document.getElementById('map'), { zoom: 15, center: madison, streetViewControl: false});
         self.mapOverlays = [];
       }
 

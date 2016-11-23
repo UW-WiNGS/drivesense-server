@@ -35,8 +35,8 @@ mysqltrip.prototype.addTracesToTrip = function(trace_messages, trip, callback) {
       return;
     }
     function callandrelease(err) {
-      conn.release();
       callback(err);
+      conn.release();
     }
 
     var sqls = "";
@@ -56,6 +56,7 @@ mysqltrip.prototype.addTracesToTrip = function(trace_messages, trip, callback) {
     }
     if(traces.length!=0) {
       conn.query(sqls, traces, function(err, rows) {
+        console.log("added traces");
         callandrelease(err);
       });
     } else {

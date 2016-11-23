@@ -16,7 +16,7 @@ var bodyLogger = function (req, res, next) {
   next();
 };
 
-app.use(bodyparser.json());
+app.use(bodyparser.json({limit: '10mb'}));
 app.use(bodyparser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 app.use(express.static(path.join(__dirname, 'public'))); 
 
