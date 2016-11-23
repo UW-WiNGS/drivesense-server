@@ -69,16 +69,18 @@ var updateTrip = function(req, res, next) {
     if(err) {
       res.status(500)
       var msg = {status: 'fail', data: err.toString()};
+      console.log("Error for trip:" + trip.guid + " " + err.toString());
       res.json(msg);
       return;
     } else if(req.body.traces) {
       //trip was successfully updated or created
       //and we have new traces to add to it
-      console.log("Adding traces to trip "+trip.guid);
+      console.log("Adding " +req.body.traces.length+ " traces to trip "+trip.guid);
       mysqltrip.addTracesToTrip(req.body.traces, trip, function(err) {
         if(err) {
           res.status(500)
           res.json({status: 'fail', data: err.toString()})
+          console.log("Error adding traces for trip:" + trip.guid + " " + err.toString());
         } else {
           res.json(trip.user_facing_vals());
         }

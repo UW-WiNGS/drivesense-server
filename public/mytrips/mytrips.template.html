@@ -66,7 +66,7 @@
 
         <table class="table">
         <tr><td>Trips</td><td>Time</td><td>Distance (mile)</td><td>Duration</td><td>Score</td><td></td></tr>
-        <tr ng-repeat="curtrip in $ctrl.trips" ng-click="$ctrl.setClickedRow($index);" ng-class="{'selected':$index == selectedRow}">
+        <tr ng-repeat="curtrip in $ctrl.trips" ng-click="$ctrl.setClickedRow($index);" ng-class="{'selected':curtrip.guid == $ctrl.curtrip.guid}">
           <td>{{ $index + 1 }} <span class="glyphicon glyphicon-upload" style="color:green" ng-show="curtrip.status==1"></span></td>
           <td>{{ curtrip.displaytime }}</td>
           <td>{{ (curtrip.distance / 1609.34).toFixed(2) }}</td>

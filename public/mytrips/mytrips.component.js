@@ -322,7 +322,7 @@ angular.
                 icon: 'img/starticon.png'
               }));
             }
-            if (i==len-1) {
+            if (i>len-1-rate) {
               var marker_icon = 'img/stopicon.png'
               self.mapOverlays.push(new google.maps.Marker({
                 position: latlng,

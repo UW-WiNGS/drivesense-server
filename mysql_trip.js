@@ -47,7 +47,7 @@ mysqltrip.prototype.addTracesToTrip = function(trace_messages, trip, callback) {
       var value = tracemessage.value;
       var typeColumn = traceTypeAndColumn(type);
       if(typeColumn) {
-        sqls += "INSERT INTO "+typeColumn[1]+" SET ?;"
+        sqls += "INSERT IGNORE INTO "+typeColumn[1]+" SET ?;"
         trace= new typeColumn[0]();
         trace.fromObjectSafe(value);
         trace.tripid = trip.tripid;
@@ -82,15 +82,16 @@ mysqltrip.prototype.updateOrCreateTrip = function (trip, user, callback) {
           callandrelease(err, null);
         } else if (rows.length==0) {
           //trip with this guid does not exist
-          var sql = "INSERT INTO `trip` SET ?;";
+          var sql = "UPDATE `trip` SET `status` = '2' WHERE `trip`.`userid` = ?; INSERT INTO `trip` SET ?;";
           console.log("Trip guid "+trip.guid+" is new, inserting it ")
-          conn.query(sql, [trip], function(err, rows){
+          conn.query(sql, [trip.userid, trip], function(err, rows){
             if(err) {
               console.log(err);
               callandrelease(err, null);
             } else {
               //trip was inserted
-              trip.tripid=rows.insertId;
+              console.log(rows);
+              trip.tripid=rows[1].insertId;
               callandrelease(null, trip);
             }
           });
