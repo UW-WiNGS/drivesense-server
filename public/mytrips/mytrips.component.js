@@ -46,15 +46,16 @@ angular.
           data: {'start':start, 'type':'Trip', 'guid':trip.guid }
       }).then(function(res) {
         console.log("Loaded "+res.data.length+" rows of new trip data for "+trip.guid)
-        trip.data_endtime = res.data[res.data.length-1].time
-        trip.endtime = trip.data_endtime;
-        if(!trip.gps){
-          trip.gps = res.data;
-        } else {
-          trip.gps.concat(res.data);
+        if(res.data.length > 0) {
+          trip.data_endtime = res.data[res.data.length-1].time
+          trip.endtime = trip.data_endtime;
+          if(!trip.gps){
+            trip.gps = res.data;
+          } else {
+            trip.gps = trip.gps.concat(res.data);
+          }        
         }
-        
-        return trip;
+        return res.data;
       });
     }
     this.updateTrip = function(trip) {
@@ -82,8 +83,8 @@ angular.
           liveUpdatePromise = null;
         }
         if(!self.curtrip.gps) {
-          tripService.getTripGPS(self.curtrip, self.curtrip.data_starttime).then(function(trip) {
-            displayTrip(trip)
+          tripService.getTripGPS(self.curtrip, 0).then(function(trip) {
+            displayTrip(self.curtrip)
             scheduleLive()
           }, function(res){
             alert("GPS load failed");
@@ -96,14 +97,14 @@ angular.
 
       function scheduleLive() {
         if(self.curtrip.status == 1) {
-          liveUpdatePromise = $interval(self.liveUpdate, 5000, 1);
+          liveUpdatePromise = $interval(self.liveUpdate, 2000, 1);
         }
       }
 
       self.liveUpdate = function() {
         console.log("Live update for trip "+self.curtrip.guid);
-        tripService.getTripGPS(self.curtrip, self.curtrip.data_endtime).then(function(trip) {
-          displayTrip(trip)
+        tripService.getTripGPS(self.curtrip, self.curtrip.data_endtime + 1).then(function(newGPS) {
+          displayNewGPS(newGPS)
           scheduleLive();
         }, function(res){
           console.log("Live GPS load failed");
@@ -218,7 +219,6 @@ angular.
       function displayTrip(trip) {
         if(!trip) return null;
         var method = self.radioValue;
-        var live = trip.status == 1;
 
         self.slider.options.floor=trip.data_starttime,
         self.slider.options.ceil=trip.data_endtime,
@@ -227,10 +227,11 @@ angular.
 
         var filteredtrip = trip.gps.filter(function(point, index) {return (point.time >= trip.starttime && point.time <= trip.endtime)});
 
-        drawChart(filteredtrip,method);
+        initChart(method);
+        drawChart(filteredtrip, method);
 
         var latlngbounds = new google.maps.LatLngBounds();
-
+        console.log("clear markers");
         //clear all circles and markers from the map
         while(self.mapOverlays[0])
         {
@@ -238,7 +239,7 @@ angular.
           tmp.setMap(null);
         }
 
-        drawMapGPS(filteredtrip, latlngbounds, method);
+        drawMapGPS(filteredtrip, latlngbounds, method, (trip.status == 1));
         
         self.map.fitBounds(latlngbounds);
         if(self.map.getZoom() > MAX_ZOOM) {
@@ -246,12 +247,27 @@ angular.
         }
       }
 
-      function drawMapGPS(gpsPoints, latlngbounds, method) {
+      function displayNewGPS(newPoints) {
+        var method = self.radioValue;
+        console.log(newPoints);
+        if(newPoints.length >0){
+          drawChart(newPoints,method, true);
+          var latlngbounds = new google.maps.LatLngBounds();
+          drawMapGPS(newPoints, latlngbounds, method, true);
+        
+          self.map.fitBounds(latlngbounds);
+          if(self.map.getZoom() > MAX_ZOOM) {
+            self.map.setZoom(MAX_ZOOM);
+          }
+        }
+      }
+
+      function drawMapGPS(gpsPoints, latlngbounds, method, live) {
         var colors = ['green', 'lightgreen', 'yellow', 'orange', 'red'];
         var icons = colors.map(function(color) {
           return {
               path: google.maps.SymbolPath.CIRCLE,
-              scale: 2,
+              scale: 3,
               fillColor: color,
               fillOpacity: 1,
               strokeOpacity:0,
@@ -293,78 +309,70 @@ angular.
             index = 0; 
             console.log("index calculation error");
           }
-          if (i==0) {
-            var marker_icon = 'img/starticon.png' 
-            self.mapOverlays.push(new google.maps.Marker({
-              position: latlng,
-              map: self.map,
-              icon: marker_icon
-            }));
-          }
-          if (i==len-1) {
-            var marker_icon = 'img/stopicon.png'
-            self.mapOverlays.push(new google.maps.Marker({
-              position: latlng,
-              map: self.map,
-              icon: marker_icon
-            }));
+          if(!live) {
+            if(self.mapOverlays.carIcon) {
+              self.mapOverlays.carIcon.setMap(null);
+              self.mapOverlays.carIcon = null;
+            }
+            if (i==0) {
+              var marker_icon = 'img/starticon.png' 
+              self.mapOverlays.push(new google.maps.Marker({
+                position: latlng,
+                map: self.map,
+                icon: 'img/starticon.png'
+              }));
+            }
+            if (i==len-1) {
+              var marker_icon = 'img/stopicon.png'
+              self.mapOverlays.push(new google.maps.Marker({
+                position: latlng,
+                map: self.map,
+                icon: marker_icon
+              }));
+            }
+          } else {
+            if(self.mapOverlays.carIcon) {
+              self.mapOverlays.carIcon.setPosition(latlng);
+            } else {
+              self.mapOverlays.carIcon = new google.maps.Marker({
+                position: latlng,
+                map: self.map,
+                icon: 'img/caricon.png'
+              });
+            }
           }
           self.mapOverlays.push(new google.maps.Marker({
             map: self.map,
             position: latlng,
             clickable: false,
             icon: icons[index],
-          }));
-          // self.mapOverlays.push(new google.maps.Circle({
-          //   strokeOpacity: 0,
-          //   fillColor: colors[index],
-          //   fillOpacity: 1,
-          //   map: self.map,
-          //   center: latlng,
-          //   radius: 20
-          // }));
-
-        
+          }));        
         }
       }
-
-      function drawChart(data, method) {
-        var len = data.length;
-        var data_list = [];
-        var init_time = parseFloat(data[0].time);
-        var rate = parseInt(len/600) + 1;
-        for(var i = 0; i < len; i+=rate){
-          var point = data[i];
-          var current_time = parseFloat(point.time);
-          var time = (current_time - init_time)/60000.0;
-          var chart_type;
-          var y_axis_text;
-          var title_text;
-          if(method == "speed") {
-            data_list.push([time, point.speed * 2.23694]);
-            title_text = "Speed";
-            y_axis_text = "Speed (mph)";
-            chart_type = "line";
-          } else if(method=="score") {
-            title_text = "Score";
-            y_axis_text = "Score";
-            chart_type = "line";
-            data_list.push([time, point.score]);
-          } else if(method=="brake") {
-            title_text = "Brakes";
-            y_axis_text = "Braking";
-            chart_type = "scatter";
-            data_list.push([time, point.brake * -1]);
-          } else if(method=="tilt") {
-            title_text = "Tilt";
-            y_axis_text = "Tilt (Degree)";
-            chart_type = "line";
-            data_list.push([time, point.tilt]);
-          } else {
-            console.log("unknown method:" + method);
-          }
-        } 
-        $('#chart').highcharts({
+      function initChart(method) {
+        var chart_type;
+        var y_axis_text;
+        var title_text;
+        if(method == "speed") {
+          title_text = "Speed";
+          y_axis_text = "Speed (mph)";
+          chart_type = "line";
+        } else if(method=="score") {
+          title_text = "Score";
+          y_axis_text = "Score";
+          chart_type = "line";
+        } else if(method=="brake") {
+          title_text = "Brakes";
+          y_axis_text = "Braking";
+          chart_type = "scatter";
+        } else if(method=="tilt") {
+          title_text = "Tilt";
+          y_axis_text = "Tilt (Degree)";
+          chart_type = "line";
+        } else {
+          console.log("unknown method:" + method);
+        }
+        self.chart = Highcharts.chart('chart', {
           turboThreshold:10000,
           legend: {
               enabled: false
@@ -388,10 +396,50 @@ angular.
                   text: y_axis_text
               }
           },
+          plotOptions: {
+            series: {
+                animation: false
+            }
+          },
           series: [{
-              data: data_list
+            data: [],
           }]
         });
+      }
+      function drawChart(data, method, appendLiveData) {
+        var len = data.length;
+        if(len>0){
+          var data_list = [];
+          var init_time = parseFloat(self.curtrip.starttime);
+          var rate = parseInt(len/600) + 1;
+          for(var i = 0; i < len; i+=1){
+            var point = data[i];
+            var current_time = parseFloat(point.time);
+            var time = (current_time - init_time)/60000.0;
+            if(method == "speed") {
+              data_list.push([time, point.speed * 2.23694]);
+            } else if(method=="score") {
+              data_list.push([time, point.score]);
+            } else if(method=="brake") {
+              data_list.push([time, point.brake * -1]);
+            } else if(method=="tilt") {
+              data_list.push([time, point.tilt]);
+            } else {
+              console.log("unknown method:" + method);
+            }
+          } 
+          if(!appendLiveData) {
+            self.chart.series[0].setData(data_list);
+          } else {
+            self.chart.xAxis[0].update({
+              min: data_list[data_list.length-1][0]-5,
+            }, false);
+            for (var i = 0; i < data_list.length; i++) {
+              self.chart.series[0].addPoint(data_list[i], false);
+            }
+            self.chart.redraw();
+          }
+        }
       }
 
 
