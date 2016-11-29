@@ -17,12 +17,22 @@ angular.
     this.deleteTrip = function(guid) {
       delete trips[guid]; 
     }
-    this.setData = function(value) {
-      trips = {};
+    this.setData = function(value, update) {
+      if(!update) {
+        trips = {};
+      }
       var len = Object.keys(value).length;
       console.log(value);
       for(var index in value) {
-        var trip = value[index]; 
+        var newtrip = value[index]; 
+        if(newtrip.guid in trips) {
+          console.log("updating trip")
+          Object.assign(trips[newtrip.guid], newtrip)
+        } else {
+          console.log("adding trip")
+          trips[newtrip.guid] = newtrip;
+        }
+        var trip = trips[newtrip.guid];
         if(!trip.starttime) {
           trip.starttime=trip.data_starttime;
         }
@@ -30,7 +40,6 @@ angular.
           trip.endtime=trip.data_endtime;
         }
         
-        var time = new Date(trip.starttime);
         trip.displaytime = moment(trip.starttime).format('MMM Do, h:mma');
         trip.displayduration = function() {
           var date = new Date(null);
@@ -58,17 +67,6 @@ angular.
           }        
         }
         return res.data;
-      });
-    }
-    this.updateTrip = function(trip) {
-      return $http({
-          url: API + '/updateTrip',
-          method: "POST",
-          data: {'guid':trip.guid }
-      }).then(function(res) {
-        console.log(res.data);
-        Object.assign(trip, res.data);
-        return trip;
       });
     }
   })
@@ -106,6 +104,7 @@ angular.
 
       self.liveUpdate = function() {
         console.log("Live update for trip "+self.curtrip.guid);
+        self.search(self.dateDropDownInput, true);
         tripService.getTripGPS(self.curtrip, self.curtrip.data_endtime + 1).then(function(newGPS) {
           displayNewGPS(newGPS)
           scheduleLive();
@@ -115,7 +114,7 @@ angular.
         });
       }
 
-      self.search = function(date) {
+      self.search = function(date, update) {
         var start = moment(date).startOf('month').valueOf();
         var end = moment(date).endOf('month').valueOf();
         console.log("search from:" + start + " to:" + end);
@@ -125,9 +124,11 @@ angular.
           data: {'start':start, 'end':end }
         }).then(function(res) {
           if(res.data.status == "success") {
-            tripService.setData(res.data.data);
-            self.selectFirstTrip();
-            self.onTimeSet(date);
+            tripService.setData(res.data.data, update);
+            if(!update) {
+              self.selectFirstTrip();
+              self.onTimeSet(date);
+            }
           } else {
             alert("search failed on the server, try again later!");
           } 
@@ -260,7 +261,7 @@ angular.
 
       function displayNewGPS(newPoints) {
         var method = self.radioValue;
-        console.log(newPoints);
+        //console.log(newPoints);
         if(newPoints.length >0){
           drawChart(newPoints,method, true);
           var latlngbounds = new google.maps.LatLngBounds();
