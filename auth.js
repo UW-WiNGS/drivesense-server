@@ -19,7 +19,7 @@ passport.use(new LocalStrategy({
       if(err) {
         return done(err);
       }
-      if(bcrypt.compareSync(password, user.password)) {
+      if(user && bcrypt.compareSync(password, user.password)) {
         return done(null, user);
       } else {
         return done(null, false, { message: 'Incorrect username or password.' }); 
@@ -57,7 +57,7 @@ passport.use(new FacebookTokenStrategy({
       if (err) { return done(err); }
       if (!user) { 
         console.log("User not found in database, creating new drivesense account.")
-        user = new User(profile.name.given_name, profile.name.family_name, profile.emails[0]);
+        user = new User(profile.name.given_name, profile.name.family_name, profile.emails[0].value);
         mysqluser.userSignUp(user, function (err, id) {
           if (err) { return done(err); }
           user.userid = id;
@@ -117,6 +117,7 @@ var signup = function (req, res, next) {
       }
       res.json(msg);
     } else {
+      //user has been populated with all info except for ID
       user.userid = id;
       req.user = user;
       next();

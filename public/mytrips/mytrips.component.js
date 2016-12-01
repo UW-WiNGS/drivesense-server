@@ -1,77 +1,134 @@
 angular.
   module('driveSenseApp')
-  .service('tripformat', function () { //TODO this can be refactored out of a service
-    function timeStamp(now) {
-    // Create an array with the current month, day and time
-      var date = [ now.getMonth() + 1, now.getDate(), now.getFullYear() ];
-    // Create an array with the current hour, minute and second
-      var time = [ now.getHours(), now.getMinutes()];
-    // Determine AM or PM suffix based on the hour
-      var suffix = ( time[0] < 12 ) ? "AM" : "PM";
-    // Convert hour from military time
-      time[0] = ( time[0] < 12 ) ? time[0] : time[0] - 12;
-    // If hour is 0, set it to 12
-      time[0] = time[0] || 12;
-    // If seconds and minutes are less than 10, add a zero
-      for ( var i = 1; i < 3; i++ ) {
-        if ( time[i] < 10 ) {
-          time[i] = "0" + time[i];
-        }
-      }
-    // Return the formatted string
-      return date.join("/") + " " + time.join(":") + " " + suffix;
-    }
+  .service('tripService', function ($http, API, $q) { //TODO this can be refactored out of a service
     var trips = [];
     this.getTrips = function() {
       return trips;
     }
-    this.getTrip = function(key) {
-      return trips[key];
+    this.tripCount = function() {
+      return Object.keys(trips).length;
+    }
+    this.getTrip = function(guid) {
+      return trips[guid];
     }
     this.getKeys = function() {
       return Object.keys(trips);
     } 
-    this.setData = function(value) {
-      trips = [];
-      var len = Object.keys(value).length;
-      var i = len - 1;
-      for(var tripid in value) {
-        var trip = value[tripid]; 
-        trip.tripid = tripid;
-        var time = new Date(trip.starttime);
-        trip.displaytime = timeStamp(time); 
-        trips[i--] = trip; 
+    this.deleteTrip = function(guid) {
+      delete trips[guid]; 
+    }
+    this.setData = function(value, update) {
+      if(!update) {
+        trips = {};
       }
+      var len = Object.keys(value).length;
+      console.log(value);
+      for(var index in value) {
+        var newtrip = value[index]; 
+        if(newtrip.guid in trips) {
+          console.log("updating trip")
+          Object.assign(trips[newtrip.guid], newtrip)
+        } else {
+          console.log("adding trip")
+          trips[newtrip.guid] = newtrip;
+        }
+        var trip = trips[newtrip.guid];
+        if(!trip.starttime) {
+          trip.starttime=trip.data_starttime;
+        }
+        if(!trip.endtime) {
+          trip.endtime=trip.data_endtime;
+        }
+        
+        trip.displaytime = moment(trip.starttime).format('MMM Do, h:mma');
+        trip.displayduration = function() {
+          var date = new Date(null);
+          date.setSeconds((this.endtime - this.starttime)/1000); // specify value for SECONDS here
+          return date.toISOString().substr(11, 8);
+        }
+        trips[trip.guid] = trip; 
+      }
+    }
+    //Returns a promise for when the trip is populated
+    this.getTripGPS = function(trip, start) {
+      return $http({
+          url: API + '/tripTraces',
+          method: "POST",
+          data: {'start':start, 'type':'Trip', 'guid':trip.guid }
+      }).then(function(res) {
+        console.log("Loaded "+res.data.length+" rows of new trip data for "+trip.guid)
+        if(res.data.length > 0) {
+          trip.data_endtime = res.data[res.data.length-1].time
+          trip.endtime = trip.data_endtime;
+          if(!trip.gps){
+            trip.gps = res.data;
+          } else {
+            trip.gps = trip.gps.concat(res.data);
+          }        
+        }
+        return res.data;
+      });
     }
   })
   .component('tripComponent', {
     templateUrl: 'mytrips/mytrips.template.html',
-    controller: function($scope, $http, tripformat, API) {
+    controller: function($scope, $http, tripService, API, $interval) {
       var self = this;
+      self.tripService=tripService;
+      var MAX_ZOOM = 17;
+      var liveUpdatePromise;
 
       self.showTrip = function() {
-        var method = self.radioValue;
-        displayTrip(self.curtrip, method); 
+        if(liveUpdatePromise) {
+          $interval.cancel(liveUpdatePromise);
+          liveUpdatePromise = null;
+        }
+        if(!self.curtrip.gps) {
+          tripService.getTripGPS(self.curtrip, 0).then(function(trip) {
+            displayTrip(self.curtrip)
+            scheduleLive()
+          }, function(res){
+            alert("GPS load failed");
+          });
+        } else {
+          displayTrip(self.curtrip); 
+          scheduleLive();
+        }
       };
 
-      self.search = function(date) {
-        var next;
-        if (date.getMonth() == 11) {
-          next = new Date(date.getFullYear() + 1, 0, 1);
-        } else {
-          next = new Date(date.getFullYear(), date.getMonth() + 1, 1);
+      function scheduleLive() {
+        if(self.curtrip.status == 1) {
+          liveUpdatePromise = $interval(self.liveUpdate, 2000, 1);
         }
-        console.log("search from:" + date.getTime() + " to:" + next.getTime());
+      }
+
+      self.liveUpdate = function() {
+        console.log("Live update for trip "+self.curtrip.guid);
+        self.search(self.dateDropDownInput, true);
+        tripService.getTripGPS(self.curtrip, self.curtrip.data_endtime + 1).then(function(newGPS) {
+          displayNewGPS(newGPS)
+          scheduleLive();
+        }, function(res){
+          console.log("Live GPS load failed");
+          scheduleLive();
+        });
+      }
+
+      self.search = function(date, update) {
+        var start = moment(date).startOf('month').valueOf();
+        var end = moment(date).endOf('month').valueOf();
+        console.log("search from:" + start + " to:" + end);
         $http({
           url: API + '/searchtrips',
           method: "POST",
-          data: {'start':date.getTime(), 'end':next.getTime() }
+          data: {'start':start, 'end':end }
         }).then(function(res) {
           if(res.data.status == "success") {
-            tripformat.setData(res.data.data);
-            self.trips = tripformat.getTrips();       
-            self.setClickedRow(0); 
-            self.onTimeSet(date, next);
+            tripService.setData(res.data.data, update);
+            if(!update) {
+              self.selectFirstTrip();
+              self.onTimeSet(date);
+            }
           } else {
             alert("search failed on the server, try again later!");
           } 
@@ -100,7 +157,7 @@ angular.
       self.init();
 
 
-      self.onTimeSet = function(date, oldDate) {
+      self.onTimeSet = function(date) {
         self.dateDropDownInput = date;
         self.dateDropDownDisplay = (date.getMonth() + 1) + "/" + date.getFullYear();
       };
@@ -127,57 +184,66 @@ angular.
         self.search(next);
       }
 
-     
-      self.setClickedRow = function(index){
-        self.selectedRow = index;
-        self.curtrip = self.trips[index];  
-        console.log(index + " is clicked");
-        self.showTrip();
+      self.selectFirstTrip = function() {
+        if(tripService.tripCount() > 0) {
+          self.setCurTrip(tripService.getKeys()[0]);
+        } else {
+          self.setCurTrip(null);
+        }
+      } 
+      self.setCurTrip = function(guid){
+        console.log("Select trip: "+guid);
+        if(guid == null) {
+          self.curtrip = null;
+        } else {
+          self.curtrip = tripService.getTrip(guid);    
+        }
+        self.showTrip(); 
       }
-      self.removeTrip = function(index) {
+      self.removeTrip = function(guid) {
         var deletetrip = confirm('Are you sure you want to delete (unrecoverable)?');
         if (!deletetrip) {
           return; 
         }  
         $http({
-            url: API + '/removetrip',
+            url: API + '/updateTrip',
             method: "POST",
-            data: { 'tripid' : self.trips[index].tripid }
+            data: { 'guid' : guid,
+                    'status' : 0 }
         }).then(function(res) {
-          if(res.data.status == "success") {
+          if(res.data.status == 0) {
             //delete locally
-            self.trips.splice(index, 1);    
-            var len = Object.keys(self.trips).length;
-            self.curtrip = self.trips[index%len];  
-            self.showTrip();
-            self.setClickedRow(index%len);
+            tripService.deleteTrip(guid);
+            if(self.curtrip.guid == guid){
+              self.selectFirstTrip();
+            }
           } else {
-            alert("delete failed on the server, try again later!");
+            alert("Delete failed on the server, try again later!");
           } 
         });  
       } 
       function initMap() {
         var madison = {lat: 43.073052, lng: -89.401230};
-        self.map = new google.maps.Map(document.getElementById('map'), { zoom: 15, center: madison});
+        self.map = new google.maps.Map(document.getElementById('map'), { zoom: 15, center: madison, streetViewControl: false});
         self.mapOverlays = [];
       }
 
-      function displayTrip(trip, method) {
+      function displayTrip(trip) {
         if(!trip) return null;
-        console.log( trip);
+        var method = self.radioValue;
 
-        self.slider.options.floor=trip.gps[0].time,
-        self.slider.options.ceil=trip.gps[trip.gps.length-1].time,
+        self.slider.options.floor=trip.data_starttime,
+        self.slider.options.ceil=trip.data_endtime,
 
         showLegend(method);
 
         var filteredtrip = trip.gps.filter(function(point, index) {return (point.time >= trip.starttime && point.time <= trip.endtime)});
 
-        drawChart(filteredtrip,method);
+        initChart(method);
+        drawChart(filteredtrip, method);
 
         var latlngbounds = new google.maps.LatLngBounds();
-        var len = trip.gps.length;
-
+        console.log("clear markers");
         //clear all circles and markers from the map
         while(self.mapOverlays[0])
         {
@@ -185,20 +251,53 @@ angular.
           tmp.setMap(null);
         }
 
-        var colors = ['green', 'lightgreen', 'yellow', 'orange', 'red'];
+        drawMapGPS(filteredtrip, latlngbounds, method, (trip.status == 1));
+        
+        self.map.fitBounds(latlngbounds);
+        if(self.map.getZoom() > MAX_ZOOM) {
+          self.map.setZoom(MAX_ZOOM);
+        }
+      }
 
-        var len = filteredtrip.length;
+      function displayNewGPS(newPoints) {
+        var method = self.radioValue;
+        //console.log(newPoints);
+        if(newPoints.length >0){
+          drawChart(newPoints,method, true);
+          var latlngbounds = new google.maps.LatLngBounds();
+          drawMapGPS(newPoints, latlngbounds, method, true);
+        
+          self.map.fitBounds(latlngbounds);
+          if(self.map.getZoom() > MAX_ZOOM) {
+            self.map.setZoom(MAX_ZOOM);
+          }
+        }
+      }
+
+      function drawMapGPS(gpsPoints, latlngbounds, method, live) {
+        var colors = ['green', 'lightgreen', 'yellow', 'orange', 'red'];
+        var icons = colors.map(function(color) {
+          return {
+              path: google.maps.SymbolPath.CIRCLE,
+              scale: 3,
+              fillColor: color,
+              fillOpacity: 1,
+              strokeOpacity:0,
+            }
+        });
+
+        var len = gpsPoints.length;
         var rate = parseInt(len/600) + 1;
         for(var i = 0; i < len; i += rate) {
-          var point = filteredtrip[i];
+          var point = gpsPoints[i];
           var latlng = new google.maps.LatLng(point.lat, point.lng);
           latlngbounds.extend(latlng);
           
           var index = 0;
-          var speed = point.curspeed * 2.23694;
-          var score = point.curscore;
-          var brake = point.curevent;
-          var tilt = point.curtilt;
+          var speed = point.speed * 2.23694;
+          var score = point.score;
+          var brake = point.brake;
+          var tilt = point.tilt;
           if(method == "speed") {
             index = Math.round(speed/10.0);
           } else if(method=="score") {
@@ -222,75 +321,70 @@ angular.
             index = 0; 
             console.log("index calculation error");
           }
-          if (i==0) {
-            var marker_icon = 'img/starticon.png' 
-            self.mapOverlays.push(new google.maps.Marker({
-              position: latlng,
-              map: self.map,
-              icon: marker_icon
-            }));
-          }
-          if (i==len-1) {
-            var marker_icon = 'img/stopicon.png'
-            self.mapOverlays.push(new google.maps.Marker({
-              position: latlng,
-              map: self.map,
-              icon: marker_icon
-            }));
-          }
-          self.mapOverlays.push(new google.maps.Circle({
-            strokeOpacity: 0,
-            fillColor: colors[index],
-            fillOpacity: 1,
-            map: self.map,
-            center: latlng,
-            radius: 20
-          }));
-
-        
-        }
-        self.map.fitBounds(latlngbounds);
-      }
-
-
-
-      function drawChart(data, method) {
-        var len = data.length;
-        var data_list = [];
-        var init_time = parseFloat(data[0].time);
-        var rate = parseInt(len/600) + 1;
-        for(var i = 0; i < len; i+=rate){
-          var point = data[i];
-          var current_time = parseFloat(point.time);
-          var time = (current_time - init_time)/60000.0;
-          var chart_type;
-          var y_axis_text;
-          var title_text;
-          if(method == "speed") {
-            data_list.push([time, point.curspeed * 2.23694]);
-            title_text = "Speed";
-            y_axis_text = "Speed (mph)";
-            chart_type = "line";
-          } else if(method=="score") {
-            title_text = "Score";
-            y_axis_text = "Score";
-            chart_type = "line";
-            data_list.push([time, point.curscore]);
-          } else if(method=="brake") {
-            title_text = "Brakes";
-            y_axis_text = "Braking";
-            chart_type = "scatter";
-            data_list.push([time, point.curevent * -1]);
-          } else if(method=="tilt") {
-            title_text = "Tilt";
-            y_axis_text = "Tilt (Degree)";
-            chart_type = "line";
-            data_list.push([time, point.curtilt]);
+          if(!live) {
+            if(self.mapOverlays.carIcon) {
+              self.mapOverlays.carIcon.setMap(null);
+              self.mapOverlays.carIcon = null;
+            }
+            if (i==0) {
+              var marker_icon = 'img/starticon.png' 
+              self.mapOverlays.push(new google.maps.Marker({
+                position: latlng,
+                map: self.map,
+                icon: 'img/starticon.png'
+              }));
+            }
+            if (i>len-1-rate) {
+              var marker_icon = 'img/stopicon.png'
+              self.mapOverlays.push(new google.maps.Marker({
+                position: latlng,
+                map: self.map,
+                icon: marker_icon
+              }));
+            }
           } else {
-            console.log("unknown method:" + method);
+            if(self.mapOverlays.carIcon) {
+              self.mapOverlays.carIcon.setPosition(latlng);
+            } else {
+              self.mapOverlays.carIcon = new google.maps.Marker({
+                position: latlng,
+                map: self.map,
+                icon: 'img/caricon.png'
+              });
+            }
           }
-        } 
-        $('#chart').highcharts({
+          self.mapOverlays.push(new google.maps.Marker({
+            map: self.map,
+            position: latlng,
+            clickable: false,
+            icon: icons[index],
+          }));        
+        }
+      }
+      function initChart(method) {
+        var chart_type;
+        var y_axis_text;
+        var title_text;
+        if(method == "speed") {
+          title_text = "Speed";
+          y_axis_text = "Speed (mph)";
+          chart_type = "line";
+        } else if(method=="score") {
+          title_text = "Score";
+          y_axis_text = "Score";
+          chart_type = "line";
+        } else if(method=="brake") {
+          title_text = "Brakes";
+          y_axis_text = "Braking";
+          chart_type = "scatter";
+        } else if(method=="tilt") {
+          title_text = "Tilt";
+          y_axis_text = "Tilt (Degree)";
+          chart_type = "line";
+        } else {
+          console.log("unknown method:" + method);
+        }
+        self.chart = Highcharts.chart('chart', {
           turboThreshold:10000,
           legend: {
               enabled: false
@@ -314,10 +408,50 @@ angular.
                   text: y_axis_text
               }
           },
+          plotOptions: {
+            series: {
+                animation: false
+            }
+          },
           series: [{
-              data: data_list
+            data: [],
           }]
         });
+      }
+      function drawChart(data, method, appendLiveData) {
+        var len = data.length;
+        if(len>0){
+          var data_list = [];
+          var init_time = parseFloat(self.curtrip.starttime);
+          var rate = parseInt(len/600) + 1;
+          for(var i = 0; i < len; i+=1){
+            var point = data[i];
+            var current_time = parseFloat(point.time);
+            var time = (current_time - init_time)/60000.0;
+            if(method == "speed") {
+              data_list.push([time, point.speed * 2.23694]);
+            } else if(method=="score") {
+              data_list.push([time, point.score]);
+            } else if(method=="brake") {
+              data_list.push([time, point.brake * -1]);
+            } else if(method=="tilt") {
+              data_list.push([time, point.tilt]);
+            } else {
+              console.log("unknown method:" + method);
+            }
+          } 
+          if(!appendLiveData) {
+            self.chart.series[0].setData(data_list);
+          } else {
+            self.chart.xAxis[0].update({
+              min: data_list[data_list.length-1][0]-5,
+            }, false);
+            for (var i = 0; i < data_list.length; i++) {
+              self.chart.series[0].addPoint(data_list[i], false);
+            }
+            self.chart.redraw();
+          }
+        }
       }
 
 

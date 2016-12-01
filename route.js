@@ -3,6 +3,7 @@ var mysqluser = require('./mysql_user.js');
 var mysqltrip = require('./mysql_trip.js');
 var User = require('./user.js');
 var Trip = require('./trip.js');
+var TripTrace = require('./traces/trip_trace.js');
 
 var fs = require('fs-extra');
 var jwt = require('jsonwebtoken');
@@ -11,19 +12,6 @@ var formidable = require('formidable');
 var sqlite3 = require('sqlite3').verbose();
 
 
-var removetrip = function (req, res, next) {
-  var userid = req.body.userid;
-  var tripid = req.body.tripid;
-  mysqltrip.deleteTrip(userid, tripid, function(err, value){
-    if(err) {
-       var msg = {status: 'fail', data: err.toString()};
-       res.json(msg);  
-    } else {
-       var msg = {status: 'success', data: null};
-       res.json(msg);   
-    }
-  });  
-}
 
 var searchtrips = function (req, res, next) {
   var userid = req.user.userid;
@@ -36,167 +24,80 @@ var searchtrips = function (req, res, next) {
       res.json(msg);
       return;
     }
-    for(var i = 0; i < rows.length; ++i) {
-      var row = rows[i];
-      if(row.tripid in trips) {
-        var gps = {time: row.time, lat: row.lat, lng: row.lng, alt: row.alt, curspeed: row.curspeed, curscore: row.curscore, curevent: row.curevent, curtilt: row.curtilt}; 
-        trips[row.tripid].gps.push(gps);
-      } else {
-        var trip = new Trip();
-        trip.fromObject(row);  
-        trip.gps = [];
-        var gps = {time: row.time, lat: row.lat, lng: row.lng, alt: row.alt, curspeed: row.curspeed, curscore: row.curscore, curevent: row.curevent, curtilt: row.curtilt};
-        trip.gps.push(gps);
-        trips[row.tripid] = trip; 
-      }
-    }
-    var msg = {status: 'success', data:trips};
+    var msg = {status: 'success', data:rows};
     res.json(msg);
   });  
 };
 
-var showtrips = function (req, res, next) {
-  var userid = req.body.userid;
-  var trips = {};
-  mysqltrip.loadGPS(userid, function(err, rows){
+var tripTraces = function (req, res, next) {
+  var userid = req.user.userid;
+  mysqltrip.getTripTraces(userid, req.body.guid, req.body.type, req.body.start, function(err, traces) {
     if(err) {
       var msg = {status: 'fail', data: err.toString()};
       res.json(msg);
       return;
     }
-    for(var i = 0; i < rows.length; ++i) {
-      var row = rows[i];
-      if(row.tripid in trips) {
-        var gps = {time: row.time, lat: row.lat, lng: row.lng, alt: row.alt, speed: row.speed, score: row.score, brake: row.event}; 
-        trips[row.tripid].gps.push(gps);
-      } else {
-        var trip = new Trip();
-        trip.fromObject(row);  
-        trip.gps = [];
-        var gps = {time: row.time, lat: row.lat, lng: row.lng, alt: row.alt, speed: row.speed, score: row.score, brake: row.event};
-        trip.gps.push(gps);
-        trips[row.tripid] = trip; 
-      }
-    }
-    var msg = {status: 'success', data:trips};
-    res.json(msg);
-  }); 
-};
-
-var upload = function (req, res, next) {
-  var form = new formidable.IncomingForm();
-  form.parse(req, function(err, fields, files) {
-    var file = files.uploads;
-    console.log(fields.email)
-    mysqluser.getUserByEmail(fields.email, function(err, user){
-      if(err) {
-        console.log(err);
-        var msg = {status: 'fail', data: err.toString()};
-        res.json(msg);
-        return;
-      } 
-      var folder = path.join(__dirname, '../uploads/' + user.userid + '/');
-      fs.mkdirp(folder, function (err) {
-        if(err) {
-          console.log(err);
-          var msg = {status: 'fail', data: err.toString()};
-          res.json(msg);
-          return;
-        }
-        //insert the data into database
-        fields.userid = user.userid;
-
-        insertTripIntoDatabase(fields, file.path, function(err) {/*we do not care about err at this point*/});
-        //backup the data
-        fs.copy(file.path, path.join(folder, file.name), function(err){
-          if (err) {
-            console.error(err);
-            var msg = {status: 'fail', data: err.toString()};
-            res.json(msg);
-          } else {
-            var msg = {status: 'success', data: ''};
-            res.json(msg);
-          } 
-        }); 
-      });
-    });
-  });//end of paring form
+    res.json(traces);
+  });
 }
 
-
-/**
- * synchronize deletion with Android
- * handle two cases:
- * 1. android delete ---> send to server, server delete
- * 2. server delete ---> send to android --> step 1 
- * 
- */
-var androidsync = function (req, res, next) {
-  var form = new formidable.IncomingForm();
-  form.parse(req, function(err, fields, files) { 
-    var tnames = JSON.parse(fields.tripnames);
-    var deviceid = fields.deviceid;
-    mysqltrip.androidDeleteTrip(deviceid, tnames, function(err, sta) {
-      if(err) {
-        var msg = {status: 'fail', data: err.toString()};
-        res.json(msg); 
-        return;
-      } 
-      mysqltrip.getDeletedTrips(deviceid, function(err, rows){
-        if(err) {
-          var msg = {status: 'fail', data: err.toString()};
-          res.json(msg); 
-          return;
-        }
-        console.log(rows);
-        var webdeletes = [];
-        for(var i = 0; i < rows.length; ++i) {
-          webdeletes.push(rows[i].starttime);
-        }
-        var msg = {status: 'success', data: JSON.stringify(webdeletes)};
-        res.json(msg); 
-      });    
-    });
-  });//end of paring form
-}
-
-var insertTripIntoDatabase = function (fields, dbfile, callback) {
-  var trip = new Trip();
-  trip.fromObject(fields);
-  mysqltrip.insertTrip(trip, function(err, tripid) {
+// Get the trip attributes for all of the currently logged in user's trips
+// Does not include the traces for the trips
+var allTrips = function (req, res, next) {
+  var userid = req.user.userid;
+  mysqltrip.getTripsByUserID(userid, function(err, rows) {
     if(err) {
-      if(err.code == "ER_DUP_ENTRY") {
-        callback(null);
-      } else {
-        callback(err);
-      }
+      res.status(500)
+      var msg = {status: 'fail', data: err.toString()};
+      res.json(msg);
       return;
     }
-    var db = new sqlite3.Database(dbfile);
-    db.all("select * from gps;", function(err, rows) {
-      if (err) { 
-        console.log(err); 
-        callback(err);
-      } else {
-        mysqltrip.insertGPS(tripid, rows, function(err){
-          if(err) {
-            console.log(err);
-          }
-          callback(err);
-        }); 
-      }
-    });
+    res.json(rows);
   });
-    //get userid etc. by email 
 }
- 
 
-module.exports.upload = upload;
-module.exports.androidsync = androidsync;
+// Update the actual values of a trip row (deleted, finalized, starttime, etc)
+// If the trip does not exist it will be created
+// If trip traces are included in the "traces" key, they will be added to the trip
+// Return value:
+// JSON representation of the trip
+// Hint: An empty update (no changes) simply returns the current state of the trip
+var updateTrip = function(req, res, next) {
+  var recvdtrip = new Trip();
+  recvdtrip.fromObjectSafe(req.body);
+  mysqltrip.updateOrCreateTrip(recvdtrip, req.user, function(err, trip) {
+    if(err) {
+      res.status(500)
+      var msg = {status: 'fail', data: err.toString()};
+      console.log("Error for trip:" + recvdtrip.guid + " " + err.toString());
+      res.json(msg);
+      return;
+    } else if(req.body.traces) {
+      //trip was successfully updated or created
+      //and we have new traces to add to it
+      console.log("Adding " +req.body.traces.length+ " traces to trip "+trip.guid);
+      mysqltrip.addTracesToTrip(req.body.traces, trip, function(err) {
+        if(err) {
+          res.status(500)
+          res.json({status: 'fail', data: err.toString()})
+          console.log("Error adding traces for trip:" + trip.guid + " " + err.toString());
+        } else {
+          res.json(trip.user_facing_vals());
+        }
+      });
+    } else {
+      // no new traces to add, return trip object
+      res.json(trip.user_facing_vals());
+    }
+  });
+}
 
+
+module.exports.allTrips = allTrips;
+module.exports.tripTraces = tripTraces;
+module.exports.updateTrip = updateTrip;
 module.exports.searchtrips = searchtrips;
-module.exports.removetrip = removetrip;
-module.exports.showtrips = showtrips;
+
 
 
 
