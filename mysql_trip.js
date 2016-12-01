@@ -19,6 +19,9 @@ function traceTypeAndColumn(stringname) {
   }
 }
 
+// NOTE: Trip GUIDs are ONLY GUARANTEED TO BE UNIQUE PER USER
+// You cannot only select by guid without a userid or you may get more than one / the wrong trip
+
 var mysqltrip = function() {
 
 }
@@ -154,26 +157,6 @@ mysqltrip.prototype.getTripsByUserID = function (userid, callback) {
     var sql = "select ?? from trip where userid = ? and status >= 1;"; 
     conn.query(sql, [Trip.user_facing, userid], function(err, rows, field){
       if(err) {
-        callback(err, null);
-      } else {
-        callback(null, rows);
-      }
-      conn.release();
-    });
-  });
-}
-
-mysqltrip.prototype.getDeletedTrips = function (deviceid, callback) {
-  mysql.getConnection(function(err, conn) {
-    if(err) {
-      callback(err, null);
-      return;
-    }
-    var sql = "select guid from trip where deviceid = '" + deviceid + "' and status = 0;"; 
-    conn.query(sql, function(err, rows, field){
-      if(err) {
-        console.log("getDeletedTrips");
-        console.log(err);
         callback(err, null);
       } else {
         callback(null, rows);
