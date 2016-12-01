@@ -63,13 +63,13 @@ var allTrips = function (req, res, next) {
 // JSON representation of the trip
 // Hint: An empty update (no changes) simply returns the current state of the trip
 var updateTrip = function(req, res, next) {
-  var trip = new Trip();
-  trip.fromObjectSafe(req.body);
-  mysqltrip.updateOrCreateTrip(trip, req.user, function(err, trip) {
+  var recvdtrip = new Trip();
+  recvdtrip.fromObjectSafe(req.body);
+  mysqltrip.updateOrCreateTrip(recvdtrip, req.user, function(err, trip) {
     if(err) {
       res.status(500)
       var msg = {status: 'fail', data: err.toString()};
-      console.log("Error for trip:" + trip.guid + " " + err.toString());
+      console.log("Error for trip:" + recvdtrip.guid + " " + err.toString());
       res.json(msg);
       return;
     } else if(req.body.traces) {

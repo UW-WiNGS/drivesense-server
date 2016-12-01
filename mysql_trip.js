@@ -97,45 +97,17 @@ mysqltrip.prototype.updateOrCreateTrip = function (trip, user, callback) {
         conn.release();
         callback(err, trip);
       }
-      var sql = "SELECT * FROM `trip` WHERE `guid` LIKE ?;";
-      conn.query(sql, trip.guid, function(err, rows) {
+      console.log("Insert or update for "+trip.guid+" for user "+trip.userid);
+      var sql="INSERT INTO `trip` SET ? ON DUPLICATE KEY UPDATE ?; SELECT * FROM `trip` WHERE `userid` = ? and `guid` LIKE ?;"
+      conn.query(sql, [trip, trip, trip.userid, trip.guid], function(err, rows){
         if(err) {
+          console.log(err);
           callandrelease(err, null);
-        } else if (rows.length==0) {
-          //trip with this guid does not exist
-          var sql = "INSERT INTO `trip` SET ?;";
-          console.log("Trip guid "+trip.guid+" is new, inserting it ")
-          conn.query(sql, trip, function(err, rows){
-            if(err) {
-              console.log(err);
-              callandrelease(err, null);
-            } else {
-              //trip was inserted
-              console.log(rows);
-              trip.tripid=rows.insertId;
-              callandrelease(null, trip);
-            }
-          });
         } else {
-          //trip does exist. update it if and only if the user owns it
-          if(rows[0].userid == user.userid) {
-            console.log("Trip guid "+trip.guid+" exists, updating it ")
-            var sql="UPDATE `trip` SET ? WHERE `trip`.`guid` = ?; SELECT * FROM `trip` WHERE `guid` LIKE ?;"
-            conn.query(sql, [trip.user_facing_vals(), trip.guid, trip.guid], function(err, rows){
-              if(err) {
-                console.log(err);
-                callandrelease(err, null);
-              } else {
-                //trip was inserted
-                trip = new Trip();
-                trip.fromObject(rows[1][0]);
-                callandrelease(null, trip);
-              }
-            });
-          } else {
-            console.log("Trip guid "+trip.guid+" not owned by user");
-            callandrelease("GUID owned by another user", null);
-          }
+          //trip was inserted
+          trip = new Trip();
+          trip.fromObject(rows[1][0]);
+          callandrelease(null, trip);
         }
       });
     });
@@ -157,7 +129,7 @@ mysqltrip.prototype.getTripTraces = function (userid, tripguid, tracetypename, s
       conn.release();
       callback(err, traces);
     }
-    var sql = "SELECT * FROM `trip` LEFT JOIN ?? as T ON T.tripid = trip.tripid WHERE trip.guid = ? AND T.time >= ? AND userid = ?";
+    var sql = "SELECT * FROM `trip` LEFT JOIN ?? as T ON T.tripid = trip.tripid WHERE trip.guid = ? AND T.time >= ? AND trip.userid = ?";
     conn.query(sql, [typeColumn[1], tripguid, start, userid], function(err, rows, field){
       if(err) {
         callandrelease(err, null);
