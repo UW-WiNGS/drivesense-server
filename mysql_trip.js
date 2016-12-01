@@ -123,27 +123,18 @@ mysqltrip.prototype.getTripTraces = function (userid, tripguid, tracetypename, s
     callback("No valid type specified", null);
     return;
   }
-  mysql.getConnection(function(err, conn) {
-    if(err) {
-      callback(err, null);
-      return;
-    }
-    function callandrelease(err, traces) {
-      conn.release();
-      callback(err, traces);
-    }
+  Promise.using(mysql.getConnectionDisposer(), function(conn) {
     var sql = "SELECT * FROM `trip` LEFT JOIN ?? as T ON T.tripid = trip.tripid WHERE trip.guid = ? AND T.time >= ? AND trip.userid = ?";
-    conn.query(sql, [typeColumn[1], tripguid, start, userid], function(err, rows, field){
-      if(err) {
-        callandrelease(err, null);
-      } else {
-        var traces = rows.map(function(elem){
-          var trace = new typeColumn[0]();
-          trace.fromObjectSafe(elem);
-          return trace;
-        });
-        callandrelease(null, traces);
-      }
+    return conn.query(sql, [typeColumn[1], tripguid, start, userid]).then(function(rows) {
+      var traces = rows.map(function(elem){
+        var trace = new typeColumn[0]();
+        trace.fromObjectSafe(elem);
+        return trace;
+      });
+      callback(null, traces);
+    }).catch(function(error) {
+      console.log(error);
+      callback(err, null);
     });
   });
 }

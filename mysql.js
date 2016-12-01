@@ -1,16 +1,20 @@
 //mysql -u drivesense -h mysql.cs.wisc.edu -p --skip-secure-auth
 
 var mysql      = require('mysql');
+var mysql_promise = require('promise-mysql');
 var config     = require('./config');
 
-
-var pool  = mysql.createPool({
+var options = {
   host     : config.database.host,
   user     : config.database.user,
   password : config.database.password,
   database : config.database.db,
   multipleStatements: true,
-});
+};
+
+var pool  = mysql.createPool(options);
+
+var pool_promise = mysql_promise.createPool(options);
 
 var getConnection = function(callback) {
     pool.getConnection(function(err, connection) {
@@ -18,4 +22,11 @@ var getConnection = function(callback) {
     });
 };
 
+function getConnectionDisposer() {
+  return pool_promise.getConnection().disposer(function(connection) {
+    pool_promise.releaseConnection(connection);
+  });
+}
+
 module.exports.getConnection = getConnection;
+module.exports.getConnectionDisposer = getConnectionDisposer;
