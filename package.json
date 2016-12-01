@@ -6,6 +6,7 @@
   "dependencies": {
     "angular-ui-router": "^0.3.1",
     "bcrypt-nodejs": "0.0.3",
+    "bluebird": "^3.4.6",
     "body-parser": "~1.15.1",
     "express": "~4.13.4",
     "fs-extra": "~0.26.7",
