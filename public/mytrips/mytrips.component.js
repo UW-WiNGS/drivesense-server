@@ -22,7 +22,6 @@ angular.
         trips = {};
       }
       var len = Object.keys(value).length;
-      console.log(value);
       for(var index in value) {
         var newtrip = value[index]; 
         if(newtrip.guid in trips) {
@@ -83,17 +82,22 @@ angular.
           $interval.cancel(liveUpdatePromise);
           liveUpdatePromise = null;
         }
-        if(!self.curtrip.gps) {
-          tripService.getTripGPS(self.curtrip, 0).then(function(trip) {
-            displayTrip(self.curtrip)
-            scheduleLive()
-          }, function(res){
-            alert("GPS load failed");
-          });
+        if(!self.curtrip){
+          clearTrip();
         } else {
-          displayTrip(self.curtrip); 
-          scheduleLive();
+          if(!self.curtrip.gps) {
+            tripService.getTripGPS(self.curtrip, 0).then(function(trip) {
+              displayTrip(self.curtrip)
+              scheduleLive()
+            }, function(res){
+              alert("GPS load failed");
+            });
+          } else {
+            displayTrip(self.curtrip); 
+            scheduleLive();
+          }          
         }
+
       };
 
       function scheduleLive() {
@@ -163,24 +167,14 @@ angular.
       };
 
       self.searchLastMonth = function() {
-        var date = self.dateDropDownInput;
-        var last;  
-        if (date.getMonth() == 0) {
-          last = new Date(date.getFullYear() - 1, 12, 1);
-        } else {
-          last = new Date(date.getFullYear(), date.getMonth() - 1, 1);
-        } 
+        var date = moment(self.dateDropDownInput);
+        var last = date.subtract(1, 'month').toDate();
         self.search(last);
       }
 
       self.searchNextMonth = function() {
-        var date = self.dateDropDownInput;
-        var next;  
-        if (date.getMonth() == 11) {
-          next = new Date(date.getFullYear() + 1, 0, 1);
-        } else {
-          next = new Date(date.getFullYear(), date.getMonth() + 1, 1);
-        }
+        var date = moment(self.dateDropDownInput);
+        var next = date.add(1, 'month').toDate();
         self.search(next);
       }
 
@@ -228,6 +222,27 @@ angular.
         self.mapOverlays = [];
       }
 
+      function clearTrip() {
+        //clear map markers
+        clearMapOverlays();
+
+        //clear chart
+        initChart(self.radioValue);
+      }
+
+      function clearMapOverlays() {
+        while(self.mapOverlays[0])
+        {
+          var tmp = self.mapOverlays.pop();
+          tmp.setMap(null);
+        }
+
+        if(self.mapOverlays.carIcon) {
+          self.mapOverlays.carIcon.setMap(null);
+          self.mapOverlays.carIcon = null;
+        }
+      }
+
       function displayTrip(trip) {
         if(!trip) return null;
         var method = self.radioValue;
@@ -243,13 +258,9 @@ angular.
         drawChart(filteredtrip, method);
 
         var latlngbounds = new google.maps.LatLngBounds();
-        console.log("clear markers");
+
         //clear all circles and markers from the map
-        while(self.mapOverlays[0])
-        {
-          var tmp = self.mapOverlays.pop();
-          tmp.setMap(null);
-        }
+        clearMapOverlays();
 
         drawMapGPS(filteredtrip, latlngbounds, method, (trip.status == 1));
         
