@@ -1,18 +1,24 @@
 <nav class="navbar navbar-inverse navbar-static-top">
   <div class="container-fluid">
     <div class="navbar-header">
-       <a class="navbar-brand" href="/" style="font-size:30px;">DriveSense</a>
+       <a class="navbar-brand" href="/">DriveSense</a>
+       <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
     </div>
     <div id="navbar" class="collapse navbar-collapse">
-      <div id="signinup" class="nav navbar-nav navbar-right" ng-hide="$ctrl.isAuthed()">
-        <button type="button" class="btn btn-success navbar-btn btn-lg" data-toggle="modal" data-target="#signin" ng-click="$ctrl.showSignin()">Sign in</button>
-        <button type="button" class="btn btn-info navbar-btn btn-lg" data-toggle="modal" data-target="#signup" ng-click="$ctrl.showSignup()">Sign up</button>
-      </div>
-      <div id="username" class="nav navbar-nav navbar-right" ng-show="$ctrl.isAuthed()">
-        <a class="navbar-text" href="#/mytrips" id="mytrips" style="text-align:bottom;font-size:20px;color:white;">My Trips</a>
-        <a class="navbar-text" href="#/mytrips" id="user" style="text-align:bottom;font-size:20px;color:white;">{{$ctrl.user().firstname}} {{$ctrl.user().lastname}}</a> 
-        <button type="button" class="btn btn-info navbar-btn btn-lg" ng-click="$ctrl.logout()">Sign Out</button>
-      </div> 
+      <ul id="signinup" class="nav navbar-nav navbar-right" ng-hide="$ctrl.isAuthed()">
+        <li><button type="button" class="btn btn-success navbar-btn" data-toggle="modal" data-target="#signin" ng-click="$ctrl.showSignin()">Sign in</button></li>
+        <li><button type="button" class="btn btn-info navbar-btn" data-toggle="modal" data-target="#signup" ng-click="$ctrl.showSignup()">Sign up</button></li>
+      </ul>
+      <ul id="username" class="nav navbar-nav navbar-right" ng-show="$ctrl.isAuthed()">
+        <li><a href="#/mytrips" id="mytrips">My Trips</a></li>
+        <li><a href="#/mytrips" id="user">{{$ctrl.user().firstname}} {{$ctrl.user().lastname}}</a></li>
+        <li><button type="button" class="btn btn-info navbar-btn" ng-click="$ctrl.logout()">Sign Out</button></li>
+      </ul> 
     </div>
   </div>
 </nav>
