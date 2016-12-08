@@ -219,7 +219,15 @@ angular.
       function initMap() {
         var madison = {lat: 43.073052, lng: -89.401230};
         self.map = new google.maps.Map(document.getElementById('map'), { zoom: 15, center: madison, streetViewControl: false});
-        self.mapOverlays = [];
+        self.mapOverlays = {"markers":[], "shapes":[]};
+
+        google.maps.event.addListener(self.map, 'zoom_changed', function () {
+          console.log("zoom changed " + self.mapOverlays.shapes.length);
+          var rad = getCurrentShapeRadius();
+          for (var i = 0; i < self.mapOverlays.shapes.length; i++) {
+              self.mapOverlays.shapes[i].setRadius(rad);
+          }
+        });
       }
 
       function clearTrip() {
@@ -231,9 +239,17 @@ angular.
       }
 
       function clearMapOverlays() {
-        while(self.mapOverlays[0])
+        var markers = self.mapOverlays.markers;
+        while(markers[0])
         {
-          var tmp = self.mapOverlays.pop();
+          var tmp = markers.pop();
+          tmp.setMap(null);
+        }
+
+        var shapes = self.mapOverlays.shapes;
+        while(shapes[0])
+        {
+          var tmp = shapes.pop();
           tmp.setMap(null);
         }
 
@@ -241,6 +257,12 @@ angular.
           self.mapOverlays.carIcon.setMap(null);
           self.mapOverlays.carIcon = null;
         }
+      }
+
+      function getCurrentShapeRadius() {
+        var p = Math.pow(2, (21 - self.map.getZoom()));
+        p = p * 60 * 0.0027;
+        return p;
       }
 
       function displayTrip(trip) {
@@ -278,7 +300,8 @@ angular.
           var latlngbounds = new google.maps.LatLngBounds();
           drawMapGPS(newPoints, latlngbounds, method, true);
         
-          self.map.fitBounds(latlngbounds);
+          //self.map.fitBounds(latlngbounds);
+          self.map.panTo(latlngbounds.getCenter());
           if(self.map.getZoom() > MAX_ZOOM) {
             self.map.setZoom(MAX_ZOOM);
           }
@@ -339,7 +362,7 @@ angular.
             }
             if (i==0) {
               var marker_icon = 'img/starticon.png' 
-              self.mapOverlays.push(new google.maps.Marker({
+              self.mapOverlays.markers.push(new google.maps.Marker({
                 position: latlng,
                 map: self.map,
                 icon: 'img/starticon.png'
@@ -347,7 +370,7 @@ angular.
             }
             if (i>len-1-rate) {
               var marker_icon = 'img/stopicon.png'
-              self.mapOverlays.push(new google.maps.Marker({
+              self.mapOverlays.markers.push(new google.maps.Marker({
                 position: latlng,
                 map: self.map,
                 icon: marker_icon
@@ -364,12 +387,21 @@ angular.
               });
             }
           }
-          self.mapOverlays.push(new google.maps.Marker({
+          // self.mapOverlays.push(new google.maps.Marker({
+          //   map: self.map,
+          //   position: latlng,
+          //   clickable: false,
+          //   icon: icons[index],
+          // }));   
+          self.mapOverlays.shapes.push(new google.maps.Circle({
+            strokeOpacity: 0,
+            fillColor: colors[index],
+            fillOpacity: 1,
             map: self.map,
-            position: latlng,
-            clickable: false,
-            icon: icons[index],
-          }));        
+            center: latlng,
+            radius: getCurrentShapeRadius()
+          }));  
+
         }
       }
       function initChart(method) {

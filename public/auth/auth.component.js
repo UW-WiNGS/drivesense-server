@@ -19,6 +19,7 @@ angular.
             console.log('User signed out.');
           });
         }
+        $state.transitionTo('frontpage');
       }
       function onGoogleSigninSuccess(googleUser) {
           var id_token = googleUser.getAuthResponse().id_token;
