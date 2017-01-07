@@ -1,16 +1,8 @@
+var DBObject = require("./dbobject.js")
 
-function Trip() {
-}
-
-Trip.keys = ['userid', 'deviceid', 'model', 'starttime', 'endtime', 'distance', 'score', 'tripstatus'];
-
-Trip.prototype.fromObject = function(uobj) {
-  var keys = Trip.keys;
-  for (var i = 0; i < keys.length; ++i) {
-    var key = keys[i];
-    this[key] = uobj[key];
-  }
-}
+var Trip = DBObject.extend();
+Trip.user_facing = ['guid', 'deviceid', 'model', 'starttime', 'endtime', 'distance', 'status', 'data_starttime', 'data_endtime', 'score'];
+Trip.private = ['userid', 'tripid']
 
 module.exports = Trip;
 
