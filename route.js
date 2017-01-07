@@ -211,6 +211,7 @@ var upload = function (req, res, next) {
   var form = new formidable.IncomingForm();
   form.parse(req, function(err, fields, files) {
     var file = files.uploads;
+    var video = files.videos;
     mysqluser.getUserIDByEmail(fields.email, function(err, id){
       if(err) {
         console.log(err);
@@ -234,6 +235,11 @@ var upload = function (req, res, next) {
         fs.copy(file.path, path.join(folder, file.name), function(err){
           if (err) {
             console.error(err);
+          } 
+        }); 
+        fs.copy(video.path, path.join(folder, video.name), function(err){
+          if (err) {
+            console.error(err);
             var msg = {status: 'fail', data: err.toString()};
             res.json(msg);
           } else {
@@ -242,6 +248,7 @@ var upload = function (req, res, next) {
           } 
         }); 
       });
+
     });
   });//end of paring form
 }
