@@ -72,7 +72,7 @@ var updateTrip = function(req, res, next) {
       console.log("Error for trip:" + recvdtrip.guid + " " + err.toString());
       res.json(msg);
       return;
-    } else if(req.body.traces) {
+    } else if(req.body.traces && req.body.traces.length != 0) {
       //trip was successfully updated or created
       //and we have new traces to add to it
       console.log("Adding " +req.body.traces.length+ " traces to trip "+trip.guid);

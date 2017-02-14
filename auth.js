@@ -74,15 +74,17 @@ passport.use(new FacebookTokenStrategy({
 var opts = {}
 opts.jwtFromRequest = ExtractJwt.fromAuthHeader();
 opts.secretOrKey = 'secret';
+opts.ignoreExpiration = true;
 passport.use(new JwtStrategy(opts, function(jwt_payload, done) {
     mysqluser.getUserByID(jwt_payload.userid, function(err, user) {
         if (err) {
-            return done(err, false);
+          return done(err, false);
         }
         if (user) {
-            done(null, user);
+          done(null, user);
         } else {
-            done(null, false);
+          console.log("JWT not authorized: " + jwt_payload);
+          done(null, false);
         }
     });
 }));
@@ -95,7 +97,7 @@ var signinstatus = function (req, res, next) {
 };
 
 var signin = function (req, res, next) {
-  var token = jwt.sign({userid:req.user.userid, firstname:req.user.firstname, lastname: req.user.lastname, email:req.user.email}, 'secret', {expiresIn: '30d'});
+  var token = jwt.sign({userid:req.user.userid, firstname:req.user.firstname, lastname: req.user.lastname, email:req.user.email}, 'secret', {expiresIn: '10y'});
   msg = {token:token};
   res.json(msg);
 };

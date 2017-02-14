@@ -31,7 +31,7 @@ app.post('/searchtrips', [auth.passport.authenticate('jwt', { session: false}), 
 
 app.get('/allTrips', [auth.passport.authenticate('jwt', { session: false}), route.allTrips])
 app.post('/updateTrip', [auth.passport.authenticate('jwt', { session: false}), route.updateTrip]);
-app.post('/tripTraces', [auth.passport.authenticate('jwt', { session: false}), route.tripTraces]);
+app.post('/tripTraces', [auth.passport.authenticate('jwt', { session: false}), bodyLogger, route.tripTraces]);
 
 var server = app.listen(8000, function() {
     console.log('Listening on port %d', server.address().port);

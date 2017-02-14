@@ -60,6 +60,8 @@ mysqltrip.prototype.addTracesToTrip = function(trace_messages, trip, callback) {
         trace.fromObjectSafe(value);
         trace.tripid = trip.tripid;
         traces_to_insert[table_name].values.push(trace)
+      } else {
+        //console.log("No SQL column type for trace " + tracemessage.type);
       }
     }
     var query_promises = [];
@@ -73,14 +75,14 @@ mysqltrip.prototype.addTracesToTrip = function(trace_messages, trip, callback) {
         var single_trace = traces_to_insert[table_name].values[i];
         values.push(column_names.map(function(col) {return single_trace[col]}));
       }
-      // console.log(table_name);
-      // console.log(column_names);
+      console.log("Got trace type: "+table_name);
+      //console.log(column_names);
       // console.log(values);
       var sql = "INSERT IGNORE INTO ?? (??) VALUES ?"
       query_promises.push(promise_query(sql, [table_name,column_names, values]));
     }
     Promise.all(query_promises).then(function() {
-      console.log("All the files traces were added");
+      console.log("All the traces were added");
       callandrelease();
     }, function(err) {
       callandrelease(err);
@@ -145,7 +147,7 @@ mysqltrip.prototype.getTripsByUserID = function (userid, callback) {
       callback(err, null);
       return;
     }
-    var sql = "select ?? from trip where userid = ? and status >= 1;"; 
+    var sql = "select ?? from derived_trip where userid = ? and status >= 1;"; 
     conn.query(sql, [Trip.user_facing, userid], function(err, rows, field){
       if(err) {
         callback(err, null);
