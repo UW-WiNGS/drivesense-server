@@ -147,7 +147,7 @@ mysqltrip.prototype.getTripsByUserID = function (userid, callback) {
       callback(err, null);
       return;
     }
-    var sql = "select ?? from derived_trip where userid = ? and status >= 1;"; 
+    var sql = "select ?? from derived_trip where userid = ?;"; 
     conn.query(sql, [Trip.user_facing, userid], function(err, rows, field){
       if(err) {
         callback(err, null);
