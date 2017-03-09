@@ -12,7 +12,7 @@ var app = express();
 
 
 var bodyLogger = function (req, res, next) {
-  console.log(req.body);
+  console.log(req.url + ": " + JSON.stringify(req.body));
   next();
 };
 
@@ -29,7 +29,7 @@ app.post('/auth/facebook',[auth.passport.authenticate('facebook-token', {session
 app.get('/signinstatus', [auth.passport.authenticate('jwt', { session: false}), auth.signinstatus]);
 app.post('/searchtrips', [auth.passport.authenticate('jwt', { session: false}), route.searchtrips]);
 
-app.get('/allTrips', [auth.passport.authenticate('jwt', { session: false}), route.allTrips])
+app.get('/allTrips', [auth.passport.authenticate('jwt', { session: false}), bodyLogger, route.allTrips])
 app.post('/updateTrip', [auth.passport.authenticate('jwt', { session: false}), route.updateTrip]);
 app.post('/tripTraces', [auth.passport.authenticate('jwt', { session: false}), route.tripTraces]);
 
