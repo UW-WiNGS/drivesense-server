@@ -1,1 +1,17 @@
 .selected { font-weight: 900; }
+
+.text-blurb-box {
+  background-color: #f3f3f3;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #ccc;
+}
+.text-blurb-box hr {
+  border-top-color: #b3b3b3;
+}
+
+.carousel-box {
+  /*background-color: #f3f3f3;*/
+
+  padding-bottom: 20px;
+}

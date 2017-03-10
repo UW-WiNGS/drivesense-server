@@ -1,6 +1,6 @@
 var app = angular.module('driveSenseApp', ['ui.router', 'auth', 'ui.bootstrap.datetimepicker', 'rzModule']);
 
-app.constant('API', 'http://drivesensetest.wirover.com:8000');
+app.constant('API', 'http://drivesense.io');
 
 app.config(function($stateProvider) {
   var frontpageState = {

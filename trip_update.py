@@ -25,6 +25,6 @@ for guid in range(300,310):
     "Content-Type":"application/json"
   }
   print("Start request")
-  r = requests.post("http://drivesensetest.wirover.com:8000/updateTrip", data=output, headers=headers)
+  r = requests.post("http://drivesense.io/updateTrip", data=output, headers=headers)
   print("Sent")
   print(r.status_code, r.reason)
