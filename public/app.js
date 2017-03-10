@@ -2,10 +2,10 @@ var app = angular.module('driveSenseApp', ['ui.router', 'auth', 'ui.bootstrap.da
 
 app.constant('API', 'http://drivesense.io');
 
-app.config(function($stateProvider) {
+app.config(function($stateProvider, $urlRouterProvider) {
   var frontpageState = {
     name: 'frontpage',
-    url:"",
+    url:"/",
     templateUrl: 'frontpage.template.html',
   }
 
@@ -15,6 +15,14 @@ app.config(function($stateProvider) {
     template: '<trip-component></trip-component>',
   }
 
+  var userProfileState = {
+    name: 'profile',
+    url: '/profile',
+    template: '<profile-component></profile-component>',
+  }
+
   $stateProvider.state(frontpageState);
   $stateProvider.state(myTripsState);
+  $stateProvider.state(userProfileState);
+  $urlRouterProvider.when('', '/');
 });

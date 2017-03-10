@@ -1,7 +1,7 @@
 <nav class="navbar navbar-inverse navbar-static-top">
   <div class="container-fluid">
     <div class="navbar-header">
-       <a class="navbar-brand" href="/">DriveSense</a>
+       <a class="navbar-brand" ui-sref="frontpage">DriveSense</a>
        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false">
         <span class="sr-only">Toggle navigation</span>
         <span class="icon-bar"></span>
@@ -15,8 +15,8 @@
         <li><button type="button" class="btn btn-info navbar-btn" data-toggle="modal" data-target="#signup" ng-click="$ctrl.showSignup()">Sign up</button></li>
       </ul>
       <ul id="username" class="nav navbar-nav navbar-right" ng-show="$ctrl.isAuthed()">
-        <li><a href="#/mytrips" id="mytrips">My Trips</a></li>
-        <li><a href="#/mytrips" id="user">{{$ctrl.user().firstname}} {{$ctrl.user().lastname}}</a></li>
+        <li><a ui-sref="myTrips" id="mytrips">My Trips</a></li>
+        <li><a ui-sref="profile" id="user">{{$ctrl.user().firstname}} {{$ctrl.user().lastname}}</a></li>
         <li><button type="button" class="btn btn-info navbar-btn" ng-click="$ctrl.logout()">Sign Out</button></li>
       </ul> 
     </div>
