@@ -5,6 +5,21 @@
       First Name: {{ $ctrl.user().firstname }}<br>
       Last Name: {{ $ctrl.user().lastname }}<br>
       Email: {{ $ctrl.user().email }}<br>
+
+
+      <form id="change-password-form" ng-submit="$ctrl.changePassword()">
+        <h4>Change Account Password:</h4>
+        <div class="form-group">
+          <input type="password" placeholder="Current Password" class="form-control" name="password" ng-model="$ctrl.passwordChange.password">
+        </div> 
+        <div class="form-group">
+          <input type="password" placeholder="New Password" class="form-control" name="new-password" ng-model="$ctrl.passwordChange.newPassword">
+        </div> 
+        <div class="form-group">
+          <input type="password" placeholder="Repeat New Password" class="form-control" name="repeat-new-password" ng-model="$ctrl.passwordChange.repeatNewPassword">
+        </div> 
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form> 
     </div>
     <div class="col-sm-6">
       <h3>Preferences:</h3><hr />

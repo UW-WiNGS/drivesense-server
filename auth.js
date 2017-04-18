@@ -19,9 +19,13 @@ passport.use(new LocalStrategy({
       if(err) {
         return done(err);
       }
-      if(user && bcrypt.compareSync(password, user.password)) {
+      if(!user.password) {
+        console.log("User does not have a password set.");
+        return done(null, false, { message: 'Your account does not have a password set. Sign in with Google or Facebook.' }); 
+      } else if(user.password && bcrypt.compareSync(password, user.password)) {
         return done(null, user);
       } else {
+        console.log("User entered wrong password.");
         return done(null, false, { message: 'Incorrect username or password.' }); 
       }
     });
@@ -127,6 +131,36 @@ var signup = function (req, res, next) {
   }); 
 };
 
+var changePassword = function(req, res, next) {
+  var newPassword = req.body.newPassword;
+  var oldPassword = req.body.oldPassword;
+  var matches = false;
+  if(oldPassword && req.user.password)
+  {
+    matches = bcrypt.compareSync(oldPassword, req.user.password);
+  } else if(!oldPassword && !req.user.password) {
+    //if no old password was provided and none is stored in the DB
+    matches = true;
+  }
+  if(matches) {
+    req.user.password = bcrypt.hashSync(newPassword);
+    mysqluser.updateUserPassword(req.user, function(err) {
+      if(err) {
+        res.status(500);
+        msg = {status: 'fail', data: err};
+        res.json(msg);
+      }
+      res.json({status: "success"});
+      next();
+    })
+  } else {
+    res.status(400);
+    res.json({status: "fail", data:"Old password was incorrect"});
+    next();
+  }
+}
+
+module.exports.changePassword = changePassword;
 module.exports.passport = passport;
 module.exports.signin = signin;
 module.exports.signinstatus = signinstatus;

@@ -12,7 +12,11 @@ var app = express();
 
 
 var bodyLogger = function (req, res, next) {
-  console.log(req.url + ": " + JSON.stringify(req.body));
+  var email = "";
+  if(req.user)
+    email = req.user.email;
+
+  console.log(req.ip+" " +req.url +" " +email+ ": " + JSON.stringify(req.body));
   next();
 };
 
@@ -21,9 +25,10 @@ app.use(bodyparser.urlencoded({ extended: true })); // for parsing application/x
 app.use(express.static(path.join(__dirname, 'public'))); 
 
 app.post('/auth/signup', auth.signup, auth.signin);
-app.post('/auth/signin', [bodyLogger, auth.passport.authenticate('local', {session:false}), auth.signin]);
+app.post('/auth/signin', [auth.passport.authenticate('local', {session:false}), auth.signin]);
 app.post('/auth/google',[auth.passport.authenticate('google-id-token', {session:false}), auth.signin]);
 app.post('/auth/facebook',[auth.passport.authenticate('facebook-token', {session:false}), auth.signin]);
+app.post('/auth/changepassword', [auth.passport.authenticate('jwt', { session: false}), auth.changePassword]);
 
 
 app.get('/signinstatus', [auth.passport.authenticate('jwt', { session: false}), auth.signinstatus]);

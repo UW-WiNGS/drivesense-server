@@ -1,5 +1,6 @@
 var mysql = require('./mysql.js');
 var User = require('./user.js');
+var Promise = require("bluebird");
 
 var mysqluser = function() {
 
@@ -41,6 +42,22 @@ mysqluser.prototype.userSignUp = function (user, callback) {
       } else {
         callback(null, rows.insertId);
       }
+      conn.release();
+    });
+  });
+}
+
+
+mysqluser.prototype.updateUserPassword = function (user, callback) {
+  mysql.getConnection(function(err, conn) {
+    if(err) {
+      callback(err, null);
+      return;
+    }
+    var sql = "UPDATE `user` SET `password` = ? WHERE `user`.`userid` = ?;";
+    console.log(user)
+    conn.query(sql, [user.password, user.userid], function(err, rows, field){
+      callback(err);
       conn.release();
     });
   });

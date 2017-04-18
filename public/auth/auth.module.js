@@ -62,6 +62,12 @@ angular.module('auth', [])
       password: password
     })
   }
+  self.changePassword = function(oldPassword, newPassword) {
+    return $http.post(API + '/auth/changepassword', {
+      oldPassword: oldPassword,
+      newPassword: newPassword
+    })
+  }
   self.googleLogin = function(googleToken) {
     return $http.post(API + '/auth/google', {
         id_token: googleToken

@@ -41,6 +41,9 @@ angular.
       function handleFailure(res) {
         alert("DriveSense login failed.");
       }
+      function handleSignupFailure(res) {
+        alert("DriveSense signup failed. Do you already have an account?");
+      }
       function closeSignin() {
         $('#signin').modal('hide')
         $state.transitionTo('myTrips');
@@ -62,7 +65,7 @@ angular.
       this.signup = function(){
         if(this.signupinfo.email && this.signupinfo.password && this.signupinfo.repeat == this.signupinfo.password) {
           userService.signup(this.signupinfo.firstname, this.signupinfo.lastname, this.signupinfo.email, this.signupinfo.password)
-          .then(closeSignup, handleFailure);
+          .then(closeSignup, handleSignupFailure);
         } else {
           alert("Signup form validation error.")
         }
