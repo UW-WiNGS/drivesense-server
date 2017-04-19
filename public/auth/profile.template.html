@@ -2,9 +2,9 @@
   <div class="row">
     <div class="col-sm-6">
       <h3>User Profile:</h3><hr />
-      First Name: {{ $ctrl.user().firstname }}<br>
-      Last Name: {{ $ctrl.user().lastname }}<br>
-      Email: {{ $ctrl.user().email }}<br>
+      <b>First Name:</b> {{ $ctrl.user().firstname }}<br>
+      <b>Last Name:</b> {{ $ctrl.user().lastname }}<br>
+      <b>Email:</b> {{ $ctrl.user().email }}<br><br>
 
 
       <form id="change-password-form" ng-submit="$ctrl.changePassword()">
@@ -26,14 +26,20 @@
       <h4>Units:</h4>
       <div class="radio">
         <label>
-          <input type="radio" name="optionsRadios" id="optionsRadios1" value="imperial" checked>
+          <input type="radio" value="imperial" ng-model="$ctrl.preferences.units">
           Imperial (mi)
         </label>
       </div>
       <div class="radio">
         <label>
-          <input type="radio" name="optionsRadios" id="optionsRadios2" value="metric">
+          <input type="radio" value="metric" ng-model="$ctrl.preferences.units">
           Metric (km)
+        </label>
+      </div><br>
+      <h4>Data Usage:</h4>
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" ng-model="$ctrl.preferences.share_data"> Allow my anonymized DriveSense data to be used for academic research.
         </label>
       </div>
     </div>

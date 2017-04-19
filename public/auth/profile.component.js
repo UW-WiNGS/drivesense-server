@@ -4,6 +4,10 @@ angular.
     templateUrl: 'auth/profile.template.html',
     controller: function ProfileController(authService, userService, $state) {
       this.passwordChange = {};
+      this.preferences = {
+        units: "imperial",
+        share_data: true
+      };
       this.changePassword = function() {
         if(this.passwordChange.newPassword && this.passwordChange.repeatNewPassword && (this.passwordChange.newPassword == this.passwordChange.repeatNewPassword)) {
           userService.changePassword(this.passwordChange.password, this.passwordChange.newPassword)

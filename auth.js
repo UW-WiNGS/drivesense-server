@@ -19,10 +19,10 @@ passport.use(new LocalStrategy({
       if(err) {
         return done(err);
       }
-      if(!user.password) {
+      if(user && !user.password) {
         console.log("User does not have a password set.");
         return done(null, false, { message: 'Your account does not have a password set. Sign in with Google or Facebook.' }); 
-      } else if(user.password && bcrypt.compareSync(password, user.password)) {
+      } else if(user && user.password && bcrypt.compareSync(password, user.password)) {
         return done(null, user);
       } else {
         console.log("User entered wrong password.");
@@ -101,7 +101,8 @@ var signinstatus = function (req, res, next) {
 };
 
 var signin = function (req, res, next) {
-  var token = jwt.sign({userid:req.user.userid, firstname:req.user.firstname, lastname: req.user.lastname, email:req.user.email}, 'secret', {expiresIn: '10y'});
+  var hasPassword = (req.user.password != null);
+  var token = jwt.sign({userid:req.user.userid, firstname:req.user.firstname, lastname: req.user.lastname, email:req.user.email, hasPassword: hasPassword}, 'secret', {expiresIn: '10y'});
   msg = {token:token};
   res.json(msg);
 };
