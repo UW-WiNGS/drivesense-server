@@ -118,8 +118,10 @@ var signup = function (req, res, next) {
       console.log(err.code);
       var msg = {};
       if(err.code == "ER_DUP_ENTRY") {
-        msg = {status: 'fail', data: err.code};
+        res.status(400);
+        msg = {status: 'fail', data: 'Duplicate signup for email '+user.email};
       } else {
+        res.status(500);
         msg = {status: 'fail', data: 'unknown'}; 
       }
       res.json(msg);
