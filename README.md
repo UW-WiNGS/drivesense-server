@@ -14,4 +14,3 @@ $ node r_tables.js
 # database username and password 
 $ mysql.js
 ```
-

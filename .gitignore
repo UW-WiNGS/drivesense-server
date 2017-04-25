@@ -1,2 +1,5 @@
 localconfig.js
 sftp-config.json
+public/node_modules/
+node_modules/
+npm-debug.log
