@@ -73,6 +73,11 @@ angular.module('auth', [])
         id_token: googleToken
       })
   };
+  self.FBLogin = function(accessToken) {
+    return $http.post(API + '/auth/facebook', {
+        access_token: accessToken
+      })
+  };
   self.logout = function() {
     $window.localStorage.removeItem('jwtToken');
   }

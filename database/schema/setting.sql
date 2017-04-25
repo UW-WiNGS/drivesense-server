@@ -1,5 +1,4 @@
 CREATE TABLE `setting` (
-  `id` int(11) NOT NULL,
   `userid` int(10) UNSIGNED NOT NULL,
   `name` varchar(250) NOT NULL,
   `value` varchar(4000) NOT NULL COMMENT 'JSON value of the setting'
@@ -7,8 +6,7 @@ CREATE TABLE `setting` (
 
 
 ALTER TABLE `setting`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `userid` (`userid`,`name`);
+  ADD PRIMARY KEY (`userid`,`name`) USING BTREE;
 
 
 ALTER TABLE `setting`

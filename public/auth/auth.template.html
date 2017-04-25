@@ -32,8 +32,9 @@
     <h4 class="modal-title" id="signinLabel">Sign In</h4>
   </div>
   <div class="modal-body">
-    <h5>Sign in with Google:</h5><br>
-    <div id="signin-google"></div>
+    <h5>Sign in with Google or Facebook:</h5><br>
+    <div id="signin-google"></div><br>
+    <div class="fb-login-button" data-max-rows="1" data-size="large" data-button-type="login_with" data-show-faces="false" data-auto-logout-link="false" data-use-continue-as="false" onlogin="onFacebookLoginAttempt();"></div>
     <hr>
     <h5>Sign in with a Drivesense account:</h5><br>
     <form id="signinform" ng-submit="$ctrl.login()" ng-hide="$ctrl.isAuthed()">
@@ -61,8 +62,9 @@
     <h4 class="modal-title">Sign Up</h4>
   </div>
   <div class="modal-body">
-    <h5>Sign up with Google:</h5><br>
-    <div id="signup-google"></div>
+    <h5>Sign up with Google or Facebook:</h5><br>
+    <div id="signup-google"></div><br>
+    <div class="fb-login-button" data-max-rows="1" data-size="large" data-button-type="login_with" data-show-faces="false" data-auto-logout-link="false" data-use-continue-as="false" onlogin="onFacebookLoginAttempt();"></div>
     <hr>
     <h5>Sign up for a Drivesense account:</h5><br>
     <form id="signupform" ng-submit="$ctrl.signup()" ng-hide="$ctrl.isAuthed()">

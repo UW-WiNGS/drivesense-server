@@ -15,7 +15,7 @@ angular.
         userService.logout && userService.logout();
         if(auth2) {
           auth2.signOut().then(function () {
-            console.log('User signed out.');
+            console.log('User signed out of Google.');
           });
         }
         $state.transitionTo('frontpage');
@@ -23,6 +23,11 @@ angular.
       function onGoogleSigninSuccess(googleUser) {
           var id_token = googleUser.getAuthResponse().id_token;
           userService.googleLogin(id_token).then(closeSignin, handleFailure);
+      }
+      onFacebookLoginAttempt= function() {
+        FB.getLoginStatus(function(response) {
+          userService.FBLogin(response.authResponse.accessToken).then(closeSignin, handleFailure);
+        });
       }
       function onGoogleFailure(error) {
         console.log(error);
@@ -45,6 +50,7 @@ angular.
         alert("DriveSense signup failed. Do you already have an account?");
       }
       function closeSignin() {
+        $('#signup').modal('hide')
         $('#signin').modal('hide')
         $state.transitionTo('myTrips');
       }

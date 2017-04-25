@@ -21,6 +21,7 @@ passport.use(new LocalStrategy({
       }
       if(user && !user.password) {
         console.log("User does not have a password set.");
+        //this message unfortunately does not go anywhere because the passport framework is garbage and has no way to return a message in the response
         return done(null, false, { message: 'Your account does not have a password set. Sign in with Google or Facebook.' }); 
       } else if(user && user.password && bcrypt.compareSync(password, user.password)) {
         return done(null, user);
