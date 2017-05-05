@@ -37,6 +37,7 @@ passport.use(new GoogleTokenStrategy({
     clientID: config.google.clientID,
   },
   function(parsedToken, googleId, done) {
+    console.log(parsedToken);
     mysqluser.getUserByEmail(parsedToken.payload.email, function (err, user) {
       if (err) { return done(err); }
       if (!user) { 
@@ -62,7 +63,7 @@ passport.use(new FacebookTokenStrategy({
       if (err) { return done(err); }
       if (!user) { 
         console.log("User not found in database, creating new drivesense account.")
-        user = new User(profile.name.given_name, profile.name.family_name, profile.emails[0].value);
+        user = new User(profile.name.givenName, profile.name.familyName, profile.emails[0].value);
         mysqluser.userSignUp(user, function (err, id) {
           if (err) { return done(err); }
           user.userid = id;
